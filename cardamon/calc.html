@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cardano Calc</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script language="JavaScript">
+        function hideDisclaimer() {
+            $('.disclaimer-group').hide();
+        }
+        function resize() {
+            $('#disclaimer-margin').height($('#disclaimer').height());
+        }
+        $( window ).resize(function() {
+            resize();
+        });
+        $(function() {
+            // hideDisclaimer();
+            resize();
+        })
+    </script>
+    <style>
+
+        /* Extra small */
+        @media only screen and (max-width : 767px) {
+            body{font-size: 10px;}
+            #footer{font-size: 8px;}
+        }
+
+        /* Small */
+        @media only screen and (min-width : 768px) {
+            body{font-size: 14px;}
+            #footer{font-size: 12px;}
+        }
+
+        /* Medium */
+        @media only screen and (min-width : 992px) {
+            body{font-size: 16px;}
+            #footer{font-size: 14px;}
+        }
+
+        /* Large */
+        @media only screen and (min-width : 1200px) {
+            body{font-size: 18px;}
+            #footer{font-size: 15px;}
+        }
+
+        #disclaimer {
+            border: 3px solid red;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 10px;
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            width: 100%;
+            background: white;
+        }
+
+        #disclaimer-margin {
+            height: 180px;
+        }
+
+        .topwarn {
+            font-size: 40px;
+        }
+
+        .topwarn, .warn {
+            color: orangered;
+            font-weight: bold;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .inv-table {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border-spacing: 0;
+            border: none;
+        }
+
+        #disclaimer button {
+            margin: 0;
+            padding: 5px;
+            width: 30px;
+            height: 30px;
+        }
+
+        #header > h1 {
+            margin-top: 0;
+            padding-top: 5px;
+        }
+
+        #footer {
+            border-top: 1px solid lightgrey;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 3px 5px 5px;
+            width: 100%;
+            color: grey;
+            background: white;
+        }
+
+        .zero-margin {
+            margin: 0;
+        }
+
+        code {
+            font-family: 'Consolas', monospace, sans-serif;
+            background: #eeeeee;
+            padding: 2px 2px 0;
+            border-radius: 3px;
+        }
+
+        code.codeblock {
+            font-size: 14px;
+            border: 1px solid lightgrey;
+            margin: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
+            padding-bottom: 3px;
+            display: block;
+            width: fit-content;
+            line-height: 1.5;
+        }
+
+        #footer-margin {
+            height: 60px;
+        }
+
+        #params-list {
+            padding-left: 25px;
+        }
+
+        #logo {
+            width: 30px;
+            position: relative;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="disclaimer" class="disclaimer-group">
+        <table border="0" class="inv-table">
+            <tr>
+                <td width="50">
+                    <br/>
+                </td>
+                <td>
+                    <p class="bold zero-margin"><span class="topwarn">Warning!</span> All following calculations are <span class="warn">NOT PRECISE</span>
+                        and should ONLY be used as <span class="warn">AN EXAMPLE</span>.</p>
+                </td>
+                <td width="50" valign="top" align="right">
+                    <button onclick="hideDisclaimer()">X</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <p>The point of this page is to <span class="bold">demonstrate</span> HOW Cardano profits are calculated
+                        and to show how many <span class="warn">UNKNOWN VARIABLES</span> are used in the calculation.
+                        Result of this calculator <span class="warn">SHOULD NOT</span> be considered a promise or a guarantee
+                        of future profits, and should not be used as a financial advice.</p>
+                    <p>Not a single company associated with the Cardano project (IOHK, Emurgo, Cardano Foundation, etc.)
+                        should be held accountable for the results of this calculator!</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="disclaimer-margin" class="disclaimer-group"><br/></div>
+
+    <div id="header">
+        <h1><img src="ada-logo.png" id="logo"/> ₳ Cardano Staking Profits Calculator</h1>
+    </div>
+
+    <div class="tab" id="year">
+        <h2 class="zero-margin">Formula explanation:</h2>
+        <p>All information for calculations are taken from these two documents:</p>
+        <ol>
+            <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
+            <li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>
+        </ol>
+        <h3>Parameters require for calculations:</h3>
+        <ul id="params-list">
+            <li><code>INFL</code> - the level of inflation in yearly percentile reserve decrease</li>
+            <li><code>YEAR</code> - numbe of full years since the launch of the staking</li>
+            <li><code>STAKE</code> - your stake in coins</li>
+            <li><code>TOTAL_STAKE</code> - total stake in the system in coins</li>
+            <li><code>TX_EPOCH</code> - average number of transactions each epoch (5 days)</li>
+            <li><code>TX_SIZE</code> - average size of a transaction</li>
+            <li><code>TAX</code> - the percentage of profits taxed towards the treasury</li>
+            <li><code>POOL_FEE</code> - the percentage of profits that pool takes as a fee</li>
+        </ul>
+        <h3>Full formula:</h3>
+        <code class="codeblock">
+            MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL<br/>
+            FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
+            RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE<br/>
+        </code>
+        <h3>Detailed explanation:</h3>
+        <p class="bold">Minted coins</p>
+        <p class="zero-margin">First we calculate how much coins will be issues this year as an inflation:</p>
+        <code class="codeblock">
+            MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL
+        </code>
+        <p>The 13 billions number is taken from the monetary policy and represents the total reserve
+        of coins not issued from the beginning. These coins will be gradually issued thru minting
+        using formula above to calculate the amount. Formula is taken from the staking explanation post.</p>
+
+        <p class="zero-margin">For example: if we take an <b>arbitrary example</b> of 5% reserve decrease, and calculated it for the
+        second year (1 whole year after launch), then it would give us:</p>
+        <code class="codeblock">
+            13,887,515,354 * (1 - 5%)<sup>1</sup> * 5% = 659,656,979.315
+        </code>
+        <p>Just under 660 millions of newly minted ADA in the second year of staking.</p>
+
+        <p>The <code>MINT</code> value now gives us notion of how much <b>new</b> coins will
+        be issued to reward people. But there are also fees that users pay to send coins or execute any
+        transactions. Total fees for the whole year are calculated like this:</p>
+
+        <p class="bold">Fees</p>
+
+        <code class="codeblock">
+            TX_YEAR = 73 * TX_EPOCH<br/>
+            FIXED_FEES = TX_YEAR * 0.155381<br/>
+            SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
+            FEES = FIXED_FEES + SIZE_FEES<br/>
+        </code>
+
+        <p><code>TX_YEAR</code> gives us the average number of transactions for the whole year.
+        One year consists of 73 epochs. For now it's fixed, but in theory also may change.
+        Best practice would be to make it a separate parameter <code>EPOCH_YEAR</code></p>
+
+        <p><code>FIXED_FEES</code> is the number of all transactions per year multiplied by
+        the <b>fixed transaction cost</b> as described in the staking explanation post.
+        It also might change in the future so would be best to define parameter <code>TX_FEE_FIXED</code></p>
+
+        <p><code>SIZE_FEES</code> is the sum of all bytes of all transactions per year multiplied by
+        the <b>byte cost</b> as described in the staking explanation post.
+        It also might change in the future so would be best to define parameter <code>TX_FEE_PER_BYTE</code></p>
+
+        <p class="zero-margin">For example: if we take current average number of transaction from
+        <a href="https://adatracker.com/charts">the actual tracker</a> it would be around 15,000.
+        And if we take an average transaction size to be 200 byte, as described in the staking explanation post.
+        Then we could calculate:</p>
+        <code class="codeblock">
+            TX_YEAR = 73 * 15,000 = 1,095,000<br/>
+            FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
+            SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174<br/>
+            FEES = 170,142.195 + 9,624.174 = 179,766.369<br/>
+        </code>
+
+        <p class="bold">Tax</p>
+
+        <code class="codeblock">
+            UNTAXED_REWARD = MINT + FEES<br/>
+            TAXED_REWARD = UNTAXED_REWARD - TAX<br/>
+        </code>
+
+        <p><code>UNTAXED_REWARD</code> is the total pool of reward for all stakers in the system, but before
+        tax is subtracted. Once we subtract some percentage of the total pool into treasury -
+        we get the final <code>TAXED_REWARD</code> - total reward distributed among all stakers.</p>
+
+        <p class="zero-margin">For example: if we take <code>TAX</code> to be 20% just as
+        an arbitrary rational example (IOHK proposed 20% tax for ETC, but it might end up
+        being be 25% for Cardano, or some other number), then calculations would go like:</p>
+        <code class="codeblock">
+            UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684<br/>
+            TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547<br/>
+        </code>
+
+        <p class="bold">Share by stake</p>
+
+        <code class="codeblock">
+            SHARE = STAKE / TOTAL_STAKE<br/>
+            REWARD_SHARE = TAXED_REWARD * SHARE<br/>
+        </code>
+
+        <p>Any arbitrary staker (in the pool or not) may calculate his <b>AVERAGE</b> share of the rewards,
+        by calculating his <code>SHARE</code> in the total stake of the system.
+        This parameter of the total stake is actually the most important one, because
+        it directly and in the most significant way affects how much coins a user will receive
+        by staking <b>the same</b> amount of coins. The lower total stake - the greater you share
+        can be with the same coins staked.</p>
+
+        <p class="zero-margin">For example: if we take <code>TOTAL_STAKE</code> to be 10 billion (just as
+        an arbitrary completely random example, no one knows how many actual coins will be staked) and
+        we take out stake to be 42 thousand coins, then calculations would go like:</p>
+        <code class="codeblock">
+            SHARE = 42,000 / 10,000,000,000 = 0.0000042<br/>
+            REWARD_SHARE = 527,869,396.547 * 0.0000042 = 2217.0515<br/>
+        </code>
+
+        <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
+        about 2217.0514 in a year, but <b>ONLY IF</b> there would be 10 billions of total stake.</p>
+
+        <p class="bold">Pools fees</p>
+
+        <code class="codeblock">
+            RESULT_REWARD = REWARD_SHARE - POOL_FEE
+        </code>
+
+        <p class="zero-margin">Pools might take fees of different size and they will define those at the moment
+        of the pool registration. For example: if we take a <b>completely arbitrary</b> number of 5%,
+        then calculations would go like:</p>
+        <code class="codeblock">
+            RESULT_REWARD = 2217.0515 - 5% = 2106.198925
+        </code>
+
+        <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 2106.198925 for a 42K stake,
+        or almost exactly 5%, which is not bad at all.</p>
+
+    </div>
+
+    <div id="footer-margin"><br/></div>
+
+    <div id="footer">
+        Dev: <a href="https://twitter.com/vsubhuman">@vsubhuman</a>
+        | GitHub <a href="https://github.com/vantuz-subhuman">@vantuz-subhuman</a>
+        | Forum <a href="https://forum.cardano.org/">forum.cardano.org</a>
+        | Chat <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a>
+    </div>
+</body>
+</html>
