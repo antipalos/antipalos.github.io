@@ -14,8 +14,21 @@
         $( window ).resize(function() {
             resize();
         });
+        function selectTab(tab) {
+            if (!tab) {
+                return;
+            }
+            $('.tab-selector').removeClass('selected');
+            $('.tab-selector[tab="' + tab + '"]').addClass('selected');
+        }
+        function tab(e) {
+            if ($(e).hasClass('selected')) {
+                return;
+            }
+            selectTab($(e).attr('tab'))
+        }
         $(function() {
-            // hideDisclaimer();
+            hideDisclaimer();
             resize();
         })
     </script>
@@ -45,6 +58,10 @@
             #footer{font-size: 15px;}
         }
 
+        body {
+            font-family: Calibri sans-serif;
+        }
+
         #disclaimer {
             border: 3px solid red;
             text-align: center;
@@ -55,7 +72,7 @@
             right: 0;
             top: 0;
             width: 100%;
-            background: white;
+            background: #ffeeee;
         }
 
         #disclaimer-margin {
@@ -93,6 +110,36 @@
         #header > h1 {
             margin-top: 0;
             padding-top: 5px;
+            margin-bottom: 5px;
+            /*border: 1px solid red;*/
+        }
+
+        #header > table {
+            border-top: 1px solid lightgrey;
+            border-bottom: 1px solid lightgrey;
+            text-align: center;
+        }
+
+        #header > table td {
+            padding-left: 40px;
+            padding-right: 40px;
+            font-family: Consolas sans-serif;
+            font-weight: bold;
+        }
+
+        .tab-td {
+            border-right: 1px solid lightgrey;
+        }
+
+        .tab-selector.selected {
+            font-style: normal;
+            text-decoration: none;
+            color: black;
+        }
+
+        #header {
+            width: 100%;
+            margin-bottom: 15px;
         }
 
         #footer {
@@ -104,7 +151,7 @@
             padding: 3px 5px 5px;
             width: 100%;
             color: grey;
-            background: white;
+            background: #f8f8f8;
         }
 
         .zero-margin {
@@ -137,11 +184,6 @@
 
         #params-list {
             padding-left: 25px;
-        }
-
-        #logo {
-            width: 30px;
-            position: relative;
         }
 
     </style>
@@ -178,6 +220,19 @@
 
     <div id="header">
         <h1>Cardano Staking Profits Calculator</h1>
+        <table class="tabs">
+            <tr>
+                <td class="tab-td">
+                    <a class="tab-selector selected" href="javascript:void(0)" onclick="tab(this)" tab="formula">Formula</a>
+                </td>
+                <td class="tab-td">
+                    <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="calc">Calculator</a>
+                </td>
+                <td>
+                    <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="about">About</a>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="tab" id="year">
@@ -323,7 +378,7 @@
 
     <div id="footer">
         Dev: <a href="https://twitter.com/vsubhuman">@vsubhuman</a>
-        | GitHub <a href="https://github.com/vantuz-subhuman">@vantuz-subhuman</a>
+        | GitHub <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">@Antipalos</a>
         | Forum <a href="https://forum.cardano.org/">forum.cardano.org</a>
         | Chat <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a>
     </div>
