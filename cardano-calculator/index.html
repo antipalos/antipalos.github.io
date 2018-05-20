@@ -76,7 +76,7 @@
             }
         }
         $(function() {
-            // hideDisclaimer();
+            hideDisclaimer();
             resize();
             hashEvent()
         });
@@ -205,7 +205,7 @@
         }
 
         .zero-margin {
-            margin: 0;
+            margin-bottom: 0;
         }
 
         code {
@@ -234,6 +234,55 @@
 
         #params-list {
             padding-left: 25px;
+        }
+
+        .inp-param {
+            width: 15ch;
+        }
+
+        [data-tip] {
+            position:relative;
+
+        }
+        [data-tip]:before {
+            content:'';
+            /* hides the tooltip when not hovered */
+            display:none;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid #1a1a1a;
+            position:absolute;
+            top:30px;
+            left:35px;
+            z-index:8;
+            font-size:0;
+            line-height:0;
+            width:0;
+            height:0;
+        }
+        [data-tip]:after {
+            display:none;
+            content:attr(data-tip);
+            position:absolute;
+            top:35px;
+            left:0;
+            padding:5px 8px;
+            background:#1a1a1a;
+            color:#fff;
+            z-index:9;
+            font-size: 0.75em;
+            height:auto;
+            line-height:18px;
+            -webkit-border-radius: 3px;
+            -moz-border-radius: 3px;
+            border-radius: 3px;
+            white-space: pre-line;
+            word-wrap:normal;
+        }
+        [data-tip]:hover:before,
+        [data-tip]:hover:after {
+            display:block;
+            width: max-content;
         }
 
     </style>
@@ -287,10 +336,11 @@
 
     <div class="tab" tab="formula">
         <h2 class="zero-margin">Formula explanation:</h2>
-        <p>All information for calculations are taken from these two documents:</p>
+        <p>All information for calculations are taken from these documents:</p>
         <ol>
             <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
             <li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>
+            <li><a href="https://adatracker.com/charts">AdaTracker charts (to approximate transaction number)</a></li>
         </ol>
         <h3>Parameters require for calculations:</h3>
         <ul id="params-list">
@@ -426,6 +476,61 @@
 
     <div class="tab" tab="calc">
         <h2 class="zero-margin">Calculator:</h2>
+        <h3 class="zero-margin">Define parameters:</h3>
+        <table id="calc-form" border="0" cellpadding="3">
+            <tr><td data-tip="How much total coins you will send to a pool">
+                <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
+            </td><td data-tip="Cannot be bigger than the total stake">
+                <input id="inp_STAKE" class="inp-param" type="number" min="1" max="10000000000" value="1000"/>
+            </td></tr>
+            <tr><td data-tip="How much total coins there are staked in the system.
+                              This values is completely guessed at 10 billion (around 30% of total supply).
+                              In real life it might turn out to be anything and also will change with time.">
+                <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
+            </td><td data-tip="Cannot be smaller than your stake">
+                <input id="inp_TOTAL_STAKE" class="inp-param" type="number" min="1000" max="45000000000" value="10000000000"/>
+            </td></tr>
+            <tr><td data-tip="The number of the year from the start launch of the Shelley staking (starting with 1 - first year).
+                              Inflation decreases each year so number of issued coins changes.">
+                <label for="inp_YEAR">Year since staking: </label>
+            </td><td data-tip="Max year to calculate - 500">
+                <input id="inp_YEAR" class="inp-param" type="number" min="1" max="500" value="1"/>
+            </td></tr>
+            <tr><td data-tip="Percent of reserved coins issued each year.
+                              The number of 5% is taken from the official staking explanation post.
+                              But generally is considered to be only an 'arbitrary example'">
+                <label for="inp_INFL">Yearly reserve decrease (%): </label>
+            </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
+                <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5"/>
+            </td></tr>
+            <tr><td data-tip="Average number of transactions in each epoch.
+                              Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
+                <label for="inp_TX_EPOCH">Transactions in epoch: </label>
+            </td><td data-tip="Cannot be less than 0">
+                <input id="inp_TX_EPOCH" class="inp-param" type="number" min="0" value="15000"/>
+            </td></tr>
+            <tr><td data-tip="Average transaction size in byte.
+                              The number of 200 bytes if taken from the staking explanation post.">
+                <label for="inp_TX_SIZE">Transaction size (bytes): </label>
+            </td><td data-tip="Cannot be less than 1">
+                <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="200"/>
+            </td></tr>
+            <tr><td data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
+                              The number of 20% is speculative and approximate. There's no definite information yet,
+                              but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
+                <label for="inp_TAX">Treasury tax (%): </label>
+            </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
+                <input id="inp_TAX" class="inp-param" type="number" min="0" max="100" step="0.1" value="20"/>
+            </td></tr>
+            <tr><td data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
+                              The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
+                <label for="inp_POOL_FEE">Pool fee (%): </label>
+            </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
+                <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5"/>
+            </td></tr>
+        </table>
+        <h3>Intermediary calculations:</h3>
+        <h3>Result:</h3>
     </div>
 
     <div class="tab" tab="about">
