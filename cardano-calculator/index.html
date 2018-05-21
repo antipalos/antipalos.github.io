@@ -14,6 +14,9 @@
         $( window ).resize(function() {
             resize();
         });
+        function frmt(num, scale=10) {
+            return Number(num.toFixed(scale)).toLocaleString('en-IN', {'maximumFractionDigits': scale})
+        }
         function parseHash(hash) {
             let sLocationAndParams = hash.split(/\?(.+)/);
             let sLocation = sLocationAndParams[0];
@@ -78,12 +81,15 @@
         function parseParamIntoContext(el) {
             let id = el.attr('id');
             if (!id.startsWith("inp_")) {
-                return false;
+                return null;
             }
             param = id.substr(4);
             valtype = el.attr('valtype');
             parser = valtype === 'int' ? parseInt : valtype === 'float' ? parseFloat : (x) => x;
-            window.CardanoCalculatorParams[param] = parser(el.val());
+            let parsedValue = parser(el.val());
+            window.CardanoCalculatorParams[param] = parsedValue;
+            return parsedValue
+
         }
         function updateCalculations() {
             let userStake = window.CardanoCalculatorParams.STAKE;
@@ -99,43 +105,43 @@
             let txFeeFixed = 0.155381;
             let txFeePerByte = 0.000043946;
             let userShare = userStake / totalStake;
-            $('#ctx_STAKE').text(Number((userShare * 100).toFixed(10)) + '%');
+            $('#ctx_STAKE').text(frmt(userShare * 100) + '%');
             let reserveAtYearStart = initialReserve * Math.pow((1 - infl), year);
             let issuedAtYearStart = initialReserve - reserveAtYearStart;
             let supplyAtYearStart = initialTotalSupply + issuedAtYearStart;
-            $('#ctx_YEAR').text(Number(supplyAtYearStart.toFixed(3)) + ' ADA total');
+            $('#ctx_YEAR').text(frmt(supplyAtYearStart, 3) + ' ADA total');
             let issuedThisYear = reserveAtYearStart * infl;
             let supplyInflation = (issuedThisYear * 100) / supplyAtYearStart;
-            $('#ctx_INFL').text(Number(issuedThisYear.toFixed(3)) + ' ADA issued (' + Number(supplyInflation.toFixed(10)) + '% inflation)');
+            $('#ctx_INFL').text(frmt(issuedThisYear, 3) + ' ADA issued (' + frmt(supplyInflation) + '% inflation)');
             let stakedShare = (totalStake * 100) / supplyAtYearStart;
-            $('#ctx_TOTAL_STAKE').text(Number(stakedShare.toFixed(10)) + '%');
+            $('#ctx_TOTAL_STAKE').text(frmt(stakedShare) + '%');
             let tps = txEpoch / (21600 * 20);
-            $('#ctx_TX_EPOCH').text(Number(tps.toFixed(10)) + ' tps');
+            $('#ctx_TX_EPOCH').text(frmt(tps) + ' tps');
             let txFee = txFeeFixed + (txSize * txFeePerByte);
-            $('#ctx_TX_SIZE').text(Number(txFee.toFixed(10)) + ' avg fee');
+            $('#ctx_TX_SIZE').text(frmt(txFee) + ' avg fee');
             let txFeeYearly = txEpoch * 73 * txFee;
             let untaxedRewardAtYearStart = issuedAtYearStart + (txFeeYearly * year);
             let untaxedRewardThisYear = issuedThisYear + txFeeYearly;
             let taxAtYearStart = untaxedRewardAtYearStart * tax;
             let taxThisYear = untaxedRewardThisYear * tax;
-            $('#ctx_TAX').text(Number(taxAtYearStart.toFixed(2)) + ' ADA in treasury (+ ' + Number(taxThisYear.toFixed(2)) + ' ADA added this year)');
+            $('#ctx_TAX').text(frmt(taxAtYearStart, 3) + ' ADA in treasury (+ ' + frmt(taxThisYear, 3) + ' ADA added this year)');
             let taxedRewardAtYearStart = untaxedRewardAtYearStart - taxAtYearStart;
             let taxedRewardThisYear = untaxedRewardThisYear - taxThisYear;
             let userRewardAtYearStart = taxedRewardAtYearStart * userShare;
             let userRewardThisYear = taxedRewardThisYear * userShare;
             let poolFeeAtYearStart = userRewardAtYearStart * poolFee;
             let poolFeeThisYear = userRewardThisYear * poolFee;
-            $('#ctx_POOL_FEE').text(Number(poolFeeThisYear.toFixed(10)) + ' ADA yearly');
+            $('#ctx_POOL_FEE').text(frmt(poolFeeThisYear) + ' ADA yearly');
             let resultAtYearStart = userRewardAtYearStart - poolFeeAtYearStart;
             let resultThisYear = userRewardThisYear - poolFeeThisYear;
             let resultAtYearEnd = resultAtYearStart + resultThisYear;
-            $('#resultAtYearStart').text(Number(resultAtYearStart.toFixed(10)) + ' ADA');
-            $('#resultThisYear').text(Number(resultThisYear.toFixed(10)) + ' ADA');
-            $('#resultAtYearEnd').text(Number(resultAtYearEnd.toFixed(10)) + ' ADA');
+            $('#resultAtYearStart').text(frmt(resultAtYearStart) + ' ADA');
+            $('#resultThisYear').text(frmt(resultThisYear) + ' ADA');
+            $('#resultAtYearEnd').text(frmt(resultAtYearEnd) + ' ADA');
         }
         function paramUpdate(e) {
             parseParamIntoContext($(e));
-            updateCalculations()
+            updateCalculations();
         }
         function initParamsContext() {
             window['CardanoCalculatorParams'] = {};
@@ -557,7 +563,7 @@
 
     </div>
 
-    <div class="tab" tab="calc">
+    <div class="tab" tab="calc" style="display: none">
         <h2 class="zero-margin">Calculator:</h2>
         <h3 class="zero-margin">Define parameters:</h3>
         <table id="calc-form" border="0" cellpadding="3">
@@ -648,7 +654,7 @@
         </table>
     </div>
 
-    <div class="tab" tab="about">
+    <div class="tab" tab="about" style="display: none">
         <h2 class="zero-margin">About this project:</h2>
     </div>
 
