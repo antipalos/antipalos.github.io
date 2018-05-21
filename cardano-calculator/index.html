@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Cardano Calc</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="cleave.min.js"></script>
     <script language="JavaScript">
         function hideDisclaimer() {
             $('.disclaimer-group').hide();
@@ -78,7 +79,14 @@
                 }
             }
         }
-        function parseParamIntoContext(el) {
+        function commify(numStr) {
+            let len = numStr.indexOf('.') || numStr.length;
+            for (let i = len-3; i > 0; i-=3) {
+                numStr = numStr.slice(0, i) + ',' + numStr.slice(i);
+            }
+            return numStr;
+        }
+        function parseParamIntoContext(el, shift=0) {
             let id = el.attr('id');
             if (!id.startsWith("inp_")) {
                 return null;
@@ -86,7 +94,11 @@
             param = id.substr(4);
             valtype = el.attr('valtype');
             parser = valtype === 'int' ? parseInt : valtype === 'float' ? parseFloat : (x) => x;
-            let parsedValue = parser(el.val());
+            let parsedValue = parser(el.val().replace(/,/g,''));
+            if (shift) {
+                parsedValue += shift;
+                el.val(commify(frmt(parsedValue, valtype === 'float' ? 1 : 0)));
+            }
             window.CardanoCalculatorParams[param] = parsedValue;
             return parsedValue
 
@@ -139,8 +151,8 @@
             $('#resultThisYear').text(frmt(resultThisYear) + ' ADA');
             $('#resultAtYearEnd').text(frmt(resultAtYearEnd) + ' ADA');
         }
-        function paramUpdate(e) {
-            parseParamIntoContext($(e));
+        function paramUpdate(e, shift=0) {
+            parseParamIntoContext($(e), shift);
             updateCalculations();
         }
         function initParamsContext() {
@@ -149,11 +161,24 @@
             updateCalculations()
         }
         $(function() {
-            // hideDisclaimer();
+            hideDisclaimer();
             resize();
             hashEvent();
             initParamsContext();
             $('.inp-param').on("change paste keyup", function() { paramUpdate(this) });
+            $('.cleave-num').each(function () {
+                let cleave = new Cleave(this, {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand'
+                });
+            });
+            $('.inp-param.cleave-num').keydown(function() {
+                let char = event.which || event.keyCode;
+                if (char === 38 || char === 40) {
+                    shift = 39 - char;
+                    paramUpdate(this, shift);
+                }
+            });
         });
         $(window).bind('hashchange', hashEvent);
     </script>
@@ -570,7 +595,7 @@
             <tr><td data-tip="How much total coins you will send to a pool">
                 <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
             </td><td data-tip="Cannot be bigger than the total stake">
-                <input id="inp_STAKE" class="inp-param" type="number" min="1" max="10000000000" value="1000" valtype="int"/>
+                <input id="inp_STAKE" class="inp-param cleave-num" type="text" min="1" max="10000000000" value="1000" valtype="int"/>
             </td><td data-tip="Share of total stake">
                 <span id="ctx_STAKE" class="inp-ctx"></span>
             </td></tr>
@@ -579,7 +604,7 @@
                               In real life it might turn out to be anything and also will change with time.">
                 <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
             </td><td data-tip="Cannot be smaller than your stake">
-                <input id="inp_TOTAL_STAKE" class="inp-param" type="number" min="1000" max="45000000000" value="10000000000" valtype="int"/>
+                <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1000" max="45000000000" value="10000000000" valtype="int"/>
             </td><td data-tip="Share of total supply this year">
                 <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
             </td></tr>
@@ -604,7 +629,7 @@
                               Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
                 <label for="inp_TX_EPOCH">Transactions in epoch: </label>
             </td><td data-tip="Cannot be less than 0">
-                <input id="inp_TX_EPOCH" class="inp-param" type="number" min="0" value="15000" valtype="int"/>
+                <input id="inp_TX_EPOCH" class="inp-param cleave-num" type="text" min="0" value="15000" valtype="int"/>
             </td><td data-tip="Average transactions per second with a 5 day epoch and 20 second slot">
                 <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
             </td></tr>
@@ -630,7 +655,7 @@
                 <label for="inp_POOL_FEE">Pool fee (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
                 <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
-            </td><td>
+            </td><td data-tip="How much coins will pool earn from YOUR stake in a year">
                 <span id="ctx_POOL_FEE" class="inp-ctx"></span>
             </td></tr>
         </table>
