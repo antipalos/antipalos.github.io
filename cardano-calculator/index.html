@@ -15,7 +15,7 @@
             resize();
         });
         function frmt(num, scale=10) {
-            return Number(num.toFixed(scale)).toLocaleString('en-IN', {'maximumFractionDigits': scale})
+            return Number(num.toFixed(scale)).toLocaleString('en-US', {'maximumFractionDigits': scale})
         }
         function parseHash(hash) {
             let sLocationAndParams = hash.split(/\?(.+)/);
