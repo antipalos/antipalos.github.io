@@ -103,9 +103,35 @@
             return parsedValue
 
         }
+        function markError(id, msg) {
+            let el = $('#inp_'+id).parent();
+            el.attr('err-tip',msg);
+            el.addClass('err-inp');
+            return msg;
+        }
         function updateCalculations() {
+            let inputs = $('.inp-param').parent();
+            inputs.removeAttr('err-tip');
+            inputs.removeClass('err-inp');
             let userStake = window.CardanoCalculatorParams.STAKE;
             let totalStake = window.CardanoCalculatorParams.TOTAL_STAKE;
+            let negativeErrors = Object.entries(window.CardanoCalculatorParams).map(function(e) {
+                let el = $('#inp_'+e[0]),
+                    min = parseInt(el.attr('min')),
+                    max = parseInt(el.attr('max'));
+                if (e[1] < min) {
+                    return markError(e[0], 'Cannot be less than ' + min);
+                } else if (e[1] > max) {
+                    return markError(e[0], 'Cannot be more than ' + max);
+                }
+            }).filter((x) => x);
+            if (negativeErrors.length > 0) {
+                return;
+            }
+            if (userStake > totalStake) {
+                return (markError('STAKE', 'Stake cannot be greater than TOTAL stake'),
+                        markError('TOTAL_STAKE', 'Total stake cannot be less than user stake'));
+            }
             let year = window.CardanoCalculatorParams.YEAR - 1;
             let infl = (window.CardanoCalculatorParams.INFL / 100);
             let txEpoch = window.CardanoCalculatorParams.TX_EPOCH;
@@ -117,10 +143,13 @@
             let txFeeFixed = 0.155381;
             let txFeePerByte = 0.000043946;
             let userShare = userStake / totalStake;
-            $('#ctx_STAKE').text(frmt(userShare * 100) + '%');
             let reserveAtYearStart = initialReserve * Math.pow((1 - infl), year);
             let issuedAtYearStart = initialReserve - reserveAtYearStart;
             let supplyAtYearStart = initialTotalSupply + issuedAtYearStart;
+            if (totalStake > supplyAtYearStart) {
+                return markError('TOTAL_STAKE', 'Total stake cannot be greater than total supply for this year')
+            }
+            $('#ctx_STAKE').text(frmt(userShare * 100) + '%');
             $('#ctx_YEAR').text(frmt(supplyAtYearStart, 3) + ' ADA total');
             let issuedThisYear = reserveAtYearStart * infl;
             let supplyInflation = (issuedThisYear * 100) / supplyAtYearStart;
@@ -152,7 +181,7 @@
             $('#resultAtYearEnd').text(frmt(resultAtYearEnd) + ' ADA');
         }
         function paramUpdate(e, shift=0) {
-            if (parseParamIntoContext($(e), shift)) {
+            if (parseParamIntoContext($(e), shift) != null) {
                 updateCalculations();
             }
         }
@@ -341,11 +370,11 @@
             width: 15ch;
         }
 
-        [data-tip] {
+        [data-tip], [err-tip] {
             position:relative;
 
         }
-        [data-tip]:before {
+        [data-tip]:before, [err-tip]:before {
             content:'';
             /* hides the tooltip when not hovered */
             display:none;
@@ -361,7 +390,7 @@
             width:0;
             height:0;
         }
-        [data-tip]:after {
+        [data-tip]:after, [err-tip]:after {
             display:none;
             content:attr(data-tip);
             position:absolute;
@@ -380,13 +409,20 @@
             white-space: pre-line;
             word-wrap:normal;
         }
+        [err-tip]:after {
+            content:attr(err-tip);
+            background: orangered;
+            color: black;
+        }
         [data-tip]:hover:before,
-        [data-tip]:hover:after {
+        [data-tip]:hover:after,
+        [err-tip]:hover:before,
+        [err-tip]:hover:after {
             display:block;
             width: max-content;
         }
 
-        input.invalid {
+        .err-inp {
             background-color: red;
         }
 
