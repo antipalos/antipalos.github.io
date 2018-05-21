@@ -156,10 +156,12 @@
             $('#ctx_INFL').text(frmt(issuedThisYear, 3) + ' ADA issued (' + frmt(supplyInflation) + '% inflation)');
             let stakedShare = (totalStake * 100) / supplyAtYearStart;
             $('#ctx_TOTAL_STAKE').text(frmt(stakedShare) + '%');
-            let tps = txEpoch / (21600 * 20);
+            let tpb = txEpoch / 21600;
+            let tps = tpb / 20;
             $('#ctx_TX_EPOCH').text(frmt(tps) + ' tps');
             let txFee = txFeeFixed + (txSize * txFeePerByte);
-            $('#ctx_TX_SIZE').text(frmt(txFee) + ' avg fee');
+            let blockReward = ((issuedThisYear / (73 * 21600)) + (tpb * txFee)) * (1 - tax);
+            $('#ctx_TX_SIZE').text(frmt(txFee) + ' avg fee (' + frmt(blockReward) + ' avg block reward)');
             let txFeeYearly = txEpoch * 73 * txFee;
             let untaxedRewardAtYearStart = issuedAtYearStart + (txFeeYearly * year);
             let untaxedRewardThisYear = issuedThisYear + txFeeYearly;
@@ -675,7 +677,7 @@
                 <label for="inp_TX_SIZE">Transaction size (bytes): </label>
             </td><td data-tip="Cannot be less than 1">
                 <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="200" valtype="int"/>
-            </td><td data-tip="Average translation fee">
+            </td><td data-tip="Average translation fee (Average taxed block reward)">
                 <span id="ctx_TX_SIZE" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
