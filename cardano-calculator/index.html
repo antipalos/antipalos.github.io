@@ -85,12 +85,62 @@
             parser = valtype === 'int' ? parseInt : valtype === 'float' ? parseFloat : (x) => x;
             window.CardanoCalculatorParams[param] = parser(el.val());
         }
+        function updateCalculations() {
+            let userStake = window.CardanoCalculatorParams.STAKE;
+            let totalStake = window.CardanoCalculatorParams.TOTAL_STAKE;
+            let year = window.CardanoCalculatorParams.YEAR - 1;
+            let infl = (window.CardanoCalculatorParams.INFL / 100);
+            let txEpoch = window.CardanoCalculatorParams.TX_EPOCH;
+            let txSize = window.CardanoCalculatorParams.TX_SIZE;
+            let tax = (window.CardanoCalculatorParams.TAX / 100);
+            let poolFee = (window.CardanoCalculatorParams.POOL_FEE / 100);
+            let initialTotalSupply = 31112484646;
+            let initialReserve = 13887515354;
+            let txFeeFixed = 0.155381;
+            let txFeePerByte = 0.000043946;
+            let userShare = userStake / totalStake;
+            $('#ctx_STAKE').text(Number((userShare * 100).toFixed(10)) + '%');
+            let reserveAtYearStart = initialReserve * Math.pow((1 - infl), year);
+            let issuedAtYearStart = initialReserve - reserveAtYearStart;
+            let supplyAtYearStart = initialTotalSupply + issuedAtYearStart;
+            $('#ctx_YEAR').text(Number(supplyAtYearStart.toFixed(3)) + ' ADA total');
+            let issuedThisYear = reserveAtYearStart * infl;
+            let supplyInflation = (issuedThisYear * 100) / supplyAtYearStart;
+            $('#ctx_INFL').text(Number(issuedThisYear.toFixed(3)) + ' ADA issued (' + Number(supplyInflation.toFixed(10)) + '% inflation)');
+            let stakedShare = (totalStake * 100) / supplyAtYearStart;
+            $('#ctx_TOTAL_STAKE').text(Number(stakedShare.toFixed(10)) + '%');
+            let tps = txEpoch / (21600 * 20);
+            $('#ctx_TX_EPOCH').text(Number(tps.toFixed(10)) + ' tps');
+            let txFee = txFeeFixed + (txSize * txFeePerByte);
+            $('#ctx_TX_SIZE').text(Number(txFee.toFixed(10)) + ' avg fee');
+            let txFeeYearly = txEpoch * 73 * txFee;
+            let untaxedRewardAtYearStart = issuedAtYearStart + (txFeeYearly * year);
+            let untaxedRewardThisYear = issuedThisYear + txFeeYearly;
+            let taxAtYearStart = untaxedRewardAtYearStart * tax;
+            let taxThisYear = untaxedRewardThisYear * tax;
+            $('#ctx_TAX').text(Number(taxAtYearStart.toFixed(2)) + ' ADA in treasury (+ ' + Number(taxThisYear.toFixed(2)) + ' ADA added this year)');
+            let taxedRewardAtYearStart = untaxedRewardAtYearStart - taxAtYearStart;
+            let taxedRewardThisYear = untaxedRewardThisYear - taxThisYear;
+            let userRewardAtYearStart = taxedRewardAtYearStart * userShare;
+            let userRewardThisYear = taxedRewardThisYear * userShare;
+            let poolFeeAtYearStart = userRewardAtYearStart * poolFee;
+            let poolFeeThisYear = userRewardThisYear * poolFee;
+            $('#ctx_POOL_FEE').text(Number(poolFeeThisYear.toFixed(10)) + ' ADA yearly');
+            let resultAtYearStart = userRewardAtYearStart - poolFeeAtYearStart;
+            let resultThisYear = userRewardThisYear - poolFeeThisYear;
+            let resultAtYearEnd = resultAtYearStart + resultThisYear;
+            $('#resultAtYearStart').text(Number(resultAtYearStart.toFixed(10)) + ' ADA');
+            $('#resultThisYear').text(Number(resultThisYear.toFixed(10)) + ' ADA');
+            $('#resultAtYearEnd').text(Number(resultAtYearEnd.toFixed(10)) + ' ADA');
+        }
         function paramUpdate(e) {
             parseParamIntoContext($(e));
+            updateCalculations()
         }
         function initParamsContext() {
             window['CardanoCalculatorParams'] = {};
-            $('.inp-param').each(function() { parseParamIntoContext($(this)) })
+            $('.inp-param').each(function() { parseParamIntoContext($(this)) });
+            updateCalculations()
         }
         $(function() {
             hideDisclaimer();
@@ -308,6 +358,16 @@
             background-color: red;
         }
 
+        .inp-ctx {
+            font-size: 14px;
+            color: grey;
+        }
+
+        #results-table td {
+            padding-right: 15px;
+            padding-bottom: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -505,6 +565,8 @@
                 <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
             </td><td data-tip="Cannot be bigger than the total stake">
                 <input id="inp_STAKE" class="inp-param" type="number" min="1" max="10000000000" value="1000" valtype="int"/>
+            </td><td data-tip="Share of total stake">
+                <span id="ctx_STAKE" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="How much total coins there are staked in the system.
                               This values is completely guessed at 10 billion (around 30% of total supply).
@@ -512,12 +574,16 @@
                 <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
             </td><td data-tip="Cannot be smaller than your stake">
                 <input id="inp_TOTAL_STAKE" class="inp-param" type="number" min="1000" max="45000000000" value="10000000000" valtype="int"/>
+            </td><td data-tip="Share of total supply this year">
+                <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="The number of the year from the start launch of the Shelley staking (starting with 1 - first year).
                               Inflation decreases each year so number of issued coins changes.">
                 <label for="inp_YEAR">Year since staking: </label>
             </td><td data-tip="Max year to calculate - 500">
                 <input id="inp_YEAR" class="inp-param" type="number" min="1" max="500" value="1" valtype="int"/>
+            </td><td data-tip="Total supply at the start of this year">
+                <span id="ctx_YEAR" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="Percent of reserved coins issued each year.
                               The number of 5% is taken from the official staking explanation post.
@@ -525,18 +591,24 @@
                 <label for="inp_INFL">Yearly reserve decrease (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
                 <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
+            </td><td data-tip="New coins issued this year (+ Total supply inflation)">
+                <span id="ctx_INFL" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="Average number of transactions in each epoch.
                               Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
                 <label for="inp_TX_EPOCH">Transactions in epoch: </label>
             </td><td data-tip="Cannot be less than 0">
                 <input id="inp_TX_EPOCH" class="inp-param" type="number" min="0" value="15000" valtype="int"/>
+            </td><td data-tip="Average transactions per second with a 5 day epoch and 20 second slot">
+                <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="Average transaction size in byte.
                               The number of 200 bytes if taken from the staking explanation post.">
                 <label for="inp_TX_SIZE">Transaction size (bytes): </label>
             </td><td data-tip="Cannot be less than 1">
                 <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="200" valtype="int"/>
+            </td><td data-tip="Average translation fee">
+                <span id="ctx_TX_SIZE" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
                               The number of 20% is speculative and approximate. There's no definite information yet,
@@ -544,16 +616,36 @@
                 <label for="inp_TAX">Treasury tax (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
                 <input id="inp_TAX" class="inp-param" type="number" min="0" max="100" step="0.1" value="20" valtype="float"/>
+            </td><td data-tip="Coins in treasury at the start of this year (+ coins added this year)">
+                <span id="ctx_TAX" class="inp-ctx"></span>
             </td></tr>
             <tr><td data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
                               The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
                 <label for="inp_POOL_FEE">Pool fee (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
                 <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
+            </td><td>
+                <span id="ctx_POOL_FEE" class="inp-ctx"></span>
             </td></tr>
         </table>
-        <h3>Intermediary calculations:</h3>
-        <h3>Result:</h3>
+        <h3>Your profits:</h3>
+        <table id="results-table" border="0" cellpadding="0" cellspacing="0">
+            <tr><td>
+                <b>At the start of the year:</b>
+            </td><td>
+                <span id="resultAtYearStart"></span>
+            </td></tr>
+            <tr><td>
+                <b>During this year:</b>
+            </td><td>
+                <span id="resultThisYear"></span>
+            </td></tr>
+            <tr><td>
+                <b>At the end of the year</b>
+            </td><td>
+                <span id="resultAtYearEnd"></span>
+            </td></tr>
+        </table>
     </div>
 
     <div class="tab" tab="about">
@@ -563,7 +655,8 @@
     <div id="footer-margin"><br/></div>
 
     <div id="footer">
-        Dev: <a href="https://twitter.com/vsubhuman">@vsubhuman</a>
+        Version: 0.1
+        | Dev: <a href="https://twitter.com/vsubhuman">@vsubhuman</a>
         | GitHub <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">@Antipalos</a>
         | Forum <a href="https://forum.cardano.org/">forum.cardano.org</a>
         | Chat <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a>
