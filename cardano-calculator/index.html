@@ -15,15 +15,15 @@
             resize();
         });
         function parseHash(hash) {
-            let sLocaltionAndParams = hash.split(/\?(.+)/);
-            let sLocation = sLocaltionAndParams[0];
+            let sLocationAndParams = hash.split(/\?(.+)/);
+            let sLocation = sLocationAndParams[0];
             if (sLocation.startsWith('#')) {
                 sLocation = sLocation.substr(1)
             }
             let result = {'location': sLocation};
-            if (sLocaltionAndParams.length > 1) {
+            if (sLocationAndParams.length > 1) {
                 result['params'] = {};
-                let sParamStr = sLocaltionAndParams[1];
+                let sParamStr = sLocationAndParams[1];
                 let sParams = sParamStr.split('&');
                 for (let i = 0; i < sParams.length; i++) {
                     let sParamPair = sParams[i].split(/=(.*)/);
@@ -75,10 +75,29 @@
                 }
             }
         }
+        function parseParamIntoContext(el) {
+            let id = el.attr('id');
+            if (!id.startsWith("inp_")) {
+                return false;
+            }
+            param = id.substr(4);
+            valtype = el.attr('valtype');
+            parser = valtype === 'int' ? parseInt : valtype === 'float' ? parseFloat : (x) => x;
+            window.CardanoCalculatorParams[param] = parser(el.val());
+        }
+        function paramUpdate(e) {
+            parseParamIntoContext($(e));
+        }
+        function initParamsContext() {
+            window['CardanoCalculatorParams'] = {};
+            $('.inp-param').each(function() { parseParamIntoContext($(this)) })
+        }
         $(function() {
             hideDisclaimer();
             resize();
-            hashEvent()
+            hashEvent();
+            initParamsContext();
+            $('.inp-param').on("change paste keyup", function() { paramUpdate(this) });
         });
         $(window).bind('hashchange', hashEvent);
     </script>
@@ -285,6 +304,10 @@
             width: max-content;
         }
 
+        input.invalid {
+            background-color: red;
+        }
+
     </style>
 </head>
 <body>
@@ -481,52 +504,52 @@
             <tr><td data-tip="How much total coins you will send to a pool">
                 <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
             </td><td data-tip="Cannot be bigger than the total stake">
-                <input id="inp_STAKE" class="inp-param" type="number" min="1" max="10000000000" value="1000"/>
+                <input id="inp_STAKE" class="inp-param" type="number" min="1" max="10000000000" value="1000" valtype="int"/>
             </td></tr>
             <tr><td data-tip="How much total coins there are staked in the system.
                               This values is completely guessed at 10 billion (around 30% of total supply).
                               In real life it might turn out to be anything and also will change with time.">
                 <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
             </td><td data-tip="Cannot be smaller than your stake">
-                <input id="inp_TOTAL_STAKE" class="inp-param" type="number" min="1000" max="45000000000" value="10000000000"/>
+                <input id="inp_TOTAL_STAKE" class="inp-param" type="number" min="1000" max="45000000000" value="10000000000" valtype="int"/>
             </td></tr>
             <tr><td data-tip="The number of the year from the start launch of the Shelley staking (starting with 1 - first year).
                               Inflation decreases each year so number of issued coins changes.">
                 <label for="inp_YEAR">Year since staking: </label>
             </td><td data-tip="Max year to calculate - 500">
-                <input id="inp_YEAR" class="inp-param" type="number" min="1" max="500" value="1"/>
+                <input id="inp_YEAR" class="inp-param" type="number" min="1" max="500" value="1" valtype="int"/>
             </td></tr>
             <tr><td data-tip="Percent of reserved coins issued each year.
                               The number of 5% is taken from the official staking explanation post.
                               But generally is considered to be only an 'arbitrary example'">
                 <label for="inp_INFL">Yearly reserve decrease (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
-                <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5"/>
+                <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
             </td></tr>
             <tr><td data-tip="Average number of transactions in each epoch.
                               Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
                 <label for="inp_TX_EPOCH">Transactions in epoch: </label>
             </td><td data-tip="Cannot be less than 0">
-                <input id="inp_TX_EPOCH" class="inp-param" type="number" min="0" value="15000"/>
+                <input id="inp_TX_EPOCH" class="inp-param" type="number" min="0" value="15000" valtype="int"/>
             </td></tr>
             <tr><td data-tip="Average transaction size in byte.
                               The number of 200 bytes if taken from the staking explanation post.">
                 <label for="inp_TX_SIZE">Transaction size (bytes): </label>
             </td><td data-tip="Cannot be less than 1">
-                <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="200"/>
+                <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="200" valtype="int"/>
             </td></tr>
             <tr><td data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
                               The number of 20% is speculative and approximate. There's no definite information yet,
                               but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
                 <label for="inp_TAX">Treasury tax (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
-                <input id="inp_TAX" class="inp-param" type="number" min="0" max="100" step="0.1" value="20"/>
+                <input id="inp_TAX" class="inp-param" type="number" min="0" max="100" step="0.1" value="20" valtype="float"/>
             </td></tr>
             <tr><td data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
                               The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
                 <label for="inp_POOL_FEE">Pool fee (%): </label>
             </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
-                <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5"/>
+                <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
             </td></tr>
         </table>
         <h3>Intermediary calculations:</h3>
