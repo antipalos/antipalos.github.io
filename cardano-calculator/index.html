@@ -193,7 +193,6 @@
             updateCalculations()
         }
         $(function() {
-            hideDisclaimer();
             resize();
             hashEvent();
             initParamsContext();
@@ -226,18 +225,24 @@
         @media only screen and (min-width : 768px) {
             body{font-size: 14px;}
             #footer{font-size: 12px;}
+            p:not(#disclaimer *) {width: 90%;}
+            li {width: 90%;}
         }
 
         /* Medium */
         @media only screen and (min-width : 992px) {
             body{font-size: 16px;}
             #footer{font-size: 14px;}
+            p:not(#disclaimer *) {width: 80%;}
+            li {width: 80%;}
         }
 
         /* Large */
         @media only screen and (min-width : 1200px) {
             body{font-size: 18px;}
             #footer{font-size: 15px;}
+            p:not(#disclaimer *) {width: 60%;}
+            li {width: 60%;}
         }
 
         body {
@@ -488,7 +493,7 @@
     </div>
 
     <div class="tab" tab="formula">
-        <h2 class="zero-margin">Formula explanation:</h2>
+        <h2 class="zero-margin">Formula explanation</h2>
         <p>All information for calculations are taken from these documents:</p>
         <ol>
             <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
@@ -628,7 +633,7 @@
     </div>
 
     <div class="tab" tab="calc" style="display: none">
-        <h2 class="zero-margin">Calculator:</h2>
+        <h2 class="zero-margin">Calculator</h2>
         <h3 class="zero-margin">Define parameters:</h3>
         <table id="calc-form" border="0" cellpadding="3">
             <tr><td data-tip="How much total coins you will send to a pool">
@@ -719,7 +724,69 @@
     </div>
 
     <div class="tab" tab="about" style="display: none">
-        <h2 class="zero-margin">About this project:</h2>
+        <h2 class="zero-margin">About this project</h2>
+        <p>As mentioned in the disclaimer:</p>
+        <ul>
+            <li>All calculations are actually <b>rough estimates</b></li>
+            <li>No result from this calculator should be considered as a promise of a future profits</li>
+            <li>There are too much <b>unknown variables</b> present in the calculations and without knowing those -
+            <b>no result</b> might be easily predicted</li>
+        </ul>
+
+        <h3 class="zero-margin">Why</h3>
+        <p>Main points of this project are:</p>
+        <ol>
+            <li>Show <b>how</b> calculations are done</li>
+            <li>Show how <b>complex</b> calculations are</li>
+            <li>Show how many <b>variables</b> are used</li>
+            <li>Show how many variables are yet <b>unknown</b></li>
+            <li>Show <b>estimated</b> order of magnitude for rewards</li>
+        </ol>
+        <p>This project is <b>educational</b>! Remember this project if someone shows you a calculator
+        with a couple of fields and a single question of how big your stake is. Or if someone tries to
+        get an easy answer of "what the profit percentage will be" - show them this calculator.</p>
+        <p>Also it provides a nice place for the formula explanations with an immediate example.</p>
+
+        <h3 class="zero-margin">Project development</h3>
+        <p>This calculator is in the initial primitive state. It was developed extremely fast with the
+        main point ot get the formula and the example to people as soon as possible. There are many
+        potential additional calculations possible, so project is planned for some support in the near future.</p>
+        <p>To ask development questions or propose features, you use:</p>
+        <ol>
+            <li>This dedicated discussion issue: <a href="https://github.com/antipalos/antipalos.github.io/issues/1">
+                https://github.com/antipalos/antipalos.github.io/issues/1</a></li>
+            <li>Project issues in general: <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                https://github.com/antipalos/antipalos.github.io/issues</a></li>
+        </ol>
+
+        <h3 class="zero-margin">Design</h3>
+        <p>I clearly don't care that much. I'm a backend developer normally, so I neither want, nor can mess with
+        all this complex designing stuff. If you're ready to voluntarily help design this whole thing better - you are welcomed
+        to contact me so we could set up some collaboration. Any help in this question will be greatly appreciated.</p>
+
+        <h3 class="zero-margin">Help</h3>
+        <p>If anyone wants to help with all of this, there are options:</p>
+        <ul>
+            <li>Create issue with a <b>detailed tip</b> on how I can make some JS or CSS stuff work better here:
+                <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                    https://github.com/antipalos/antipalos.github.io/issues</a><br/><br/></li>
+            <li>Create issue with a suggestions for new cool calculations - especially awesome if you can also suggest a formula:
+                <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                    https://github.com/antipalos/antipalos.github.io/issues</a><br/><br/></li>
+            <li>Just look for something to fix or add and open a PR:
+                <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">
+                    https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator</a><br/><br/></li>
+            <li>Spread the gospel about Cardano in general and this calculator in particular:
+                <a href="https://forum.cardano.org/">https://forum.cardano.org/</a><br/><br/></li>
+            <li>Donate $ADA to motivate more future development: DdzFFzCqrhsx4Y49VGNS7EoQSkaUawCH2ispq2wCt5nZvZw5bMkfoDUtQQWurQip5wmEBPTRFe4NTBnrnUUqaC9h8WbaCwtWqrGQwJiW<br/><br/></li>
+        </ul>
+
+        <h3 class="zero-margin">Contacts</h3>
+        <p>Twitter: <a href="https://twitter.com/vsubhuman">@vsubhuman</a></p>
+        <p>GitHub: <a href="https://github.com/vantuz-subhuman">@vantuz-subhuman</a></p>
+        <p>Forum: <a href="https://forum.cardano.org/u/vantuz-subhuman">/u/vantuz-subhuman</a></p>
+        <p>Reddit: <a href="https://www.reddit.com/user/vantuz-subhuman/">/u/vantuz-subhuman</a></p>
+        <p>Cardano chat: <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a></p>
     </div>
 
     <div id="footer-margin"><br/></div>
@@ -727,7 +794,7 @@
     <div id="footer">
         Version: 0.1
         | Dev: <a href="https://twitter.com/vsubhuman">@vsubhuman</a>
-        | GitHub <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">@Antipalos</a>
+        | GitHub <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
         | Forum <a href="https://forum.cardano.org/">forum.cardano.org</a>
         | Chat <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a>
     </div>
