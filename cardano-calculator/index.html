@@ -483,10 +483,10 @@
         <table class="tabs">
             <tr>
                 <td class="tab-td">
-                    <a class="tab-selector selected" href="javascript:void(0)" onclick="tab(this)" tab="formula">Formula</a>
+                    <a class="tab-selector selected" href="javascript:void(0)" onclick="tab(this)" tab="calc">Calculator</a>
                 </td>
                 <td class="tab-td">
-                    <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="calc">Calculator</a>
+                    <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="formula">Formula</a>
                 </td>
                 <td>
                     <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="about">About</a>
@@ -495,7 +495,7 @@
         </table>
     </div>
 
-    <div class="tab" tab="formula">
+    <div class="tab" tab="formula" style="display: none">
         <h2 class="zero-margin">Formula explanation</h2>
         <p>All information for calculations are taken from these documents:</p>
         <ol>
@@ -506,7 +506,7 @@
         <h3>Parameters require for calculations:</h3>
         <ul id="params-list">
             <li><code>INFL</code> - the level of inflation in yearly percentile reserve decrease</li>
-            <li><code>YEAR</code> - numbe of full years since the launch of the staking</li>
+            <li><code>YEAR</code> - number of full years since the launch of the staking</li>
             <li><code>STAKE</code> - your stake in coins</li>
             <li><code>TOTAL_STAKE</code> - total stake in the system in coins</li>
             <li><code>TX_EPOCH</code> - average number of transactions each epoch (5 days)</li>
@@ -522,7 +522,7 @@
         </code>
         <h3>Detailed explanation:</h3>
         <p class="bold">Minted coins</p>
-        <p class="zero-margin">First we calculate how much coins will be issues this year as an inflation:</p>
+        <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
         <code class="codeblock">
             MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL
         </code>
@@ -635,9 +635,13 @@
 
     </div>
 
-    <div class="tab" tab="calc" style="display: none">
+    <div class="tab" tab="calc">
         <h2 class="zero-margin">Calculator</h2>
+        <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
+            For a detailed explanation of how this whole thing works visit the 'Formula' tab in the top menu.</p>
         <h3 class="zero-margin">Define parameters:</h3>
+        <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
+            (Up\Down arrow keys may be used in the input fields)</p>
         <table id="calc-form" border="0" cellpadding="3">
             <tr><td data-tip="How much total coins you will send to a pool">
                 <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
