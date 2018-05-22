@@ -132,7 +132,7 @@
                 return (markError('STAKE', 'Stake cannot be greater than TOTAL stake'),
                         markError('TOTAL_STAKE', 'Total stake cannot be less than user stake'));
             }
-            let year = window.CardanoCalculatorParams.YEAR - 1;
+            let year = window.CardanoCalculatorParams.YEAR - 2019;
             let infl = (window.CardanoCalculatorParams.INFL / 100);
             let txEpoch = window.CardanoCalculatorParams.TX_EPOCH;
             let txSize = window.CardanoCalculatorParams.TX_SIZE;
@@ -458,15 +458,18 @@
             padding: 0;
         }
 
-        .calc-group-header {
-            color: grey;
+        .calc-group-header-wrapper {
             border-top: 1px solid #eeeeee;
             border-bottom: 1px solid #eeeeee;
-            font-size: 15px;
             background-color: #f9f9f9;
             padding-left: 5px;
             padding-right: 5px;
             border-radius: 4px;
+            padding-bottom: 2px;
+        }
+        .calc-group-header {
+            color: grey;
+            font-size: 15px;
         }
 
     </style>
@@ -669,30 +672,38 @@
 
             <table id="calc-form" border="0" cellpadding="3">
 
-                <tr><td colspan="3" data-tip="Parameters that only depend on the user">
-                    <span class="calc-group-header">User parameters</span>
+                <tr><td colspan="3">
+                    <div class="calc-group-header-wrapper">
+                        <span data-tip="Parameters that only depend on the user">
+                                <span class="calc-group-header">User parameters</span>
+                        </span>
+                    </div>
                 </td></tr>
 
                 <tr><td data-tip="How much total coins you will send to a pool">
                     <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
                 </td><td data-tip="Cannot be bigger than the total stake">
                     <input id="inp_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="1000" valtype="int"/>
-                </td><td data-tip="Share of total stake">
-                    <span id="ctx_STAKE" class="inp-ctx"></span>
+                </td><td>
+                    <span data-tip="Share of total stake"><span id="ctx_STAKE" class="inp-ctx"></span></span>
                 </td></tr>
 
-                <tr><td data-tip="The number of the year from the start launch of the Shelley staking (starting with 1 - first year).
-                                  Inflation decreases each year so number of issued coins changes.">
-                    <label for="inp_YEAR">Year since staking: </label>
-                </td><td data-tip="Max year to calculate - 500">
-                    <input id="inp_YEAR" class="inp-param" type="number" min="1" max="500" value="1" valtype="int"/>
-                </td><td data-tip="Total supply at the start of this year">
-                    <span id="ctx_YEAR" class="inp-ctx"></span>
+                <tr><td data-tip="The year is used in calculatins,
+                                  since inflation decreases each year so number of issued coins changes.">
+                    <label for="inp_YEAR">Year: </label>
+                </td><td data-tip="Max allowed year - 2519">
+                    <input id="inp_YEAR" class="inp-param" type="number" min="2019" max="2519" value="2019" valtype="int"/>
+                </td><td>
+                    <span data-tip="Total supply at the start of this year"><span id="ctx_YEAR" class="inp-ctx"></span></span>
                 </td></tr>
 
-                <tr><td colspan="3" data-tip="Parameters that aren't directly set by anyone
-                                              but may (and will) fluctuate with system popularity">
-                    <span class="calc-group-header">Environment parameters</span>
+                <tr><td colspan="3">
+                    <div class="calc-group-header-wrapper">
+                        <span data-tip="Parameters that aren't directly set by anyone
+                                        but may (and will) fluctuate with system popularity">
+                            <span class="calc-group-header">Environment parameters</span>
+                        </span>
+                    </div>
                 </td></tr>
 
                 <tr><td data-tip="How much total coins there are staked in the system.
@@ -724,9 +735,13 @@
                     <span id="ctx_TX_SIZE" class="inp-ctx"></span>
                 </td></tr>
 
-                <tr><td colspan="3" data-tip="Parameters defined by the system,
-                                              but yet unknown until the 'Shelley' (staking) is released">
-                    <span class="calc-group-header">System parameters</span>
+                <tr><td colspan="3">
+                    <div class="calc-group-header-wrapper">
+                        <span data-tip="Parameters defined by the system,
+                                        but yet unknown until the 'Shelley' (staking) is released">
+                            <span class="calc-group-header">System parameters</span>
+                        </span>
+                    </div>
                 </td></tr>
 
                 <tr><td data-tip="Percent of reserved coins issued each year.
@@ -751,8 +766,12 @@
                     <span id="ctx_TAX" class="inp-ctx"></span>
                 </td></tr>
 
-                <tr><td colspan="3" data-tip="Parameters that may change based on your pool selection">
-                    <span class="calc-group-header">Pool parameters</span>
+                <tr><td colspan="3">
+                    <div class="calc-group-header-wrapper">
+                        <span data-tip="Parameters that may change based on your pool selection">
+                            <span class="calc-group-header">Pool parameters</span>
+                        </span>
+                    </div>
                 </td></tr>
 
                 <tr><td data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
