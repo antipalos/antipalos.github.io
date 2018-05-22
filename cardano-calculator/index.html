@@ -450,6 +450,19 @@
             padding-bottom: 5px;
         }
 
+        #calc-form {
+            margin-top: 15px;
+            border-left: 1px solid #eeeeee;
+            padding: 0;
+        }
+
+        .calc-group-header {
+            color: grey;
+            border-top: 1px solid #eeeeee;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 15px;
+        }
+
     </style>
 </head>
 <body>
@@ -647,7 +660,13 @@
             <h3 class="zero-margin">Define parameters:</h3>
             <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
                 (Up\Down arrow keys may be used in the input fields)</p>
+
             <table id="calc-form" border="0" cellpadding="3">
+
+                <tr><td colspan="3" data-tip="Parameters that only depend on the user">
+                    <span class="calc-group-header">User parameters</span>
+                </td></tr>
+
                 <tr><td data-tip="How much total coins you will send to a pool">
                     <label for="inp_STAKE"><b>Your</b> stake (in coins): </label>
                 </td><td data-tip="Cannot be bigger than the total stake">
@@ -655,15 +674,7 @@
                 </td><td data-tip="Share of total stake">
                     <span id="ctx_STAKE" class="inp-ctx"></span>
                 </td></tr>
-                <tr><td data-tip="How much total coins there are staked in the system.
-                                  This values is completely guessed at 10 billion (around 30% of total supply).
-                                  In real life it might turn out to be anything and also will change with time.">
-                    <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
-                </td><td data-tip="Cannot be smaller than your stake">
-                    <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="10000000000" valtype="int"/>
-                </td><td data-tip="Share of total supply this year">
-                    <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
-                </td></tr>
+
                 <tr><td data-tip="The number of the year from the start launch of the Shelley staking (starting with 1 - first year).
                                   Inflation decreases each year so number of issued coins changes.">
                     <label for="inp_YEAR">Year since staking: </label>
@@ -672,15 +683,23 @@
                 </td><td data-tip="Total supply at the start of this year">
                     <span id="ctx_YEAR" class="inp-ctx"></span>
                 </td></tr>
-                <tr><td data-tip="Percent of reserved coins issued each year.
-                                  The number of 5% is taken from the official staking explanation post.
-                                  But generally is considered to be only an 'arbitrary example'">
-                    <label for="inp_INFL">Yearly reserve decrease (%): </label>
-                </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
-                    <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
-                </td><td data-tip="New coins issued this year (+ Total supply inflation)">
-                    <span id="ctx_INFL" class="inp-ctx"></span>
+
+                <tr><td colspan="3" data-tip="Parameters that aren't directly set by anyone
+                                              but may (and will) fluctuate with system popularity">
+                    <span class="calc-group-header">Environment parameters</span>
                 </td></tr>
+
+                <tr><td data-tip="How much total coins there are staked in the system.
+                                  This values is completely guessed at 10 billion (around 30% of total supply).
+                                  In real life it might turn out to be anything and also will change with time.">
+                    <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
+                </td><td data-tip="Cannot be smaller than your stake">
+                <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="10000000000" valtype="int"/>
+
+                </td><td data-tip="Share of total supply this year">
+                    <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
+                </td></tr>
+
                 <tr><td data-tip="Average number of transactions in each epoch (5 days).
                                   Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
                     <label for="inp_TX_EPOCH">Transactions <b>in epoch</b>: </label>
@@ -689,6 +708,7 @@
                 </td><td data-tip="Average transactions per second with a 5 day epoch and 20 second slot">
                     <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
                 </td></tr>
+
                 <tr><td data-tip="Average transaction size in byte.
                                   The number of 200 bytes if taken from the staking explanation post.">
                     <label for="inp_TX_SIZE">Transaction size (bytes): </label>
@@ -697,6 +717,23 @@
                 </td><td data-tip="Average translation fee (Average taxed block reward)">
                     <span id="ctx_TX_SIZE" class="inp-ctx"></span>
                 </td></tr>
+
+                <tr><td colspan="3" data-tip="Parameters defined by the system, but yet unknown">
+                    <span class="calc-group-header">System parameters</span>
+                </td></tr>
+
+                <tr><td data-tip="Percent of reserved coins issued each year.
+                                  The number of 5% is taken from the official staking explanation post.
+                                  But generally is considered to be only an 'arbitrary example'">
+                    <label for="inp_INFL">Yearly reserve decrease (%): </label>
+                </td><td data-tip="Should be in between 0% and 100% with a 0.1% step">
+                <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/>
+
+
+                </td><td data-tip="New coins issued this year (+ Total supply inflation)">
+                    <span id="ctx_INFL" class="inp-ctx"></span>
+                </td></tr>
+
                 <tr><td data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
                                   The number of 20% is speculative and approximate. There's no definite information yet,
                                   but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
@@ -706,6 +743,11 @@
                 </td><td data-tip="Coins in treasury at the start of this year (+ coins added this year)">
                     <span id="ctx_TAX" class="inp-ctx"></span>
                 </td></tr>
+
+                <tr><td colspan="3" data-tip="Parameters that may change based on your pool selection">
+                    <span class="calc-group-header">Pool parameters</span>
+                </td></tr>
+
                 <tr><td data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
                                   The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
                     <label for="inp_POOL_FEE">Pool fee (%): </label>
@@ -714,6 +756,7 @@
                 </td><td data-tip="How much coins will pool earn from YOUR stake in a year">
                     <span id="ctx_POOL_FEE" class="inp-ctx"></span>
                 </td></tr>
+
             </table>
             <h3>Your profits:</h3>
             <table id="results-table" border="0" cellpadding="0" cellspacing="0">
