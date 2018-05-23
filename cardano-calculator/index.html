@@ -150,7 +150,7 @@
                 return markError('TOTAL_STAKE', 'Total stake cannot be greater than total supply for this year')
             }
             $('#ctx_STAKE').text(frmt(userShare * 100) + '%');
-            $('#ctx_YEAR').text(frmt(supplyAtYearStart, 3) + ' ADA total');
+            $('#ctx_YEAR').text(frmt(supplyAtYearStart, 3) + ' ADA total (' + frmt(reserveAtYearStart, 3) + ' ADA in reserve)');
             let issuedThisYear = reserveAtYearStart * infl;
             let supplyInflation = (issuedThisYear * 100) / supplyAtYearStart;
             $('#ctx_INFL').text(frmt(issuedThisYear, 3) + ' ADA issued (' + frmt(supplyInflation) + '% inflation)');
