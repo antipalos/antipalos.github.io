@@ -47,7 +47,7 @@
             return result;
         }
         function isValidTab(tab) {
-            return ["formula", "calc", "about"].includes(tab)
+            return ['formula', 'calc', 'faq', 'about', 'roadmap'].includes(tab)
         }
         function selectTab(tab) {
             if (!tab || !isValidTab(tab)) {
@@ -57,8 +57,7 @@
             $('.tab-selector[tab="' + tab + '"]').addClass('selected');
             $('.tab').hide();
             $('.tab[tab="' + tab + '"]').show();
-            location['cardamon:hash'] = true;
-            location.hash = tab;
+            window.scrollTo(0,0);
             return true
         }
         function tab(e) {
@@ -68,10 +67,6 @@
             selectTab($(e).attr('tab'))
         }
         function hashEvent() {
-            if (location['cardamon:hash']) {
-                location['cardamon:hash'] = false;
-                return;
-            }
             params = parseHash(location.hash);
             if (params.location) {
                 if (!selectTab(params.location)) {
@@ -245,6 +240,20 @@
 
         body {
             font-family: Calibri sans-serif;
+            background-color: #fefefe;
+            color: #001144;
+        }
+
+        h2 {
+            color: #001166;
+        }
+        h3 {
+            color: #002288;
+            border-top: 1px solid #eeeeee;
+            border-bottom: 1px solid #eeeeee;
+            background: #f8f8f8;
+            border-radius: 4px;
+            padding-left: 5px;
         }
 
         #disclaimer {
@@ -318,7 +327,7 @@
         }
 
         .tab-td {
-            width: 33.33%;
+            width: 25%;
             font-family: Consolas sans-serif;
             font-weight: bold;
         }
@@ -449,6 +458,7 @@
         #results-table td {
             padding-right: 15px;
             padding-bottom: 5px;
+            padding-top: 5px;
         }
 
         #calc-form {
@@ -510,13 +520,16 @@
             <table id="tabs-table">
                 <tr>
                     <td class="tab-td">
-                        <a class="tab-selector selected" href="javascript:void(0)" onclick="tab(this)" tab="calc">Calculator</a>
+                        <a class="tab-selector selected" href="#calc" onclick="tab(this)" tab="calc">Calculator</a>
                     </td>
                     <td class="tab-td">
-                        <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="formula">Formula</a>
+                        <a class="tab-selector" href="#formula" onclick="tab(this)" tab="formula">Formula</a>
                     </td>
                     <td class="tab-td">
-                        <a class="tab-selector" href="javascript:void(0)" onclick="tab(this)" tab="about">About</a>
+                        <a class="tab-selector" href="#faq" onclick="tab(this)" tab="faq">FAQ</a>
+                    </td>
+                    <td class="tab-td">
+                        <a class="tab-selector" href="#about" onclick="tab(this)" tab="about">About</a>
                     </td>
                 </tr>
             </table>
@@ -712,7 +725,7 @@
                                   In real life it might turn out to be anything and also will change with time.">
                     <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
                 </td><td data-tip="Cannot be smaller than your stake">
-                <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="10000000000" valtype="int"/>
+                <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="15000000000" valtype="int"/>
 
                 </td><td data-tip="Share of total supply this year">
                     <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
@@ -785,7 +798,7 @@
                 </td></tr>
 
             </table>
-            <h3>Your profits:</h3>
+            <h3 class="zero-margin">Your profits:</h3>
             <table id="results-table" border="0" cellpadding="0" cellspacing="0">
                 <tr><td>
                     <b>At the start of the year:</b>
@@ -803,6 +816,58 @@
                     <span id="resultAtYearEnd"></span>
                 </td></tr>
             </table>
+        </div>
+
+        <div class="tab" tab="faq" style="display: none">
+            <h2 class="zero-margin">Frequently Asked Questions</h2>
+
+            <h3 class="zero-margin">What's up with all those parameters, eh?</h3>
+            <p>See the <a href="#formula" tab="formula" onclick="tab(this)"><b>Formula</b></a> page to find
+            detailed explanation of why all those parameters are needed.Basically, after seeing this calculator
+            and explanation of its functionality, if someone shows you a calculator with fewer parameters -
+            you may be sure they are hiding something. There are some yet undefined parameters they are not showing to you.</p>
+            <p>That's it. All those parameters are <span class="warn">required</span> to derive the final value.
+            And there's no definite value for them exist yet (or ever) like with the fixed fee cost.</p>
+
+            <h3 class="zero-margin">What's up with the design, eh?</h3>
+            <p>I couldn't care less, it works. See the <a href="#about" tab="about" onclick="tab(this)"><b>About</b></a> section.</p>
+
+            <h3 class="zero-margin">Why total stake is <u>15 billions</u>, eh?</h3>
+            <p>The amount of <b>somewhat stable</b> total stake in the system is <span class="warn">not known</span> at this point
+            and will also change in time (but not as a predictable function) until it converges
+            to some more or less stable value (in percentage) and will show only slight fluctuations from there on.</p>
+            <p>The total stake is <span class="warn">one of 2 most important parameters</span> - along with your own stake.
+            These two parameters are basically decide how much you will profit, because they directly define
+            <span class="warn">your share in total stake</span> - and this value directly shows how much of yearly
+            inflation and yearly fees will go to you.</p>
+            <p>So for now - there's <b>absolutely zero</b> available data to decide what the total stake would be in the
+            year one, or year two, or later on. For a real-world example we can take the "Waves" Proof-of-Stake platform
+            that <a href="http://dev.pywaves.org/generators-weekly/">has total stake of ~60% of its supply</a>.
+            So the 15 billion number is taken <span class="warn">completely arbitrarily</span> just as middle ground
+            around 50% of supply. The main point is to <b>SHOW</b> you how this value affects the rewards.
+            So try to move it around and just plan ahead what you profits <b>would be</b> if the total
+            stake would be at this value.</p>
+            <p>It might as well be lower in reality. But might as well be more.</p>
+
+            <h3 class="zero-margin">Why <code>Year</code> needed, eh?</h3>
+            <p>The <code>Year</code> parameter is <span class="warn">required</span>, since all the other monetary
+                behavior of the system <b>changes in time</b> - inflation decreases with total supply, fixed block
+                reward changes, etc. Any calculation that does not include time may only demonstrate you a "splice"
+                of time, for example, only the first year of staking.</p>
+
+            <h3 class="zero-margin">Why <code>Year</code> starts with 2019, eh?</h3>
+            <p>The official date of staking release in Cardano is not defined yet, but it's <b>somewhere in the fall of 2018</b>.
+                Since profits are calculated <b>only yearly</b> anyways (for now) and to make controls easier and more concise -
+                it was decided to simply place 2019 as a first <b>full</b> year of staking. Basically, you can think
+                of that date as: "the first year when I will receive my yearly profits".</p>
+
+            <h3 class="zero-margin">Are you gonna make it better, eh?</h3>
+            <p>Yes, see the <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a>.</p>
+
+            <h3 class="zero-margin">Can you add new cool feature, eh?</h3>
+            <p>See the <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a> in case it's already planned,
+            or <a href="https://github.com/antipalos/antipalos.github.io/issues/1">propose new features here</a>.</p>
+
         </div>
 
         <div class="tab" tab="about" style="display: none">
@@ -833,6 +898,7 @@
             <p>This calculator is in the initial primitive state. It was developed extremely fast with the
             main point ot get the formula and the example to people as soon as possible. There are many
             potential additional calculations possible, so project is planned for some support in the near future.</p>
+            <p>See <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a></p>
             <p>To ask development questions or propose features, you use:</p>
             <ol>
                 <li>This dedicated discussion issue: <a href="https://github.com/antipalos/antipalos.github.io/issues/1">
@@ -871,17 +937,63 @@
             <p>Reddit: <a href="https://www.reddit.com/user/vantuz-subhuman/">/u/vantuz-subhuman</a></p>
             <p>Cardano chat: <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a></p>
         </div>
+
+        <div class="tab" tab="roadmap" style="display: none">
+            <h2 class="zero-margin">Roadmap</h2>
+            <p><a href="https://github.com/antipalos/antipalos.github.io/issues/1">Propose new features here</a>
+            or <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                    vote on existing features here</a>.</p>
+
+            <h3>0.1 ✓ (Current version)</h3>
+            <ul>
+                <li>Release basic functionality ✓</li>
+            </ul>
+
+            <h3>0.2</h3>
+            <ul>
+                <li>Rework implementation (separate js\css\html)</li>
+                <li>Extract text (templating engine?)</li>
+                <li>Calculate yearly restaking</li>
+            </ul>
+
+            <h3>0.3</h3>
+            <ul>
+                <li>Rework period calculation (prepare for per-epoch calculations)</li>
+                <li>Calculator for pools</li>
+                <li>Translation support</li>
+            </ul>
+
+            <h3>0.4</h3>
+            <ul>
+                <li>Per-epoch calculations (with restaking)</li>
+                <li>Basic multiperiods calculation (epochs to years)</li>
+            </ul>
+
+            <h3>0.5</h3>
+            <ul>
+                <li>Links with parameters</li>
+                <li>Layout design? (Bootstrap or something)</li>
+                <li>...</li>
+            </ul>
+
+            <h3>0.6</h3>
+            <ul>
+                <li>Prepare for stats collecting</li>
+                <li>...</li>
+            </ul>
+        </div>
     </div>
 
     <div id="footer-margin"><br/></div>
 
     <div id="footer">
-        Version: 0.1
-        | GitHub <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
-        | Dev: <a href="https://twitter.com/vsubhuman">@vsubhuman</a>
-        | Forum: <a href="https://forum.cardano.org/">forum.cardano.org</a>
-        | Chat: <a href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a>
-        | Donate: <a href="https://cardanowiki.info/wiki/Funding">CardanoWiki</a>
+        Version: 0.1 (<a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a>)
+        | GitHub <a target="_blank" href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
+        | Dev: <a target="_blank" href="https://twitter.com/vsubhuman">@vsubhuman</a>
+        | Forum: <a target="_blank" href="https://forum.cardano.org/">forum.cardano.org</a>
+        | Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a>
+        | Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/">r/Cardano</a>
+        | Donate: <a target="_blank" href="https://cardanowiki.info/wiki/Funding">CardanoWiki</a>
     </div>
 </body>
 </html>
