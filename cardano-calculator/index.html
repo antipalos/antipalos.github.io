@@ -174,8 +174,11 @@
             let resultThisYear = userRewardThisYear - poolFeeThisYear;
             let resultAtYearEnd = resultAtYearStart + resultThisYear;
             $('#resultAtYearStart').text(frmt(resultAtYearStart) + ' ADA');
+            $('#ctx_resultAtYearStart').text('(' + frmt((resultAtYearStart * 100) / userStake, 3) + '%)');
             $('#resultThisYear').text(frmt(resultThisYear) + ' ADA');
+            $('#ctx_resultThisYear').text('(' + frmt((resultThisYear * 100) / userStake, 3) + '%)');
             $('#resultAtYearEnd').text(frmt(resultAtYearEnd) + ' ADA');
+            $('#ctx_resultAtYearEnd').text('(' + frmt((resultAtYearEnd * 100) / userStake, 3) + '%)');
         }
         function paramUpdate(e, shift=0) {
             if (parseParamIntoContext($(e), shift) != null) {
@@ -465,6 +468,11 @@
 
         #results-table td {
             padding-right: 15px;
+        }
+
+        .result-ctx {
+            font-size: 14px;
+            color: grey;
         }
 
         #results-disclaimer {
@@ -843,6 +851,8 @@
                         <b>At the start of the year:</b></span>
                 </td><td>
                     <span id="resultAtYearStart"></span>
+                </td><td>
+                    <span id="ctx_resultAtYearStart" class="result-ctx"></span>
                 </td></tr>
                 <tr><td>
                     <span data-tip="How much APPROXIMATE profit a person will receive ON AVERAGE if they stake for the whole year
@@ -850,6 +860,8 @@
                         <b>During this year:</b></span>
                 </td><td>
                     <span id="resultThisYear"></span>
+                </td><td>
+                    <span id="ctx_resultThisYear" class="result-ctx"></span>
                 </td></tr>
                 <tr><td>
                     <span data-tip="How much profit a person will have at the end of this (selected) year
@@ -858,6 +870,8 @@
                         <b>At the end of the year</b></span>
                 </td><td>
                     <span id="resultAtYearEnd"></span>
+                </td><td>
+                    <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
                 </td></tr>
             </table>
 
