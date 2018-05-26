@@ -118,166 +118,190 @@
                                                     (Up\Down arrow keys may be used in the input fields)
                                                 </p>
 
-                                                <div class="card mb-3">
-                                                    <div class="card-body" data-toggle="tooltip" data-placement="top" title="Parameters that only depend on the user">
-                                                        User parameters
-                                                    </div>
-                                                </div>
+                                                <div class="card mb-5">
 
-                                                <div class="form-row">
-
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="How much total coins you will send to a pool">
-                                                        <label for="inp_STAKE"><b>Your</b> stake (in coins):</label>
+                                                    <div class="card-header">
+                                                        <span data-toggle="tooltip" data-placement="top" title="Parameters that only depend on the user">User parameters</span>
                                                     </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be bigger than the total stake">
-                                                        <input id="inp_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="1000" valtype="int">
-                                                    </div>
+                                                    <div class="card-body">
 
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total stake">
-                                                        <span id="ctx_STAKE" class="inp-ctx"></span>
-                                                    </div>
+                                                        <div class="form-row">
 
-                                                </div>
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="How much total coins you will send to a pool">
+                                                                <label for="inp_STAKE"><b>Your</b> stake (in coins):</label>
+                                                            </div>
 
-                                                <div class="form-row">
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be bigger than the total stake">
+                                                                <input id="inp_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="1000" valtype="int">
+                                                            </div>
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The year is used in calculations,
-                                                    since inflation decreases each year so number of issued coins changes.">
-                                                        <label for="inp_YEAR">Year: </label>
-                                                    </div>
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total stake">
+                                                                <span id="ctx_STAKE" class="inp-ctx"></span>
+                                                            </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Max allowed year - 2519">
-                                                        <input id="inp_YEAR" class="inp-param form-control" type="number" min="2019" max="2519" value="2019" valtype="int">
-                                                    </div>
+                                                        </div>
 
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Total supply at the start of this year (Remaining reserve at the start of this year)">
-                                                        <span id="ctx_YEAR" class="inp-ctx"></span>
-                                                    </div>
+                                                        <div class="form-row">
 
-                                                </div>
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The year is used in calculations,
+                                                            since inflation decreases each year so number of issued coins changes.">
+                                                                <label for="inp_YEAR">Year: </label>
+                                                            </div>
 
-                                                <div class="card mb-3">
-                                                    <div class="card-body" data-toggle="tooltip" data-placement="top" title="Parameters that aren't directly set by anyone
-                                                    but may (and will) fluctuate with system popularity">
-                                                        Environment parameters
-                                                    </div>
-                                                </div>
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Max allowed year - 2519">
+                                                                <input id="inp_YEAR" class="inp-param form-control" type="number" min="2019" max="2519" value="2019" valtype="int">
+                                                            </div>
 
-                                                <div class="form-row">
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Total supply at the start of this year (Remaining reserve at the start of this year)">
+                                                                <span id="ctx_YEAR" class="inp-ctx"></span>
+                                                            </div>
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="How much total coins there are staked in the system.
-                                                    This values is completely guessed at 10 billion (around 30% of total supply).
-                                                    In real life it might turn out to be anything and also will change with time.">
-                                                        <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
-                                                    </div>
+                                                        </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be smaller than your stake">
-                                                        <input id="inp_TOTAL_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="15000000000" valtype="int">
-                                                    </div>
-
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total supply this year">
-                                                        <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
                                                     </div>
 
                                                 </div>
 
-                                                <div class="form-row">
+                                                <div class="card mb-5">
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Average number of transactions in each epoch (5 days).
-                                                    Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
-                                                        <label for="inp_TX_EPOCH">Transactions <b>in epoch</b>: </label>
+                                                    <div class="card-header">
+                                                        <span data-toggle="tooltip" data-placement="top" title="Parameters that aren't directly set by anyone
+                                                        but may (and will) fluctuate with system popularity">Environment parameters</span>
                                                     </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be less than 0">
-                                                        <input id="inp_TX_EPOCH" class="inp-param cleave-num form-control" type="text" min="0" value="15000" valtype="int">
-                                                    </div>
+                                                    <div class="card-body">
 
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Average transactions per second with a 5 day epoch and 20 second slot">
-                                                        <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
-                                                    </div>
+                                                        <div class="form-row">
 
-                                                </div>
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="How much total coins there are staked in the system.
+                                                            This values is completely guessed at 10 billion (around 30% of total supply).
+                                                            In real life it might turn out to be anything and also will change with time.">
+                                                                <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
+                                                            </div>
 
-                                                <div class="form-row">
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be smaller than your stake">
+                                                                <input id="inp_TOTAL_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="15000000000" valtype="int">
+                                                            </div>
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Average transaction size in byte.
-                                                    The number of 200 bytes if taken from the staking explanation post.">
-                                                        <label for="inp_TX_SIZE">Transaction size (bytes): </label>
-                                                    </div>
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total supply this year">
+                                                                <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
+                                                            </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be less than 1">
-                                                            <input id="inp_TX_SIZE" class="inp-param form-control" type="number" min="1" value="200" valtype="int">
-                                                    </div>
+                                                        </div>
 
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Average translation fee (Average taxed block reward)">
-                                                        <span id="ctx_TX_SIZE" class="inp-ctx"></span>
-                                                    </div>
+                                                        <div class="form-row">
 
-                                                </div>
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Average number of transactions in each epoch (5 days).
+                                                            Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
+                                                                <label for="inp_TX_EPOCH">Transactions <b>in epoch</b>: </label>
+                                                            </div>
 
-                                                <div class="card mb-3">
-                                                    <div class="card-body" data-toggle="tooltip" data-placement="top" title="Parameters defined by the system,
-                                                    but yet unknown until the 'Shelley' (staking) is released">
-                                                        System parameters
-                                                    </div>
-                                                </div>
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be less than 0">
+                                                                <input id="inp_TX_EPOCH" class="inp-param cleave-num form-control" type="text" min="0" value="15000" valtype="int">
+                                                            </div>
 
-                                                <div class="form-row">
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Average transactions per second with a 5 day epoch and 20 second slot">
+                                                                <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
+                                                            </div>
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Percent of reserved coins issued each year.
-                                                    The number of 5% is taken from the official staking explanation post.
-                                                    But generally is considered to be only an 'arbitrary example'">
-                                                        <label for="inp_INFL">Yearly reserve decrease (%): </label>
-                                                    </div>
+                                                        </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
-                                                        <input id="inp_INFL" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
-                                                    </div>
+                                                        <div class="form-row">
 
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="New coins issued this year (+ Total supply inflation)">
-                                                        <span id="ctx_INFL" class="inp-ctx"></span>
-                                                    </div>
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Average transaction size in byte.
+                                                            The number of 200 bytes if taken from the staking explanation post.">
+                                                                <label for="inp_TX_SIZE">Transaction size (bytes): </label>
+                                                            </div>
 
-                                                </div>
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be less than 1">
+                                                                    <input id="inp_TX_SIZE" class="inp-param form-control" type="number" min="1" value="200" valtype="int">
+                                                            </div>
 
-                                                <div class="form-row">
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Average translation fee (Average taxed block reward)">
+                                                                <span id="ctx_TX_SIZE" class="inp-ctx"></span>
+                                                            </div>
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The percent of ALL profits in the system that is automatically submitted into the treasury.
-                                                    The number of 20% is speculative and approximate. There's no definite information yet,
-                                                    but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
-                                                        <label for="inp_TAX">Treasury tax (%): </label>
-                                                    </div>
+                                                        </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
-                                                        <input id="inp_TAX" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="20" valtype="float">
-                                                    </div>
-
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Coins in treasury at the start of this year (+ coins added this year)">
-                                                        <span id="ctx_TAX" class="inp-ctx">
                                                     </div>
 
                                                 </div>
 
-                                                <div class="card mb-3">
-                                                    <div class="card-body" data-toggle="tooltip" data-placement="top" title="Parameters that may change based on your pool selection">
-                                                        Pool parameters
+                                                <div class="card mb-5">
+
+                                                    <div class="card-header">
+                                                        <span data-toggle="tooltip" data-placement="top" title="Parameters defined by the system,
+                                                        but yet unknown until the 'Shelley' (staking) is released">System parameters</span>
                                                     </div>
+
+                                                    <div class="card-body">
+
+                                                        <div class="form-row">
+
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Percent of reserved coins issued each year.
+                                                            The number of 5% is taken from the official staking explanation post.
+                                                            But generally is considered to be only an 'arbitrary example'">
+                                                                <label for="inp_INFL">Yearly reserve decrease (%): </label>
+                                                            </div>
+
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
+                                                                <input id="inp_INFL" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
+                                                            </div>
+
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="New coins issued this year (+ Total supply inflation)">
+                                                                <span id="ctx_INFL" class="inp-ctx"></span>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <div class="form-row">
+
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The percent of ALL profits in the system that is automatically submitted into the treasury.
+                                                            The number of 20% is speculative and approximate. There's no definite information yet,
+                                                            but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
+                                                                <label for="inp_TAX">Treasury tax (%): </label>
+                                                            </div>
+
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
+                                                                <input id="inp_TAX" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="20" valtype="float">
+                                                            </div>
+
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Coins in treasury at the start of this year (+ coins added this year)">
+                                                                <span id="ctx_TAX" class="inp-ctx">
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+
                                                 </div>
 
-                                                <div class="form-row">
+                                                <div class="card mb-5">
 
-                                                    <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The percent of ALL profits in a pool that this pool will take for itself as fees.
-                                                    The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
-                                                        <label for="inp_POOL_FEE">Pool fee (%): </label>
+                                                    <div class="card-header">
+                                                        <span data-toggle="tooltip" data-placement="top" title="Parameters that may change based on your pool selection">Pool parameters</span>
                                                     </div>
 
-                                                    <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
-                                                        <input id="inp_POOL_FEE" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
-                                                    </div>
+                                                    <div class="card-body">
 
-                                                    <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="How much coins will pool earn from YOUR stake in a year">
-                                                        <span id="ctx_POOL_FEE" class="inp-ctx"></span>
+                                                        <div class="form-row">
+
+                                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The percent of ALL profits in a pool that this pool will take for itself as fees.
+                                                            The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
+                                                                <label for="inp_POOL_FEE">Pool fee (%): </label>
+                                                            </div>
+
+                                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
+                                                                <input id="inp_POOL_FEE" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
+                                                            </div>
+
+                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="How much coins will pool earn from YOUR stake in a year">
+                                                                <span id="ctx_POOL_FEE" class="inp-ctx"></span>
+                                                            </div>
+
+                                                        </div>
+
                                                     </div>
 
                                                 </div>
