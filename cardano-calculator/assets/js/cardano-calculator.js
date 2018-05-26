@@ -62,16 +62,18 @@ function parseParamIntoContext(el, shift = 0) {
 }
 
 function markError(id, msg) {
-    let el = $('#inp_' + id).parent();
-    el.attr('err-tip', msg);
-    el.addClass('err-inp');
+    let el = $('#inp_' + id);
+    let invalidTextBox = el.parent().find('.invalid-feedback');
+    invalidTextBox.text(msg);
+    el.addClass('is-invalid');
     return msg;
 }
 
 function updateCalculations() {
-    let inputs = $('.inp-param').parent();
-    inputs.removeAttr('err-tip');
-    inputs.removeClass('err-inp');
+    let inputs = $('.inp-param');
+    let invalidTextBox = inputs.parent().find('.invalid-feedback');
+    invalidTextBox.text('');
+    inputs.removeClass('is-invalid');
     let userStake = window.CardanoCalculatorParams.STAKE;
     let totalStake = window.CardanoCalculatorParams.TOTAL_STAKE;
     let negativeErrors = Object.entries(window.CardanoCalculatorParams).map(function(e) {
