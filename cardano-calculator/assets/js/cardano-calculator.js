@@ -1,14 +1,3 @@
-function hideDisclaimer() {
-    $('.disclaimer-group').hide();
-}
-
-function resize() {
-    $('#disclaimer-margin').height($('#disclaimer').height());
-}
-$(window).resize(function() {
-    resize();
-});
-
 function frmt(num, scale = 6) {
     return Number(num.toFixed(scale)).toLocaleString('en-US', {
         'maximumFractionDigits': scale
@@ -44,38 +33,6 @@ function parseHash(hash) {
         }
     }
     return result;
-}
-
-function isValidTab(tab) {
-    return ['formula', 'calc', 'faq', 'about', 'roadmap'].includes(tab)
-}
-
-function selectTab(tab) {
-    if (!tab || !isValidTab(tab)) {
-        return false;
-    }
-    $('.tab-selector').removeClass('selected');
-    $('.tab-selector[tab="' + tab + '"]').addClass('selected');
-    $('.tab').hide();
-    $('.tab[tab="' + tab + '"]').show();
-    window.scrollTo(0, 0);
-    return true
-}
-
-function tab(e) {
-    if ($(e).hasClass('selected')) {
-        return;
-    }
-    selectTab($(e).attr('tab'))
-}
-
-function hashEvent() {
-    params = parseHash(location.hash);
-    if (params.location) {
-        if (!selectTab(params.location)) {
-            history.pushState("", document.title, window.location.pathname + window.location.search);
-        }
-    }
 }
 
 function commify(numStr) {
@@ -203,18 +160,20 @@ function initParamsContext() {
 }
 
 $(function() {
-    resize();
-    hashEvent();
+
     initParamsContext();
+
     $('.inp-param').on("change paste keyup", function() {
         paramUpdate(this)
     });
+
     $('.cleave-num').each(function() {
         let cleave = new Cleave(this, {
             numeral: true,
             numeralThousandsGroupStyle: 'thousand'
         });
     });
+
     $('.inp-param.cleave-num').keydown(function() {
         let char = event.which || event.keyCode;
         if (char === 38 || char === 40) {
@@ -222,6 +181,17 @@ $(function() {
             paramUpdate(this, shift);
         }
     });
-});
 
-$(window).bind('hashchange', hashEvent);
+    $(document).on('click', '.activate-tab', function(e) {
+
+        e.preventDefault();
+
+        var target = this.href.split('#');
+
+        (target[1]) ? $('.nav a').filter('[href="#' + target[1] + '"]').tab('show') : null;
+
+        window.scrollTo(0, 0);
+
+    });
+
+});
