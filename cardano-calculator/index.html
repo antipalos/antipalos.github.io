@@ -1,1084 +1,600 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Cardano Calc</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="cleave.min.js"></script>
-    <script language="JavaScript">
-        function hideDisclaimer() {
-            $('.disclaimer-group').hide();
-        }
-        function resize() {
-            $('#disclaimer-margin').height($('#disclaimer').height());
-        }
-        $( window ).resize(function() {
-            resize();
-        });
-        function frmt(num, scale=6) {
-            return Number(num.toFixed(scale)).toLocaleString('en-US', {'maximumFractionDigits': scale})
-        }
-        function parseHash(hash) {
-            let sLocationAndParams = hash.split(/\?(.+)/);
-            let sLocation = sLocationAndParams[0];
-            if (sLocation.startsWith('#')) {
-                sLocation = sLocation.substr(1)
-            }
-            let result = {'location': sLocation};
-            if (sLocationAndParams.length > 1) {
-                result['params'] = {};
-                let sParamStr = sLocationAndParams[1];
-                let sParams = sParamStr.split('&');
-                for (let i = 0; i < sParams.length; i++) {
-                    let sParamPair = sParams[i].split(/=(.*)/);
-                    let value = sParamPair.length > 1 ? sParamPair[1] : true;
-                    if (result.params[sParamPair[0]]) {
-                        let oldValue = result.params[sParamPair[0]];
-                        if (Array.isArray(oldValue)) {
-                            oldValue += value;
-                        } else {
-                            result.params[sParamPair[0]] = [oldValue, value]
-                        }
-                    } else {
-                        result.params[sParamPair[0]] = value;
-                    }
-                }
-            }
-            return result;
-        }
-        function isValidTab(tab) {
-            return ['formula', 'calc', 'faq', 'about', 'roadmap'].includes(tab)
-        }
-        function selectTab(tab) {
-            if (!tab || !isValidTab(tab)) {
-                return false;
-            }
-            $('.tab-selector').removeClass('selected');
-            $('.tab-selector[tab="' + tab + '"]').addClass('selected');
-            $('.tab').hide();
-            $('.tab[tab="' + tab + '"]').show();
-            window.scrollTo(0,0);
-            return true
-        }
-        function tab(e) {
-            if ($(e).hasClass('selected')) {
-                return;
-            }
-            selectTab($(e).attr('tab'))
-        }
-        function hashEvent() {
-            params = parseHash(location.hash);
-            if (params.location) {
-                if (!selectTab(params.location)) {
-                    history.pushState("", document.title, window.location.pathname + window.location.search);
-                }
-            }
-        }
-        function commify(numStr) {
-            let len = numStr.indexOf('.') || numStr.length;
-            for (let i = len-3; i > 0; i-=3) {
-                numStr = numStr.slice(0, i) + ',' + numStr.slice(i);
-            }
-            return numStr;
-        }
-        function parseParamIntoContext(el, shift=0) {
-            let id = el.attr('id');
-            if (!id.startsWith("inp_")) {
-                return null;
-            }
-            param = id.substr(4);
-            valtype = el.attr('valtype');
-            parser = valtype === 'int' ? parseInt : valtype === 'float' ? parseFloat : (x) => x;
-            let parsedValue = parser(el.val().replace(/,/g,''));
-            if (shift) {
-                parsedValue += shift;
-                el.val(commify(frmt(parsedValue, valtype === 'float' ? 1 : 0)));
-            }
-            window.CardanoCalculatorParams[param] = parsedValue;
-            return parsedValue
 
-        }
-        function markError(id, msg) {
-            let el = $('#inp_'+id).parent();
-            el.attr('err-tip',msg);
-            el.addClass('err-inp');
-            return msg;
-        }
-        function updateCalculations() {
-            let inputs = $('.inp-param').parent();
-            inputs.removeAttr('err-tip');
-            inputs.removeClass('err-inp');
-            let userStake = window.CardanoCalculatorParams.STAKE;
-            let totalStake = window.CardanoCalculatorParams.TOTAL_STAKE;
-            let negativeErrors = Object.entries(window.CardanoCalculatorParams).map(function(e) {
-                let el = $('#inp_'+e[0]),
-                    min = parseInt(el.attr('min')),
-                    max = parseInt(el.attr('max'));
-                if (e[1] < min) {
-                    return markError(e[0], 'Cannot be less than ' + min);
-                } else if (e[1] > max) {
-                    return markError(e[0], 'Cannot be more than ' + max);
-                }
-            }).filter((x) => x);
-            if (negativeErrors.length > 0) {
-                return;
-            }
-            if (userStake > totalStake) {
-                return (markError('STAKE', 'Stake cannot be greater than TOTAL stake'),
-                        markError('TOTAL_STAKE', 'Total stake cannot be less than user stake'));
-            }
-            let year = window.CardanoCalculatorParams.YEAR - 2019;
-            let infl = (window.CardanoCalculatorParams.INFL / 100);
-            let txEpoch = window.CardanoCalculatorParams.TX_EPOCH;
-            let txSize = window.CardanoCalculatorParams.TX_SIZE;
-            let tax = (window.CardanoCalculatorParams.TAX / 100);
-            let poolFee = (window.CardanoCalculatorParams.POOL_FEE / 100);
-            let initialTotalSupply = 31112484646;
-            let initialReserve = 13887515354;
-            let txFeeFixed = 0.155381;
-            let txFeePerByte = 0.000043946;
-            let userShare = userStake / totalStake;
-            let reserveAtYearStart = initialReserve * Math.pow((1 - infl), year);
-            let issuedAtYearStart = initialReserve - reserveAtYearStart;
-            let supplyAtYearStart = initialTotalSupply + issuedAtYearStart;
-            if (totalStake > supplyAtYearStart) {
-                return markError('TOTAL_STAKE', 'Total stake cannot be greater than total supply for this year')
-            }
-            $('#ctx_STAKE').text(frmt(userShare * 100) + '%');
-            $('#ctx_YEAR').text(frmt(supplyAtYearStart, 3) + ' ADA total (' + frmt(reserveAtYearStart, 3) + ' ADA in reserve)');
-            let issuedThisYear = reserveAtYearStart * infl;
-            let supplyInflation = (issuedThisYear * 100) / supplyAtYearStart;
-            $('#ctx_INFL').text(frmt(issuedThisYear, 3) + ' ADA issued (' + frmt(supplyInflation) + '% inflation)');
-            let stakedShare = (totalStake * 100) / supplyAtYearStart;
-            $('#ctx_TOTAL_STAKE').text(frmt(stakedShare) + '%');
-            let tpb = txEpoch / 21600;
-            let tps = tpb / 20;
-            $('#ctx_TX_EPOCH').text(frmt(tps) + ' tps');
-            let txFee = txFeeFixed + (txSize * txFeePerByte);
-            let blockReward = ((issuedThisYear / (73 * 21600)) + (tpb * txFee)) * (1 - tax);
-            $('#ctx_TX_SIZE').text(frmt(txFee) + ' avg fee (' + frmt(blockReward) + ' avg block reward)');
-            let txFeeYearly = txEpoch * 73 * txFee;
-            let untaxedRewardAtYearStart = issuedAtYearStart + (txFeeYearly * year);
-            let untaxedRewardThisYear = issuedThisYear + txFeeYearly;
-            let taxAtYearStart = untaxedRewardAtYearStart * tax;
-            let taxThisYear = untaxedRewardThisYear * tax;
-            $('#ctx_TAX').text(frmt(taxAtYearStart, 3) + ' ADA in treasury (+ ' + frmt(taxThisYear, 3) + ' ADA added this year)');
-            let taxedRewardAtYearStart = untaxedRewardAtYearStart - taxAtYearStart;
-            let taxedRewardThisYear = untaxedRewardThisYear - taxThisYear;
-            let userRewardAtYearStart = taxedRewardAtYearStart * userShare;
-            let userRewardThisYear = taxedRewardThisYear * userShare;
-            let poolFeeAtYearStart = userRewardAtYearStart * poolFee;
-            let poolFeeThisYear = userRewardThisYear * poolFee;
-            $('#ctx_POOL_FEE').text(frmt(poolFeeThisYear) + ' ADA yearly');
-            let resultAtYearStart = userRewardAtYearStart - poolFeeAtYearStart;
-            let resultThisYear = userRewardThisYear - poolFeeThisYear;
-            let resultAtYearEnd = resultAtYearStart + resultThisYear;
-            $('#resultAtYearStart').text(frmt(resultAtYearStart) + ' ADA');
-            $('#ctx_resultAtYearStart').text('(' + frmt((resultAtYearStart * 100) / userStake, 3) + '%)');
-            $('#resultThisYear').text(frmt(resultThisYear) + ' ADA');
-            $('#ctx_resultThisYear').text('(' + frmt((resultThisYear * 100) / userStake, 3) + '%)');
-            $('#resultAtYearEnd').text(frmt(resultAtYearEnd) + ' ADA');
-            $('#ctx_resultAtYearEnd').text('(' + frmt((resultAtYearEnd * 100) / userStake, 3) + '%)');
-        }
-        function paramUpdate(e, shift=0) {
-            if (parseParamIntoContext($(e), shift) != null) {
-                updateCalculations();
-            }
-        }
-        function initParamsContext() {
-            window['CardanoCalculatorParams'] = {};
-            $('.inp-param').each(function() { parseParamIntoContext($(this)) });
-            updateCalculations()
-        }
-        $(function() {
-            resize();
-            hashEvent();
-            initParamsContext();
-            $('.inp-param').on("change paste keyup", function() { paramUpdate(this) });
-            $('.cleave-num').each(function () {
-                let cleave = new Cleave(this, {
-                    numeral: true,
-                    numeralThousandsGroupStyle: 'thousand'
-                });
-            });
-            $('.inp-param.cleave-num').keydown(function() {
-                let char = event.which || event.keyCode;
-                if (char === 38 || char === 40) {
-                    shift = 39 - char;
-                    paramUpdate(this, shift);
-                }
-            });
-        });
-        $(window).bind('hashchange', hashEvent);
-    </script>
-    <style>
+    <head>
 
-        /* Extra small */
-        @media only screen and (max-width : 767px) {
-            body{font-size: 10px;}
-            #content-body {width: 100%;}
-            #footer{font-size: 8px;}
-        }
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Cardano Calc</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        /* Small */
-        @media only screen and (min-width : 768px) {
-            body{font-size: 14px;}
-            #content-body {width: 100%;}
-            #footer{font-size: 12px;}
-        }
+        <link rel="manifest" href="site.webmanifest">
+        <link rel="apple-touch-icon" href="icon.png">
 
-        /* Medium */
-        @media only screen and (min-width : 992px) {
-            body{font-size: 16px;}
-            #content-body {width: 80%;}
-            #footer{font-size: 14px;}
-        }
+        <link rel="icon" href="favicon.ico?v=1.0">
 
-        /* Large */
-        @media only screen and (min-width : 1200px) {
-            body{font-size: 18px;}
-            #content-body {width: 70%;}
-            #footer{font-size: 15px;}
-        }
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/cardano-calculator.css">
 
-        body {
-            font-family: Calibri sans-serif;
-            background-color: #fefefe;
-            color: #001144;
-        }
+    </head>
 
-        h2 {
-            color: #001166;
-        }
-        h3 {
-            color: #002288;
-            border-top: 1px solid #eeeeee;
-            border-bottom: 1px solid #eeeeee;
-            background: #f8f8f8;
-            border-radius: 4px;
-            padding-left: 5px;
-        }
+    <body>
 
-        .tab[tab=faq] > h3 {
-            margin-top: 40px;
-        }
-
-        #disclaimer {
-            border: 3px solid red;
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 10px;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            right: 0;
-            top: 0;
-            width: 100%;
-            background: #ffeeee;
-        }
-
-        #disclaimer-margin {
-            height: 180px;
-        }
-
-        .topwarn {
-            font-size: 40px;
-        }
-
-        .topwarn, .warn {
-            color: orangered;
-            font-weight: bold;
-        }
-
-        .bold {
-            font-weight: bold;
-        }
-
-        .inv-table {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            border-spacing: 0;
-            border: none;
-        }
-
-        #disclaimer button {
-            margin: 0;
-            padding: 5px;
-            width: 30px;
-            height: 30px;
-        }
-
-        #content-body {
-            /*border: 3px solid green;*/
-        }
-
-        #header {
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-        #header > h1 {
-            margin-top: 0;
-            padding-top: 5px;
-            margin-bottom: 15px;
-        }
-
-
-        #tabs-table {
-            border-top: 1px solid lightgrey;
-            border-bottom: 1px solid lightgrey;
-            text-align: center;
-            font-size: 25px;
-            width: 100%;
-        }
-
-        .tab-td {
-            width: 25%;
-            font-family: Consolas sans-serif;
-            font-weight: bold;
-        }
-
-        .tab-td:not(:last-child) {
-            border-right: 1px solid lightgrey;
-        }
-
-        .tab-selector.selected {
-            font-style: normal;
-            text-decoration: none;
-            color: black;
-            background-color: #eef9ee;
-            border-radius: 4px;
-            padding-left: 4px;
-            padding-right: 4px;
-        }
-
-        #footer {
-            border-top: 1px solid lightgrey;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 3px 5px 5px;
-            width: 100%;
-            color: grey;
-            background: #f8f8f8;
-        }
-
-        .zero-margin {
-            margin-bottom: 0;
-        }
-
-        code {
-            font-family: 'Consolas', monospace, sans-serif;
-            background: #eeeeee;
-            padding: 2px 2px 0;
-            border-radius: 3px;
-        }
-
-        code.codeblock {
-            font-size: 14px;
-            border: 1px solid lightgrey;
-            margin: 5px;
-            padding-left: 10px;
-            padding-right: 10px;
-            padding-top: 5px;
-            padding-bottom: 3px;
-            display: block;
-            width: fit-content;
-            line-height: 1.5;
-        }
-
-        #footer-margin {
-            height: 60px;
-        }
-
-        #params-list {
-            padding-left: 25px;
-        }
-
-        .inp-param {
-            width: 15ch;
-        }
-
-        [data-tip], [err-tip] {
-            position:relative;
-
-        }
-        [data-tip]:before, [err-tip]:before {
-            content:'';
-            /* hides the tooltip when not hovered */
-            display:none;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-bottom: 5px solid #1a1a1a;
-            position:absolute;
-            top:30px;
-            left:35px;
-            z-index:8;
-            font-size:0;
-            line-height:0;
-            width:0;
-            height:0;
-        }
-        [data-tip]:after, [err-tip]:after {
-            display:none;
-            content:attr(data-tip);
-            position:absolute;
-            top:35px;
-            left:0;
-            padding:5px 8px;
-            background:#1a1a1a;
-            color:#fff;
-            z-index:9;
-            font-size: 0.75em;
-            height:auto;
-            line-height:18px;
-            -webkit-border-radius: 3px;
-            -moz-border-radius: 3px;
-            border-radius: 3px;
-            white-space: pre-line;
-            word-wrap:normal;
-        }
-        [err-tip]:after {
-            content:attr(err-tip);
-            background: orangered;
-            color: black;
-        }
-        [data-tip]:hover:before,
-        [data-tip]:hover:after,
-        [err-tip]:hover:before,
-        [err-tip]:hover:after {
-            display:block;
-            width: max-content;
-        }
-
-        .err-inp {
-            background-color: red;
-        }
-
-        .inp-ctx {
-            font-size: 14px;
-            color: grey;
-        }
-
-        #results-table {
-            padding-top: 10px;
-        }
-
-        #results-table td {
-            padding-right: 15px;
-        }
-
-        .result-ctx {
-            font-size: 14px;
-            color: grey;
-        }
-
-        #results-disclaimer {
-            border: 2px solid lightpink;
-            border-radius: 5px;
-            padding: 5px 5px 0;
-            margin-top: 20px;
-            color: grey;
-        }
-
-        #results-disclaimer p {
-            margin: 0 0 5px;
-        }
-
-        #calc-form {
-            margin-top: 15px;
-            border-left: 3px solid #eeeeee;
-            border-radius: 5px;
-            padding: 0;
-        }
-
-        .calc-group-header-wrapper {
-            border-top: 1px solid #eeeeee;
-            border-bottom: 1px solid #eeeeee;
-            background-color: #f9f9f9;
-            padding-left: 5px;
-            padding-right: 5px;
-            border-radius: 4px;
-            padding-bottom: 2px;
-        }
-        .calc-group-header {
-            color: grey;
-            font-size: 15px;
-        }
-
-    </style>
-</head>
-<body>
-    <div id="disclaimer" class="disclaimer-group">
-        <table border="0" class="inv-table">
-            <tr>
-                <td width="50">
-                    <br/>
-                </td>
-                <td>
-                    <p class="bold zero-margin"><span class="topwarn">Warning!</span> All following calculations are <span class="warn">NOT PRECISE</span>
-                        and should ONLY be used as <span class="warn">AN EXAMPLE</span>.</p>
-                </td>
-                <td width="50" valign="top" align="right">
-                    <button onclick="hideDisclaimer()">X</button>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <p>The point of this page is to <span class="bold">demonstrate</span> HOW Cardano profits are calculated
-                        and to show how many <span class="warn">UNKNOWN VARIABLES</span> are used in the calculation.
-                        Result of this calculator <span class="warn">SHOULD NOT</span> be considered a promise or a guarantee
-                        of future profits, and should not be used as a financial advice.</p>
-                    <p>Not a single company associated with the Cardano project (IOHK, Emurgo, Cardano Foundation, etc.)
-                        should be held accountable for the results of this calculator!</p>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div id="disclaimer-margin" class="disclaimer-group"><br/></div>
-
-    <div id="content-body">
-        <div id="header">
-            <h1>Cardano Staking Profits Calculator</h1>
-            <table id="tabs-table">
+        <div id="disclaimer" class="disclaimer-group">
+            <table border="0" class="inv-table">
                 <tr>
-                    <td class="tab-td">
-                        <a class="tab-selector selected" href="#calc" onclick="tab(this)" tab="calc">Calculator</a>
+                    <td width="50">
+                        <br/>
                     </td>
-                    <td class="tab-td">
-                        <a class="tab-selector" href="#formula" onclick="tab(this)" tab="formula">Formula</a>
+                    <td>
+                        <p class="bold zero-margin"><span class="topwarn">Warning!</span> All following calculations are <span class="warn">NOT PRECISE</span>
+                            and should ONLY be used as <span class="warn">AN EXAMPLE</span>.</p>
                     </td>
-                    <td class="tab-td">
-                        <a class="tab-selector" href="#faq" onclick="tab(this)" tab="faq">FAQ</a>
+                    <td width="50" valign="top" align="right">
+                        <button onclick="hideDisclaimer()">X</button>
                     </td>
-                    <td class="tab-td">
-                        <a class="tab-selector" href="#about" onclick="tab(this)" tab="about">About</a>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <p>The point of this page is to <span class="bold">demonstrate</span> HOW Cardano profits are calculated
+                            and to show how many <span class="warn">UNKNOWN VARIABLES</span> are used in the calculation.
+                            Result of this calculator <span class="warn">SHOULD NOT</span> be considered a promise or a guarantee
+                            of future profits, and should not be used as a financial advice.</p>
+                        <p>Not a single company associated with the Cardano project (IOHK, Emurgo, Cardano Foundation, etc.)
+                            should be held accountable for the results of this calculator!</p>
                     </td>
                 </tr>
             </table>
         </div>
 
-        <div class="tab" tab="formula" style="display: none">
-            <h2 class="zero-margin">Formula explanation</h2>
-            <p>All information for calculations are taken from these documents:</p>
-            <ol>
-                <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
-                <!--<li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>-->
-                <li><a href="https://forum.cardano.org/t/summary-pos-delegation-incentives-lars-brunjes/11880">Cardano staking explained</a></li>
-                <li><a href="https://adatracker.com/charts">AdaTracker charts (to approximate transaction number)</a></li>
-            </ol>
-            <h3>Parameters require for calculations:</h3>
-            <ul id="params-list">
-                <li><code>INFL</code> - the level of inflation in yearly percentile reserve decrease</li>
-                <li><code>YEAR</code> - number of full years since the launch of the staking</li>
-                <li><code>STAKE</code> - your stake in coins</li>
-                <li><code>TOTAL_STAKE</code> - total stake in the system in coins</li>
-                <li><code>TX_EPOCH</code> - average number of transactions each epoch (5 days)</li>
-                <li><code>TX_SIZE</code> - average size of a transaction</li>
-                <li><code>TAX</code> - the percentage of profits taxed towards the treasury</li>
-                <li><code>POOL_FEE</code> - the percentage of profits that pool takes as a fee</li>
-            </ul>
-            <h3>Full formula:</h3>
-            <code class="codeblock">
-                MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL<br/>
-                FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
-                RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE<br/>
-            </code>
-            <h3>Detailed explanation:</h3>
-            <p class="bold">Minted coins</p>
-            <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
-            <code class="codeblock">
-                MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL
-            </code>
-            <p>The 13 billions number is taken from the monetary policy and represents the total reserve
-            of coins not issued from the beginning. These coins will be gradually issued thru minting
-            using formula above to calculate the amount. Formula is taken from the staking explanation post.</p>
+        <div id="disclaimer-margin" class="disclaimer-group"><br/></div>
 
-            <p class="zero-margin">For example: if we take an <b>arbitrary example</b> of 5% reserve decrease, and calculated it for the
-            second year (1 whole year after launch), then it would give us:</p>
-            <code class="codeblock">
-                13,887,515,354 * (1 - 5%)<sup>1</sup> * 5% = 659,656,979.315
-            </code>
-            <p>Just under 660 millions of newly minted ADA in the second year of staking.</p>
+        <div id="content-body">
+            <div id="header">
+                <h1>Cardano Staking Profits Calculator</h1>
+                <table id="tabs-table">
+                    <tr>
+                        <td class="tab-td">
+                            <a class="tab-selector selected" href="#calc" onclick="tab(this)" tab="calc">Calculator</a>
+                        </td>
+                        <td class="tab-td">
+                            <a class="tab-selector" href="#formula" onclick="tab(this)" tab="formula">Formula</a>
+                        </td>
+                        <td class="tab-td">
+                            <a class="tab-selector" href="#faq" onclick="tab(this)" tab="faq">FAQ</a>
+                        </td>
+                        <td class="tab-td">
+                            <a class="tab-selector" href="#about" onclick="tab(this)" tab="about">About</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
-            <p>The <code>MINT</code> value now gives us notion of how much <b>new</b> coins will
-            be issued to reward people. But there are also fees that users pay to send coins or execute any
-            transactions. Total fees for the whole year are calculated like this:</p>
+            <div class="tab" tab="formula" style="display: none">
+                <h2 class="zero-margin">Formula explanation</h2>
+                <p>All information for calculations are taken from these documents:</p>
+                <ol>
+                    <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
+                    <!--<li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>-->
+                    <li><a href="https://forum.cardano.org/t/summary-pos-delegation-incentives-lars-brunjes/11880">Cardano staking explained</a></li>
+                    <li><a href="https://adatracker.com/charts">AdaTracker charts (to approximate transaction number)</a></li>
+                </ol>
+                <h3>Parameters require for calculations:</h3>
+                <ul id="params-list">
+                    <li><code>INFL</code> - the level of inflation in yearly percentile reserve decrease</li>
+                    <li><code>YEAR</code> - number of full years since the launch of the staking</li>
+                    <li><code>STAKE</code> - your stake in coins</li>
+                    <li><code>TOTAL_STAKE</code> - total stake in the system in coins</li>
+                    <li><code>TX_EPOCH</code> - average number of transactions each epoch (5 days)</li>
+                    <li><code>TX_SIZE</code> - average size of a transaction</li>
+                    <li><code>TAX</code> - the percentage of profits taxed towards the treasury</li>
+                    <li><code>POOL_FEE</code> - the percentage of profits that pool takes as a fee</li>
+                </ul>
+                <h3>Full formula:</h3>
+                <code class="codeblock">
+                    MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL<br/>
+                    FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
+                    RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE<br/>
+                </code>
+                <h3>Detailed explanation:</h3>
+                <p class="bold">Minted coins</p>
+                <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
+                <code class="codeblock">
+                    MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL
+                </code>
+                <p>The 13 billions number is taken from the monetary policy and represents the total reserve
+                of coins not issued from the beginning. These coins will be gradually issued thru minting
+                using formula above to calculate the amount. Formula is taken from the staking explanation post.</p>
 
-            <p class="bold">Fees</p>
+                <p class="zero-margin">For example: if we take an <b>arbitrary example</b> of 5% reserve decrease, and calculated it for the
+                second year (1 whole year after launch), then it would give us:</p>
+                <code class="codeblock">
+                    13,887,515,354 * (1 - 5%)<sup>1</sup> * 5% = 659,656,979.315
+                </code>
+                <p>Just under 660 millions of newly minted ADA in the second year of staking.</p>
 
-            <code class="codeblock">
-                TX_YEAR = 73 * TX_EPOCH<br/>
-                FIXED_FEES = TX_YEAR * 0.155381<br/>
-                SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
-                FEES = FIXED_FEES + SIZE_FEES<br/>
-            </code>
+                <p>The <code>MINT</code> value now gives us notion of how much <b>new</b> coins will
+                be issued to reward people. But there are also fees that users pay to send coins or execute any
+                transactions. Total fees for the whole year are calculated like this:</p>
 
-            <p><code>TX_YEAR</code> gives us the average number of transactions for the whole year.
-            One year consists of 73 epochs. For now it's fixed, but in theory also may change.
-            Best practice would be to make it a separate parameter <code>EPOCH_YEAR</code></p>
+                <p class="bold">Fees</p>
 
-            <p><code>FIXED_FEES</code> is the number of all transactions per year multiplied by
-            the <b>fixed transaction cost</b> as described in the staking explanation post.
-            It also might change in the future so would be best to define parameter <code>TX_FEE_FIXED</code></p>
+                <code class="codeblock">
+                    TX_YEAR = 73 * TX_EPOCH<br/>
+                    FIXED_FEES = TX_YEAR * 0.155381<br/>
+                    SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
+                    FEES = FIXED_FEES + SIZE_FEES<br/>
+                </code>
 
-            <p><code>SIZE_FEES</code> is the sum of all bytes of all transactions per year multiplied by
-            the <b>byte cost</b> as described in the staking explanation post.
-            It also might change in the future so would be best to define parameter <code>TX_FEE_PER_BYTE</code></p>
+                <p><code>TX_YEAR</code> gives us the average number of transactions for the whole year.
+                One year consists of 73 epochs. For now it's fixed, but in theory also may change.
+                Best practice would be to make it a separate parameter <code>EPOCH_YEAR</code></p>
 
-            <p class="zero-margin">For example: if we take current average number of transaction from
-            <a href="https://adatracker.com/charts">the actual tracker</a> it would be around 15,000.
-            And if we take an average transaction size to be 200 byte, as described in the staking explanation post.
-            Then we could calculate:</p>
-            <code class="codeblock">
-                TX_YEAR = 73 * 15,000 = 1,095,000<br/>
-                FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
-                SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174<br/>
-                FEES = 170,142.195 + 9,624.174 = 179,766.369<br/>
-            </code>
+                <p><code>FIXED_FEES</code> is the number of all transactions per year multiplied by
+                the <b>fixed transaction cost</b> as described in the staking explanation post.
+                It also might change in the future so would be best to define parameter <code>TX_FEE_FIXED</code></p>
 
-            <p class="bold">Tax</p>
+                <p><code>SIZE_FEES</code> is the sum of all bytes of all transactions per year multiplied by
+                the <b>byte cost</b> as described in the staking explanation post.
+                It also might change in the future so would be best to define parameter <code>TX_FEE_PER_BYTE</code></p>
 
-            <code class="codeblock">
-                UNTAXED_REWARD = MINT + FEES<br/>
-                TAXED_REWARD = UNTAXED_REWARD - TAX<br/>
-            </code>
+                <p class="zero-margin">For example: if we take current average number of transaction from
+                <a href="https://adatracker.com/charts">the actual tracker</a> it would be around 15,000.
+                And if we take an average transaction size to be 200 byte, as described in the staking explanation post.
+                Then we could calculate:</p>
+                <code class="codeblock">
+                    TX_YEAR = 73 * 15,000 = 1,095,000<br/>
+                    FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
+                    SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174<br/>
+                    FEES = 170,142.195 + 9,624.174 = 179,766.369<br/>
+                </code>
 
-            <p><code>UNTAXED_REWARD</code> is the total pool of reward for all stakers in the system, but before
-            tax is subtracted. Once we subtract some percentage of the total pool into treasury -
-            we get the final <code>TAXED_REWARD</code> - total reward distributed among all stakers.</p>
+                <p class="bold">Tax</p>
 
-            <p class="zero-margin">For example: if we take <code>TAX</code> to be 20% just as
-            an arbitrary rational example (IOHK proposed 20% tax for ETC, but it might end up
-            being be 25% for Cardano, or some other number), then calculations would go like:</p>
-            <code class="codeblock">
-                UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684<br/>
-                TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547<br/>
-            </code>
+                <code class="codeblock">
+                    UNTAXED_REWARD = MINT + FEES<br/>
+                    TAXED_REWARD = UNTAXED_REWARD - TAX<br/>
+                </code>
 
-            <p class="bold">Share by stake</p>
+                <p><code>UNTAXED_REWARD</code> is the total pool of reward for all stakers in the system, but before
+                tax is subtracted. Once we subtract some percentage of the total pool into treasury -
+                we get the final <code>TAXED_REWARD</code> - total reward distributed among all stakers.</p>
 
-            <code class="codeblock">
-                SHARE = STAKE / TOTAL_STAKE<br/>
-                REWARD_SHARE = TAXED_REWARD * SHARE<br/>
-            </code>
+                <p class="zero-margin">For example: if we take <code>TAX</code> to be 20% just as
+                an arbitrary rational example (IOHK proposed 20% tax for ETC, but it might end up
+                being be 25% for Cardano, or some other number), then calculations would go like:</p>
+                <code class="codeblock">
+                    UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684<br/>
+                    TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547<br/>
+                </code>
 
-            <p>Any arbitrary staker (in the pool or not) may calculate his <b>AVERAGE</b> share of the rewards,
-            by calculating his <code>SHARE</code> in the total stake of the system.
-            This parameter of the total stake is actually the most important one, because
-            it directly and in the most significant way affects how much coins a user will receive
-            by staking <b>the same</b> amount of coins. The lower total stake - the greater you share
-            can be with the same coins staked.</p>
+                <p class="bold">Share by stake</p>
 
-            <p class="zero-margin">For example: if we take <code>TOTAL_STAKE</code> to be 15 billion (just as
-            an arbitrary completely random example, no one knows how many actual coins will be staked) and
-            we take out stake to be 42 thousand coins, then calculations would go like:</p>
-            <code class="codeblock">
-                SHARE = 42,000 / 15,000,000,000 = 0.0000028<br/>
-                REWARD_SHARE = 527,869,396.547 * 0.0000028 = 1478.0343<br/>
-            </code>
+                <code class="codeblock">
+                    SHARE = STAKE / TOTAL_STAKE<br/>
+                    REWARD_SHARE = TAXED_REWARD * SHARE<br/>
+                </code>
 
-            <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
-            about 1478.0343 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
+                <p>Any arbitrary staker (in the pool or not) may calculate his <b>AVERAGE</b> share of the rewards,
+                by calculating his <code>SHARE</code> in the total stake of the system.
+                This parameter of the total stake is actually the most important one, because
+                it directly and in the most significant way affects how much coins a user will receive
+                by staking <b>the same</b> amount of coins. The lower total stake - the greater you share
+                can be with the same coins staked.</p>
 
-            <p class="bold">Pools fees</p>
+                <p class="zero-margin">For example: if we take <code>TOTAL_STAKE</code> to be 15 billion (just as
+                an arbitrary completely random example, no one knows how many actual coins will be staked) and
+                we take out stake to be 42 thousand coins, then calculations would go like:</p>
+                <code class="codeblock">
+                    SHARE = 42,000 / 15,000,000,000 = 0.0000028<br/>
+                    REWARD_SHARE = 527,869,396.547 * 0.0000028 = 1478.0343<br/>
+                </code>
 
-            <code class="codeblock">
-                RESULT_REWARD = REWARD_SHARE - POOL_FEE
-            </code>
+                <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
+                about 1478.0343 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
 
-            <p class="zero-margin">Pools might take fees of different size and they will define those at the moment
-            of the pool registration. For example: if we take a <b>completely arbitrary</b> number of 5%,
-            then calculations would go like:</p>
-            <code class="codeblock">
-                RESULT_REWARD = 1478.0343 - 5% = 1404.1325
-            </code>
+                <p class="bold">Pools fees</p>
 
-            <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 1404.1325 for a 42K stake, or 3.34%.</p>
+                <code class="codeblock">
+                    RESULT_REWARD = REWARD_SHARE - POOL_FEE
+                </code>
 
-        </div>
+                <p class="zero-margin">Pools might take fees of different size and they will define those at the moment
+                of the pool registration. For example: if we take a <b>completely arbitrary</b> number of 5%,
+                then calculations would go like:</p>
+                <code class="codeblock">
+                    RESULT_REWARD = 1478.0343 - 5% = 1404.1325
+                </code>
 
-        <div class="tab" tab="calc">
-            <h2 class="zero-margin">Calculator</h2>
-            <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
-                For a detailed explanation of how this whole thing works visit the 'Formula' tab in the top menu.<br/>
-                Or visit the 'FAQ' page to find some common answers.</p>
-            <h3 class="zero-margin">Define parameters:</h3>
-            <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
-                (Up\Down arrow keys may be used in the input fields)</p>
+                <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 1404.1325 for a 42K stake, or 3.34%.</p>
 
-            <table id="calc-form" border="0" cellpadding="3">
+            </div>
 
-                <tr><td colspan="3">
-                    <div class="calc-group-header-wrapper">
-                        <span data-tip="Parameters that only depend on the user">
-                                <span class="calc-group-header">User parameters</span>
-                        </span>
-                    </div>
-                </td></tr>
+            <div class="tab" tab="calc">
+                <h2 class="zero-margin">Calculator</h2>
+                <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
+                    For a detailed explanation of how this whole thing works visit the 'Formula' tab in the top menu.<br/>
+                    Or visit the 'FAQ' page to find some common answers.</p>
+                <h3 class="zero-margin">Define parameters:</h3>
+                <p style="margin-top: 3px; margin-bottom: 3px; color: grey; font-size: 0.8em">
+                    (Up\Down arrow keys may be used in the input fields)</p>
 
-                <tr><td>
-                    <span data-tip="How much total coins you will send to a pool">
-                        <label for="inp_STAKE"><b>Your</b> stake (in coins): </label></span>
-                </td><td>
-                    <span data-tip="Cannot be bigger than the total stake">
-                        <input id="inp_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="1000" valtype="int"/></span>
-                </td><td>
-                    <span data-tip="Share of total stake"><span id="ctx_STAKE" class="inp-ctx"></span></span>
-                </td></tr>
+                <table id="calc-form" border="0" cellpadding="3">
 
-                <tr><td>
-                    <span data-tip="The year is used in calculatins,
-                                    since inflation decreases each year so number of issued coins changes.">
-                        <label for="inp_YEAR">Year: </label></span>
-                </td><td>
-                    <span data-tip="Max allowed year - 2519">
-                        <input id="inp_YEAR" class="inp-param" type="number" min="2019" max="2519" value="2019" valtype="int"/></span>
-                </td><td>
-                    <span data-tip="Total supply at the start of this year (Remaining reserve at the start of this year)">
-                        <span id="ctx_YEAR" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td colspan="3">
+                        <div class="calc-group-header-wrapper">
+                            <span data-tip="Parameters that only depend on the user">
+                                    <span class="calc-group-header">User parameters</span>
+                            </span>
+                        </div>
+                    </td></tr>
 
-                <tr><td colspan="3">
-                    <div class="calc-group-header-wrapper">
-                        <span data-tip="Parameters that aren't directly set by anyone
-                                        but may (and will) fluctuate with system popularity">
-                            <span class="calc-group-header">Environment parameters</span>
-                        </span>
-                    </div>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="How much total coins you will send to a pool">
+                            <label for="inp_STAKE"><b>Your</b> stake (in coins): </label></span>
+                    </td><td>
+                        <span data-tip="Cannot be bigger than the total stake">
+                            <input id="inp_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="1000" valtype="int"/></span>
+                    </td><td>
+                        <span data-tip="Share of total stake"><span id="ctx_STAKE" class="inp-ctx"></span></span>
+                    </td></tr>
 
-                <tr><td>
-                    <span data-tip="How much total coins there are staked in the system.
-                                  This values is completely guessed at 10 billion (around 30% of total supply).
-                                  In real life it might turn out to be anything and also will change with time.">
-                        <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label></span>
-                </td><td>
-                    <span data-tip="Cannot be smaller than your stake">
-                        <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="15000000000" valtype="int"/></span>
-                </td><td>
-                    <span data-tip="Share of total supply this year">
-                        <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="The year is used in calculatins,
+                                        since inflation decreases each year so number of issued coins changes.">
+                            <label for="inp_YEAR">Year: </label></span>
+                    </td><td>
+                        <span data-tip="Max allowed year - 2519">
+                            <input id="inp_YEAR" class="inp-param" type="number" min="2019" max="2519" value="2019" valtype="int"/></span>
+                    </td><td>
+                        <span data-tip="Total supply at the start of this year (Remaining reserve at the start of this year)">
+                            <span id="ctx_YEAR" class="inp-ctx"></span></span>
+                    </td></tr>
 
-                <tr><td>
-                    <span data-tip="Average number of transactions in each epoch (5 days).
-                                    Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
-                        <label for="inp_TX_EPOCH">Transactions <b>in epoch</b>: </label></span>
-                </td><td>
-                    <span data-tip="Cannot be less than 0">
-                        <input id="inp_TX_EPOCH" class="inp-param cleave-num" type="text" min="0" value="15000" valtype="int"/></span>
-                </td><td>
-                    <span data-tip="Average transactions per second with a 5 day epoch and 20 second slot">
-                        <span id="ctx_TX_EPOCH" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td colspan="3">
+                        <div class="calc-group-header-wrapper">
+                            <span data-tip="Parameters that aren't directly set by anyone
+                                            but may (and will) fluctuate with system popularity">
+                                <span class="calc-group-header">Environment parameters</span>
+                            </span>
+                        </div>
+                    </td></tr>
 
-                <tr><td>
-                    <span data-tip="Average transaction size in bytes.">
-                        <label for="inp_TX_SIZE">Transaction size (bytes): </label></span>
-                </td><td>
-                    <span data-tip="Cannot be less than 1">
-                        <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="350" valtype="int"/></span>
-                </td><td>
-                    <span data-tip="Average translation fee (Average taxed block reward)">
-                        <span id="ctx_TX_SIZE" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="How much total coins there are staked in the system.
+                                    This values is completely guessed at 10 billion (around 30% of total supply).
+                                    In real life it might turn out to be anything and also will change with time.">
+                            <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label></span>
+                    </td><td>
+                        <span data-tip="Cannot be smaller than your stake">
+                            <input id="inp_TOTAL_STAKE" class="inp-param cleave-num" type="text" min="1" max="45000000000" value="15000000000" valtype="int"/></span>
+                    </td><td>
+                        <span data-tip="Share of total supply this year">
+                            <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span></span>
+                    </td></tr>
 
-                <tr><td colspan="3">
-                    <div class="calc-group-header-wrapper">
-                        <span data-tip="Parameters defined by the system,
-                                        but yet unknown until the 'Shelley' (staking) is released">
-                            <span class="calc-group-header">System parameters</span>
-                        </span>
-                    </div>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="Average number of transactions in each epoch (5 days).
+                                        Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
+                            <label for="inp_TX_EPOCH">Transactions <b>in epoch</b>: </label></span>
+                    </td><td>
+                        <span data-tip="Cannot be less than 0">
+                            <input id="inp_TX_EPOCH" class="inp-param cleave-num" type="text" min="0" value="15000" valtype="int"/></span>
+                    </td><td>
+                        <span data-tip="Average transactions per second with a 5 day epoch and 20 second slot">
+                            <span id="ctx_TX_EPOCH" class="inp-ctx"></span></span>
+                    </td></tr>
 
-                <tr><td>
-                    <span data-tip="Percent of reserved coins issued each year.
-                                    The number of 5% is taken from the official staking explanation post.
-                                    But generally is considered to be only an 'arbitrary example'">
-                        <label for="inp_INFL">Yearly reserve decrease (%): </label></span>
-                </td><td>
-                    <span data-tip="Should be in between 0% and 100% with a 0.1% step">
-                        <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/></span>
-                </td><td>
-                    <span data-tip="New coins issued this year (+ Total supply inflation)">
-                        <span id="ctx_INFL" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="Average transaction size in bytes.">
+                            <label for="inp_TX_SIZE">Transaction size (bytes): </label></span>
+                    </td><td>
+                        <span data-tip="Cannot be less than 1">
+                            <input id="inp_TX_SIZE" class="inp-param" type="number" min="1" value="350" valtype="int"/></span>
+                    </td><td>
+                        <span data-tip="Average translation fee (Average taxed block reward)">
+                            <span id="ctx_TX_SIZE" class="inp-ctx"></span></span>
+                    </td></tr>
 
-                <tr><td>
-                    <span data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
-                                    The number of 20% is speculative and approximate. There's no definite information yet,
-                                    but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
-                        <label for="inp_TAX">Treasury tax (%): </label></span>
-                </td><td>
-                    <span data-tip="Should be in between 0% and 100% with a 0.1% step">
-                        <input id="inp_TAX" class="inp-param" type="number" min="0" max="100" step="0.1" value="20" valtype="float"/></span>
-                </td><td>
-                    <span data-tip="Coins in treasury at the start of this year (+ coins added this year)">
-                        <span id="ctx_TAX" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td colspan="3">
+                        <div class="calc-group-header-wrapper">
+                            <span data-tip="Parameters defined by the system,
+                                            but yet unknown until the 'Shelley' (staking) is released">
+                                <span class="calc-group-header">System parameters</span>
+                            </span>
+                        </div>
+                    </td></tr>
 
-                <tr><td colspan="3">
-                    <div class="calc-group-header-wrapper">
-                        <span data-tip="Parameters that may change based on your pool selection">
-                            <span class="calc-group-header">Pool parameters</span>
-                        </span>
-                    </div>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="Percent of reserved coins issued each year.
+                                        The number of 5% is taken from the official staking explanation post.
+                                        But generally is considered to be only an 'arbitrary example'">
+                            <label for="inp_INFL">Yearly reserve decrease (%): </label></span>
+                    </td><td>
+                        <span data-tip="Should be in between 0% and 100% with a 0.1% step">
+                            <input id="inp_INFL" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/></span>
+                    </td><td>
+                        <span data-tip="New coins issued this year (+ Total supply inflation)">
+                            <span id="ctx_INFL" class="inp-ctx"></span></span>
+                    </td></tr>
 
-                <tr><td>
-                    <span data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
-                                    The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
-                        <label for="inp_POOL_FEE">Pool fee (%): </label></span>
-                </td><td>
-                    <span data-tip="Should be in between 0% and 100% with a 0.1% step">
-                        <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/></span>
-                </td><td>
-                    <span data-tip="How much coins will pool earn from YOUR stake in a year">
-                        <span id="ctx_POOL_FEE" class="inp-ctx"></span></span>
-                </td></tr>
+                    <tr><td>
+                        <span data-tip="The percent of ALL profits in the system that is automatically submitted into the treasury.
+                                        The number of 20% is speculative and approximate. There's no definite information yet,
+                                        but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
+                            <label for="inp_TAX">Treasury tax (%): </label></span>
+                    </td><td>
+                        <span data-tip="Should be in between 0% and 100% with a 0.1% step">
+                            <input id="inp_TAX" class="inp-param" type="number" min="0" max="100" step="0.1" value="20" valtype="float"/></span>
+                    </td><td>
+                        <span data-tip="Coins in treasury at the start of this year (+ coins added this year)">
+                            <span id="ctx_TAX" class="inp-ctx"></span></span>
+                    </td></tr>
 
-            </table>
+                    <tr><td colspan="3">
+                        <div class="calc-group-header-wrapper">
+                            <span data-tip="Parameters that may change based on your pool selection">
+                                <span class="calc-group-header">Pool parameters</span>
+                            </span>
+                        </div>
+                    </td></tr>
 
-            <h3 class="zero-margin">Your <u>APPROXIMATE</u> profits:</h3>
-            <table id="results-table" border="0" cellpadding="0" cellspacing="0">
-                <tr><td>
-                    <span data-tip="How much profit a person will already have IF they've staked for ALL previous years">
-                        <b>At the start of the year:</b></span>
-                </td><td>
-                    <span id="resultAtYearStart"></span>
-                </td><td>
-                    <span id="ctx_resultAtYearStart" class="result-ctx"></span>
-                </td></tr>
-                <tr><td>
-                    <span data-tip="How much APPROXIMATE profit a person will receive ON AVERAGE if they stake for the whole year
-                                    IF all the parameters are ON AVERAGE the same as you have selected above.">
-                        <b>During this year:</b></span>
-                </td><td>
-                    <span id="resultThisYear"></span>
-                </td><td>
-                    <span id="ctx_resultThisYear" class="result-ctx"></span>
-                </td></tr>
-                <tr><td>
-                    <span data-tip="How much profit a person will have at the end of this (selected) year
-                                    IF they've staked for ALL previous years AND if actual system behaviour are somewhat
-                                    similar to all the selected parameters.">
-                        <b>At the end of the year</b></span>
-                </td><td>
-                    <span id="resultAtYearEnd"></span>
-                </td><td>
-                    <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
-                </td></tr>
-            </table>
+                    <tr><td>
+                        <span data-tip="The percent of ALL profits in a pool that this pool will take for itself as fees.
+                                        The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
+                            <label for="inp_POOL_FEE">Pool fee (%): </label></span>
+                    </td><td>
+                        <span data-tip="Should be in between 0% and 100% with a 0.1% step">
+                            <input id="inp_POOL_FEE" class="inp-param" type="number" min="0" max="100" step="0.1" value="5" valtype="float"/></span>
+                    </td><td>
+                        <span data-tip="How much coins will pool earn from YOUR stake in a year">
+                            <span id="ctx_POOL_FEE" class="inp-ctx"></span></span>
+                    </td></tr>
 
-            <div id="results-disclaimer">
-                <p><span class="warn">Warning!</span> Presented results <b>are not</b> a promise of future profits!
+                </table>
+
+                <h3 class="zero-margin">Your <u>APPROXIMATE</u> profits:</h3>
+                <table id="results-table" border="0" cellpadding="0" cellspacing="0">
+                    <tr><td>
+                        <span data-tip="How much profit a person will already have IF they've staked for ALL previous years">
+                            <b>At the start of the year:</b></span>
+                    </td><td>
+                        <span id="resultAtYearStart"></span>
+                    </td><td>
+                        <span id="ctx_resultAtYearStart" class="result-ctx"></span>
+                    </td></tr>
+                    <tr><td>
+                        <span data-tip="How much APPROXIMATE profit a person will receive ON AVERAGE if they stake for the whole year
+                                        IF all the parameters are ON AVERAGE the same as you have selected above.">
+                            <b>During this year:</b></span>
+                    </td><td>
+                        <span id="resultThisYear"></span>
+                    </td><td>
+                        <span id="ctx_resultThisYear" class="result-ctx"></span>
+                    </td></tr>
+                    <tr><td>
+                        <span data-tip="How much profit a person will have at the end of this (selected) year
+                                        IF they've staked for ALL previous years AND if actual system behaviour are somewhat
+                                        similar to all the selected parameters.">
+                            <b>At the end of the year</b></span>
+                    </td><td>
+                        <span id="resultAtYearEnd"></span>
+                    </td><td>
+                        <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
+                    </td></tr>
+                </table>
+
+                <div id="results-disclaimer">
+                    <p><span class="warn">Warning!</span> Presented results <b>are not</b> a promise of future profits!
+                    All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
+                    in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
+                    would somewhat match WITH PARAMETERS SELECTED ABOVE!</p>
+                    <p>These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
+                    to the one that will be used in the Cardano reward calculation protocol.</p>
+                </div>
+            </div>
+
+            <div class="tab" tab="faq" style="display: none">
+                <h2 class="zero-margin">Frequently Asked Questions</h2>
+
+                <h3 class="zero-margin">How reliable is this whole thing, eh?</h3>
+                <p>Presented results <b>are not</b> a promise of future profits!
                 All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
                 in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
                 would somewhat match WITH PARAMETERS SELECTED ABOVE!</p>
-                <p>These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
+                <p>This project is <b>strictly educational</b>. These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
                 to the one that will be used in the Cardano reward calculation protocol.</p>
+                <p>As soon as <b>any new information</b> about the incentives system becomes available - I <b>will update
+                the default parameters or the formula</b> in this calculator. Subscribe to the informational channels,
+                and <b>look out for announcements</b>.</p>
+
+                <h3 class="zero-margin">What's up with all those parameters, eh?</h3>
+                <p>See the <a href="#formula" tab="formula" onclick="tab(this)"><b>Formula</b></a> page to find
+                detailed explanation of why all those parameters are needed.Basically, after seeing this calculator
+                and explanation of its functionality, if someone shows you a calculator with fewer parameters -
+                you may be sure they are hiding something. There are some yet undefined parameters they are not showing to you.</p>
+                <p>That's it. All those parameters are <span class="warn">required</span> to derive the final value.
+                And there's no definite value for them exist yet (or ever) like with the fixed fee cost.</p>
+
+                <h3 class="zero-margin">What's up with the design, eh?</h3>
+                <p>I couldn't care less, it works. See the <a href="#about" tab="about" onclick="tab(this)"><b>About</b></a> section.</p>
+
+                <h3 class="zero-margin">Why total stake is <u>15 billions</u>, eh?</h3>
+                <p>The amount of <b>somewhat stable</b> total stake in the system is <span class="warn">not known</span> at this point
+                and will also change in time (but not as a predictable function) until it converges
+                to some more or less stable value (in percentage) and will show only slight fluctuations from there on.</p>
+                <p>The total stake is <span class="warn">one of 2 most important parameters</span> - along with your own stake.
+                These two parameters are basically decide how much you will profit, because they directly define
+                <span class="warn">your share in total stake</span> - and this value directly shows how much of yearly
+                inflation and yearly fees will go to you.</p>
+                <p>So for now - there's <b>absolutely zero</b> available data to decide what the total stake would be in the
+                year one, or year two, or later on. For a real-world example we can take the "Waves" Proof-of-Stake platform
+                that <a href="http://dev.pywaves.org/generators-weekly/">has total stake of ~60% of its supply</a>.
+                So the 15 billion number is taken <span class="warn">completely arbitrarily</span> just as middle ground
+                around 50% of supply. The main point is to <b>SHOW</b> you how this value affects the rewards.
+                So try to move it around and just plan ahead what you profits <b>would be</b> if the total
+                stake would be at this value.</p>
+                <p>It might as well be lower in reality. But might as well be more.</p>
+
+                <h3 class="zero-margin">Why <code>Year</code> needed, eh?</h3>
+                <p>The <code>Year</code> parameter is <span class="warn">required</span>, since all the other monetary
+                    behavior of the system <b>changes in time</b> - inflation decreases with total supply, fixed block
+                    reward changes, etc. Any calculation that does not include time may only demonstrate you a "splice"
+                    of time, for example, only the first year of staking.</p>
+
+                <h3 class="zero-margin">Why <code>Year</code> starts with 2019, eh?</h3>
+                <p>The official date of staking release in Cardano is not defined yet, but it's <b>somewhere in the fall of 2018</b>.
+                    Since profits are calculated <b>only yearly</b> anyways (for now) and to make controls easier and more concise -
+                    it was decided to simply place 2019 as a first <b>full</b> year of staking. Basically, you can think
+                    of that date as: "the first year when I will receive my yearly profits".</p>
+
+                <h3 class="zero-margin">Are you gonna make it better, eh?</h3>
+                <p>Yes, see the <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a>.</p>
+
+                <h3 class="zero-margin">Can you add new cool feature, eh?</h3>
+                <p>See the <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a> in case it's already planned,
+                or <a href="https://github.com/antipalos/antipalos.github.io/issues/1">propose new features here</a>.</p>
+
+            </div>
+
+            <div class="tab" tab="about" style="display: none">
+                <h2 class="zero-margin">About this project</h2>
+                <p>As mentioned in the disclaimer:</p>
+                <ul>
+                    <li>All calculations are actually <b>rough estimates</b></li>
+                    <li>No result from this calculator should be considered as a promise of a future profits</li>
+                    <li>There are too much <b>unknown variables</b> present in the calculations and without knowing those -
+                    <b>no result</b> might be easily predicted</li>
+                </ul>
+
+                <h3 class="zero-margin">Why</h3>
+                <p>Main points of this project are:</p>
+                <ol>
+                    <li>Show <b>how</b> calculations are done</li>
+                    <li>Show how <b>complex</b> calculations are</li>
+                    <li>Show how many <b>variables</b> are used</li>
+                    <li>Show how many variables are yet <b>unknown</b></li>
+                    <li>Show <b>estimated</b> order of magnitude for rewards</li>
+                </ol>
+                <p>This project is <b>educational</b>! Remember this project if someone shows you a calculator
+                with a couple of fields and a single question of how big your stake is. Or if someone tries to
+                get an easy answer of "what the profit percentage will be" - show them this calculator.</p>
+                <p>Also it provides a nice place for the formula explanations with an immediate example.</p>
+
+                <h3 class="zero-margin">Project development</h3>
+                <p>This calculator is in the initial primitive state. It was developed extremely fast with the
+                main point ot get the formula and the example to people as soon as possible. There are many
+                potential additional calculations possible, so project is planned for some support in the near future.</p>
+                <p>See <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a></p>
+                <p>To ask development questions or propose features, you use:</p>
+                <ol>
+                    <li>This dedicated discussion issue: <a href="https://github.com/antipalos/antipalos.github.io/issues/1">
+                        https://github.com/antipalos/antipalos.github.io/issues/1</a></li>
+                    <li>Project issues in general: <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                        https://github.com/antipalos/antipalos.github.io/issues</a></li>
+                </ol>
+
+                <h3 class="zero-margin">Design</h3>
+                <p>I clearly don't care that much. I'm a backend developer normally, so I neither want, nor can mess with
+                all this complex designing stuff. If you're ready to voluntarily help design this whole thing better - you are welcomed
+                to contact me so we could set up some collaboration. Any help in this question will be greatly appreciated.</p>
+
+                <h3 class="zero-margin">Help</h3>
+                <p>If anyone wants to help with all of this, there are options:</p>
+                <ul>
+                    <li>Create issue with a <b>detailed tip</b> on how I can make some JS or CSS stuff work better here:
+                        <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                            https://github.com/antipalos/antipalos.github.io/issues</a><br/><br/></li>
+                    <li>Create issue with a suggestions for new cool calculations - especially awesome if you can also suggest a formula:
+                        <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                            https://github.com/antipalos/antipalos.github.io/issues</a><br/><br/></li>
+                    <li>Just look for something to fix or add and open a PR:
+                        <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">
+                            https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator</a><br/><br/></li>
+                    <li>Spread the gospel about Cardano in general and this calculator in particular:
+                        <a href="https://forum.cardano.org/">https://forum.cardano.org/</a><br/><br/></li>
+                    <li>Donate to our community wiki at: <a href="https://cardanowiki.info/wiki/Funding">
+                            https://cardanowiki.info/wiki/Funding</a><br/><br/></li>
+                </ul>
+
+                <h3 class="zero-margin">Contacts</h3>
+                <h4>Cardano</h4>
+                <p>Forum: <a target="_blank" href="https://forum.cardano.org/">forum.cardano.org</a></p>
+                <p>Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a></p>
+                <p>Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/">r/Cardano</a></p>
+                <p>Wiki: <a target="_blank" href="https://cardanowiki.info">cardanowiki.info</a></p>
+
+                <h4>Calculator Dev</h4>
+                <p>Twitter: <a href="https://twitter.com/vsubhuman">@vsubhuman</a></p>
+                <p>GitHub: <a href="https://github.com/vantuz-subhuman">@vantuz-subhuman</a></p>
+                <p>Forum: <a href="https://forum.cardano.org/u/vantuz-subhuman">/u/vantuz-subhuman</a></p>
+                <p>Reddit: <a href="https://www.reddit.com/user/vantuz-subhuman/">/u/vantuz-subhuman</a></p>
+                <p>Cardano chat: <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a></p>
+            </div>
+
+            <div class="tab" tab="roadmap" style="display: none">
+                <h2 class="zero-margin">Roadmap</h2>
+                <p><a href="https://github.com/antipalos/antipalos.github.io/issues/1">Propose new features here</a>
+                or <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                        vote on existing features here</a>.</p>
+
+                <h3>0.1 ✓ (Current version)</h3>
+                <ul>
+                    <li>Release basic functionality ✓</li>
+                </ul>
+
+                <h3>0.2</h3>
+                <ul>
+                    <li>Rework implementation (separate js\css\html)</li>
+                    <li>Extract text (templating engine?)</li>
+                    <li>Calculate yearly restaking</li>
+                </ul>
+
+                <h3>0.3</h3>
+                <ul>
+                    <li>Rework period calculation (prepare for per-epoch calculations)</li>
+                    <li>Calculator for pools</li>
+                    <li>Translation support</li>
+                </ul>
+
+                <h3>0.4</h3>
+                <ul>
+                    <li>Per-epoch calculations (with restaking)</li>
+                    <li>Basic multiperiods calculation (epochs to years)</li>
+                </ul>
+
+                <h3>0.5</h3>
+                <ul>
+                    <li>Links with parameters</li>
+                    <li>Layout design? (Bootstrap or something)</li>
+                    <li>...</li>
+                </ul>
+
+                <h3>0.6</h3>
+                <ul>
+                    <li>Prepare for stats collecting</li>
+                    <li>...</li>
+                </ul>
             </div>
         </div>
 
-        <div class="tab" tab="faq" style="display: none">
-            <h2 class="zero-margin">Frequently Asked Questions</h2>
+        <div id="footer-margin"><br/></div>
 
-            <h3 class="zero-margin">How reliable is this whole thing, eh?</h3>
-            <p>Presented results <b>are not</b> a promise of future profits!
-            All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
-            in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
-            would somewhat match WITH PARAMETERS SELECTED ABOVE!</p>
-            <p>This project is <b>strictly educational</b>. These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
-            to the one that will be used in the Cardano reward calculation protocol.</p>
-            <p>As soon as <b>any new information</b> about the incentives system becomes available - I <b>will update
-            the default parameters or the formula</b> in this calculator. Subscribe to the informational channels,
-            and <b>look out for announcements</b>.</p>
-
-            <h3 class="zero-margin">What's up with all those parameters, eh?</h3>
-            <p>See the <a href="#formula" tab="formula" onclick="tab(this)"><b>Formula</b></a> page to find
-            detailed explanation of why all those parameters are needed.Basically, after seeing this calculator
-            and explanation of its functionality, if someone shows you a calculator with fewer parameters -
-            you may be sure they are hiding something. There are some yet undefined parameters they are not showing to you.</p>
-            <p>That's it. All those parameters are <span class="warn">required</span> to derive the final value.
-            And there's no definite value for them exist yet (or ever) like with the fixed fee cost.</p>
-
-            <h3 class="zero-margin">What's up with the design, eh?</h3>
-            <p>I couldn't care less, it works. See the <a href="#about" tab="about" onclick="tab(this)"><b>About</b></a> section.</p>
-
-            <h3 class="zero-margin">Why total stake is <u>15 billions</u>, eh?</h3>
-            <p>The amount of <b>somewhat stable</b> total stake in the system is <span class="warn">not known</span> at this point
-            and will also change in time (but not as a predictable function) until it converges
-            to some more or less stable value (in percentage) and will show only slight fluctuations from there on.</p>
-            <p>The total stake is <span class="warn">one of 2 most important parameters</span> - along with your own stake.
-            These two parameters are basically decide how much you will profit, because they directly define
-            <span class="warn">your share in total stake</span> - and this value directly shows how much of yearly
-            inflation and yearly fees will go to you.</p>
-            <p>So for now - there's <b>absolutely zero</b> available data to decide what the total stake would be in the
-            year one, or year two, or later on. For a real-world example we can take the "Waves" Proof-of-Stake platform
-            that <a href="http://dev.pywaves.org/generators-weekly/">has total stake of ~60% of its supply</a>.
-            So the 15 billion number is taken <span class="warn">completely arbitrarily</span> just as middle ground
-            around 50% of supply. The main point is to <b>SHOW</b> you how this value affects the rewards.
-            So try to move it around and just plan ahead what you profits <b>would be</b> if the total
-            stake would be at this value.</p>
-            <p>It might as well be lower in reality. But might as well be more.</p>
-
-            <h3 class="zero-margin">Why <code>Year</code> needed, eh?</h3>
-            <p>The <code>Year</code> parameter is <span class="warn">required</span>, since all the other monetary
-                behavior of the system <b>changes in time</b> - inflation decreases with total supply, fixed block
-                reward changes, etc. Any calculation that does not include time may only demonstrate you a "splice"
-                of time, for example, only the first year of staking.</p>
-
-            <h3 class="zero-margin">Why <code>Year</code> starts with 2019, eh?</h3>
-            <p>The official date of staking release in Cardano is not defined yet, but it's <b>somewhere in the fall of 2018</b>.
-                Since profits are calculated <b>only yearly</b> anyways (for now) and to make controls easier and more concise -
-                it was decided to simply place 2019 as a first <b>full</b> year of staking. Basically, you can think
-                of that date as: "the first year when I will receive my yearly profits".</p>
-
-            <h3 class="zero-margin">Are you gonna make it better, eh?</h3>
-            <p>Yes, see the <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a>.</p>
-
-            <h3 class="zero-margin">Can you add new cool feature, eh?</h3>
-            <p>See the <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a> in case it's already planned,
-            or <a href="https://github.com/antipalos/antipalos.github.io/issues/1">propose new features here</a>.</p>
-
+        <div id="footer">
+            Version: 0.1 (<a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a>)
+            | GitHub <a target="_blank" href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
+            | Dev: <a target="_blank" href="https://twitter.com/vsubhuman">@vsubhuman</a>
+            | Forum: <a target="_blank" href="https://forum.cardano.org/t/cardano-staking-profits-calculator/12314">forum.cardano.org</a>
+            | Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a>
+            | Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/comments/8m0ji3/cardano_staking_profits_calculator/">r/Cardano</a>
+            | Donate: <a target="_blank" href="https://cardanowiki.info/wiki/Funding">CardanoWiki</a>
         </div>
 
-        <div class="tab" tab="about" style="display: none">
-            <h2 class="zero-margin">About this project</h2>
-            <p>As mentioned in the disclaimer:</p>
-            <ul>
-                <li>All calculations are actually <b>rough estimates</b></li>
-                <li>No result from this calculator should be considered as a promise of a future profits</li>
-                <li>There are too much <b>unknown variables</b> present in the calculations and without knowing those -
-                <b>no result</b> might be easily predicted</li>
-            </ul>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="node_modules/cleave.js/dist/cleave.min.js"></script>
 
-            <h3 class="zero-margin">Why</h3>
-            <p>Main points of this project are:</p>
-            <ol>
-                <li>Show <b>how</b> calculations are done</li>
-                <li>Show how <b>complex</b> calculations are</li>
-                <li>Show how many <b>variables</b> are used</li>
-                <li>Show how many variables are yet <b>unknown</b></li>
-                <li>Show <b>estimated</b> order of magnitude for rewards</li>
-            </ol>
-            <p>This project is <b>educational</b>! Remember this project if someone shows you a calculator
-            with a couple of fields and a single question of how big your stake is. Or if someone tries to
-            get an easy answer of "what the profit percentage will be" - show them this calculator.</p>
-            <p>Also it provides a nice place for the formula explanations with an immediate example.</p>
+    </body>
 
-            <h3 class="zero-margin">Project development</h3>
-            <p>This calculator is in the initial primitive state. It was developed extremely fast with the
-            main point ot get the formula and the example to people as soon as possible. There are many
-            potential additional calculations possible, so project is planned for some support in the near future.</p>
-            <p>See <a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a></p>
-            <p>To ask development questions or propose features, you use:</p>
-            <ol>
-                <li>This dedicated discussion issue: <a href="https://github.com/antipalos/antipalos.github.io/issues/1">
-                    https://github.com/antipalos/antipalos.github.io/issues/1</a></li>
-                <li>Project issues in general: <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                    https://github.com/antipalos/antipalos.github.io/issues</a></li>
-            </ol>
-
-            <h3 class="zero-margin">Design</h3>
-            <p>I clearly don't care that much. I'm a backend developer normally, so I neither want, nor can mess with
-            all this complex designing stuff. If you're ready to voluntarily help design this whole thing better - you are welcomed
-            to contact me so we could set up some collaboration. Any help in this question will be greatly appreciated.</p>
-
-            <h3 class="zero-margin">Help</h3>
-            <p>If anyone wants to help with all of this, there are options:</p>
-            <ul>
-                <li>Create issue with a <b>detailed tip</b> on how I can make some JS or CSS stuff work better here:
-                    <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                        https://github.com/antipalos/antipalos.github.io/issues</a><br/><br/></li>
-                <li>Create issue with a suggestions for new cool calculations - especially awesome if you can also suggest a formula:
-                    <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                        https://github.com/antipalos/antipalos.github.io/issues</a><br/><br/></li>
-                <li>Just look for something to fix or add and open a PR:
-                    <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">
-                        https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator</a><br/><br/></li>
-                <li>Spread the gospel about Cardano in general and this calculator in particular:
-                    <a href="https://forum.cardano.org/">https://forum.cardano.org/</a><br/><br/></li>
-                <li>Donate to our community wiki at: <a href="https://cardanowiki.info/wiki/Funding">
-                        https://cardanowiki.info/wiki/Funding</a><br/><br/></li>
-            </ul>
-
-            <h3 class="zero-margin">Contacts</h3>
-            <h4>Cardano</h4>
-            <p>Forum: <a target="_blank" href="https://forum.cardano.org/">forum.cardano.org</a></p>
-            <p>Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a></p>
-            <p>Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/">r/Cardano</a></p>
-            <p>Wiki: <a target="_blank" href="https://cardanowiki.info">cardanowiki.info</a></p>
-
-            <h4>Calculator Dev</h4>
-            <p>Twitter: <a href="https://twitter.com/vsubhuman">@vsubhuman</a></p>
-            <p>GitHub: <a href="https://github.com/vantuz-subhuman">@vantuz-subhuman</a></p>
-            <p>Forum: <a href="https://forum.cardano.org/u/vantuz-subhuman">/u/vantuz-subhuman</a></p>
-            <p>Reddit: <a href="https://www.reddit.com/user/vantuz-subhuman/">/u/vantuz-subhuman</a></p>
-            <p>Cardano chat: <a href="https://t.me/CardanoDevelopersOfficial">t.me/CardanoDevelopersOfficial</a></p>
-        </div>
-
-        <div class="tab" tab="roadmap" style="display: none">
-            <h2 class="zero-margin">Roadmap</h2>
-            <p><a href="https://github.com/antipalos/antipalos.github.io/issues/1">Propose new features here</a>
-            or <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                    vote on existing features here</a>.</p>
-
-            <h3>0.1 ✓ (Current version)</h3>
-            <ul>
-                <li>Release basic functionality ✓</li>
-            </ul>
-
-            <h3>0.2</h3>
-            <ul>
-                <li>Rework implementation (separate js\css\html)</li>
-                <li>Extract text (templating engine?)</li>
-                <li>Calculate yearly restaking</li>
-            </ul>
-
-            <h3>0.3</h3>
-            <ul>
-                <li>Rework period calculation (prepare for per-epoch calculations)</li>
-                <li>Calculator for pools</li>
-                <li>Translation support</li>
-            </ul>
-
-            <h3>0.4</h3>
-            <ul>
-                <li>Per-epoch calculations (with restaking)</li>
-                <li>Basic multiperiods calculation (epochs to years)</li>
-            </ul>
-
-            <h3>0.5</h3>
-            <ul>
-                <li>Links with parameters</li>
-                <li>Layout design? (Bootstrap or something)</li>
-                <li>...</li>
-            </ul>
-
-            <h3>0.6</h3>
-            <ul>
-                <li>Prepare for stats collecting</li>
-                <li>...</li>
-            </ul>
-        </div>
-    </div>
-
-    <div id="footer-margin"><br/></div>
-
-    <div id="footer">
-        Version: 0.1 (<a href="#roadmap" tab="roadmap" onclick="tab(this)">roadmap</a>)
-        | GitHub <a target="_blank" href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
-        | Dev: <a target="_blank" href="https://twitter.com/vsubhuman">@vsubhuman</a>
-        | Forum: <a target="_blank" href="https://forum.cardano.org/t/cardano-staking-profits-calculator/12314">forum.cardano.org</a>
-        | Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a>
-        | Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/comments/8m0ji3/cardano_staking_profits_calculator/">r/Cardano</a>
-        | Donate: <a target="_blank" href="https://cardanowiki.info/wiki/Funding">CardanoWiki</a>
-    </div>
-</body>
 </html>
