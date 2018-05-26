@@ -15,7 +15,7 @@
         $( window ).resize(function() {
             resize();
         });
-        function frmt(num, scale=10) {
+        function frmt(num, scale=6) {
             return Number(num.toFixed(scale)).toLocaleString('en-US', {'maximumFractionDigits': scale})
         }
         function parseHash(hash) {
