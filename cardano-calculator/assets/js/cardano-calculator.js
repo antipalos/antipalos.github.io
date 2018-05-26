@@ -162,6 +162,7 @@ function initParamsContext() {
 $(function() {
 
     initParamsContext();
+    $('[data-toggle="tooltip"]').tooltip();
 
     $('.inp-param').on("change paste keyup", function() {
         paramUpdate(this)
