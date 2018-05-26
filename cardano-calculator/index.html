@@ -7,7 +7,7 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <title>Cardano Calc</title>
         <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=yes">
 
         <link rel="manifest" href="site.webmanifest">
         <link rel="apple-touch-icon" href="icon.png">
@@ -21,13 +21,51 @@
 
     <body>
 
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+
+            <a class="navbar-brand" href="#">Cardano Calculator</a>
+
+            <button class="navbar-toggler my-2" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+
+                    <li class="nav-item">
+                        <a class="nav-link active" id="calculator-tab" data-toggle="tab" href="#calculator" role="tab" aria-controls="calculator" aria-selected="true">Calculator</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="false">Formula</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="faq-tab" data-toggle="tab" href="#faq" role="tab" aria-controls="faq" aria-selected="false">FAQ</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="roadmap-tab" data-toggle="tab" href="#roadmap" role="tab" aria-controls="roadmap" aria-selected="false">Roadmap</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" id="about-tab" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="false">About</a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </nav>
+
         <div id="main-container" class="container-fluid">
 
             <div class="row">
 
                 <div class="col-md-12">
 
-                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
 
                         <strong>Warning!</strong> All following calculations are <b>NOT PRECISE</b>
 
@@ -58,40 +96,6 @@
                 <div class="col-md-12">
 
                     <div class="container">
-
-                        <div class="row">
-
-                            <div class="col-md-12">
-
-                                <ul class="nav nav-pills nav-fill mt-5" id="pills-tab" role="tablist">
-
-                                    <li class="nav-item">
-                                        <a class="nav-link active" id="calculator-tab" data-toggle="tab" href="#calculator" role="tab" aria-controls="calculator" aria-selected="true">Calculator</a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="false">Formula</a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="faq-tab" data-toggle="tab" href="#faq" role="tab" aria-controls="faq" aria-selected="false">FAQ</a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="roadmap-tab" data-toggle="tab" href="#roadmap" role="tab" aria-controls="roadmap" aria-selected="false">Roadmap</a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="about-tab" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="false">About</a>
-                                    </li>
-
-                                </ul>
-
-                                <hr>
-
-                            </div>
-
-                        </div>
 
                         <div class="row">
 
@@ -136,7 +140,7 @@
                                                                 <input id="inp_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="1000" valtype="int">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total stake">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total stake">
                                                                 <span id="ctx_STAKE" class="inp-ctx"></span>
                                                             </div>
 
@@ -153,7 +157,7 @@
                                                                 <input id="inp_YEAR" class="inp-param form-control" type="number" min="2019" max="2519" value="2019" valtype="int">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Total supply at the start of this year (Remaining reserve at the start of this year)">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Total supply at the start of this year (Remaining reserve at the start of this year)">
                                                                 <span id="ctx_YEAR" class="inp-ctx"></span>
                                                             </div>
 
@@ -184,7 +188,7 @@
                                                                 <input id="inp_TOTAL_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="15000000000" valtype="int">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total supply this year">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total supply this year">
                                                                 <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
                                                             </div>
 
@@ -201,7 +205,7 @@
                                                                 <input id="inp_TX_EPOCH" class="inp-param cleave-num form-control" type="text" min="0" value="15000" valtype="int">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Average transactions per second with a 5 day epoch and 20 second slot">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Average transactions per second with a 5 day epoch and 20 second slot">
                                                                 <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
                                                             </div>
 
@@ -218,7 +222,7 @@
                                                                     <input id="inp_TX_SIZE" class="inp-param form-control" type="number" min="1" value="200" valtype="int">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Average translation fee (Average taxed block reward)">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Average translation fee (Average taxed block reward)">
                                                                 <span id="ctx_TX_SIZE" class="inp-ctx"></span>
                                                             </div>
 
@@ -249,7 +253,7 @@
                                                                 <input id="inp_INFL" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="New coins issued this year (+ Total supply inflation)">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="New coins issued this year (+ Total supply inflation)">
                                                                 <span id="ctx_INFL" class="inp-ctx"></span>
                                                             </div>
 
@@ -267,7 +271,7 @@
                                                                 <input id="inp_TAX" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="20" valtype="float">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="Coins in treasury at the start of this year (+ coins added this year)">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Coins in treasury at the start of this year (+ coins added this year)">
                                                                 <span id="ctx_TAX" class="inp-ctx">
                                                             </div>
 
@@ -296,7 +300,7 @@
                                                                 <input id="inp_POOL_FEE" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
                                                             </div>
 
-                                                            <div class="form-group col-md-5 text-center pt-2" data-toggle="tooltip" data-placement="top" title="How much coins will pool earn from YOUR stake in a year">
+                                                            <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="How much coins will pool earn from YOUR stake in a year">
                                                                 <span id="ctx_POOL_FEE" class="inp-ctx"></span>
                                                             </div>
 
@@ -318,7 +322,7 @@
                                                         <span id="resultAtYearStart"></span>
                                                     </div>
 
-                                                    <div class="form-group col-md-5 text-center" data-toggle="tooltip">
+                                                    <div class="form-group col-md-5 text-md-center" data-toggle="tooltip">
                                                         <span id="ctx_resultAtYearStart" class="result-ctx"></span>
                                                     </div>
 
@@ -335,7 +339,7 @@
                                                         <span id="resultThisYear"></span>
                                                     </div>
 
-                                                    <div class="form-group col-md-5 text-center" data-toggle="tooltip">
+                                                    <div class="form-group col-md-5 text-md-center" data-toggle="tooltip">
                                                         <span id="ctx_resultThisYear" class="result-ctx"></span>
                                                     </div>
 
@@ -353,7 +357,7 @@
                                                         <span id="resultAtYearEnd"></span>
                                                     </div>
 
-                                                    <div class="form-group col-md-5 text-center" data-toggle="tooltip">
+                                                    <div class="form-group col-md-5 text-md-center" data-toggle="tooltip">
                                                         <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
                                                     </div>
 
