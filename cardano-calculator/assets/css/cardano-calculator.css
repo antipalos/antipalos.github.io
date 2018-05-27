@@ -2,6 +2,44 @@ body {
     min-height: 101vh;
     padding-top: 5rem;
 }
+.inp-ctx {
+    font-size: 12px;
+}
+
+.swiper-container {
+    width: 100%;
+    margin-top: 2rem;
+}
+.swiper-pagination {
+    position: relative!important;
+}
+.swiper-slide {
+    padding: 2rem 3rem 0 3rem;
+}
+.swiper-pagination-bullet {
+    width: calc(25% - 10px)!important;
+    height: auto!important;
+    margin: 0 5px!important;
+    padding: 5px 0!important;
+    border-bottom: 2px solid #ccc;
+    background: #fff!important;
+    border-radius: 0!important;
+}
+.swiper-pagination-bullet-active {
+    background: #fff!important;
+    border-bottom: 2px solid #007bff!important;
+}
+#footer {
+    margin-top: 5rem;
+}
+
+@media (max-width: 767.99px) {
+
+    .swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet {
+        font-size: 12px;
+    }
+
+}
 
 @media (min-width: 768px) {
 

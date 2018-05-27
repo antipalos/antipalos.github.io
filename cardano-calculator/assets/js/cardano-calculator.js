@@ -167,7 +167,7 @@ $(function() {
     $('[data-toggle="tooltip"]').tooltip();
 
     $('.inp-param').on("change paste keyup", function() {
-        paramUpdate(this)
+        paramUpdate(this);
     });
 
     $('.cleave-num').each(function() {
@@ -185,11 +185,32 @@ $(function() {
         }
     });
 
+    let swiper = new Swiper('.swiper-container', {
+        loop: false,
+        autoHeight: true,
+        pagination: {
+            el: '.swiper-pagination',
+            renderBullet: function (index, className) {
+
+                let swiperWrapper       = $('.swiper-wrapper');
+                let slide               = swiperWrapper.find('.swiper-slide')[index];
+                let parameterGroupName  = $(slide).data('parametergroup');
+
+                return '<span class="' + className + '">' + parameterGroupName + '</span>';
+
+            }
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev'
+        }
+    });
+
     $(document).on('click', '.activate-tab', function(e) {
 
         e.preventDefault();
 
-        var target = this.href.split('#');
+        let target = this.href.split('#');
 
         (target[1]) ? $('.nav a').filter('[href="#' + target[1] + '"]').tab('show') : null;
 
