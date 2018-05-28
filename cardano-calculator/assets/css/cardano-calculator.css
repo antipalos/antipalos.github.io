@@ -24,10 +24,14 @@ body {
     border-bottom: 2px solid #ccc;
     background: #fff!important;
     border-radius: 0!important;
+    outline: 0!important;
 }
 .swiper-pagination-bullet-active {
     background: #fff!important;
     border-bottom: 2px solid #007bff!important;
+}
+.swiper-button-next, .swiper-button-prev {
+    outline: 0;
 }
 #footer {
     margin-top: 5rem;
@@ -37,6 +41,9 @@ body {
 
     .swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet {
         font-size: 12px;
+    }
+    .swiper-slide {
+        padding: 2rem 1.5rem;
     }
 
 }

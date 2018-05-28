@@ -188,8 +188,10 @@ $(function() {
     let swiper = new Swiper('.swiper-container', {
         loop: false,
         autoHeight: true,
+        simulateTouch: false,
         pagination: {
             el: '.swiper-pagination',
+            clickable: true,
             renderBullet: function (index, className) {
 
                 let swiperWrapper       = $('.swiper-wrapper');
