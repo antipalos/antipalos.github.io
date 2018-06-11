@@ -46,6 +46,36 @@ body {
         padding: 2rem 1.5rem;
     }
 
+    .card-body .form-group.col-md-3 {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        height: 2em;
+    }
+
+    .card-body .form-group.col-md-3 label {
+        position: absolute;
+        margin-bottom: 0;
+        padding-bottom: 0;
+        bottom: 0;
+    }
+
+    .card-body .form-group.col-md-4 {
+        margin-top: 0;
+        padding-top: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .card-body .form-group.col-md-5 {
+        padding-top: 0;
+    }
+
+    .card-body .form-group.col-md-5 span {
+        position: absolute;
+        margin-top: 0;
+        top: 0;
+    }
 }
 
 @media (min-width: 768px) {
@@ -53,5 +83,4 @@ body {
     .codeblock {
         padding-left: 1rem;
     }
-
 }

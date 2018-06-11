@@ -154,16 +154,31 @@ function paramUpdate(e, shift = 0) {
 }
 
 function initParamsContext() {
-    window['CardanoCalculatorParams'] = {};
     $('.inp-param').each(function() {
         parseParamIntoContext($(this))
     });
     updateCalculations()
 }
 
+function selectTab(url) {
+    let target = url ? url.split('#') : null;
+    if (target[1] && target[1] !== window.CardanoCalculatorState.tab) {
+        $('.nav a').filter('[href="#' + target[1] + '"]').tab('show');
+        window.scrollTo(0, 0);
+        history.pushState("", document.title, url);
+        console.log(target);
+        window.CardanoCalculatorState.tab = target[1]
+    }
+}
+
 $(function() {
 
+    window['CardanoCalculatorState'] = {};
+    window['CardanoCalculatorParams'] = {};
+
+    selectTab(location.href);
     initParamsContext();
+
     $('[data-toggle="tooltip"]').tooltip();
 
     $('.inp-param').on("change paste keyup", function() {
@@ -209,15 +224,8 @@ $(function() {
     });
 
     $(document).on('click', '.activate-tab', function(e) {
-
         e.preventDefault();
-
-        let target = this.href.split('#');
-
-        (target[1]) ? $('.nav a').filter('[href="#' + target[1] + '"]').tab('show') : null;
-
-        window.scrollTo(0, 0);
-
+        selectTab(this.href);
     });
 
 });
