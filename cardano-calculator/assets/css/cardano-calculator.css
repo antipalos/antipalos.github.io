@@ -69,12 +69,14 @@ body {
 
     .card-body .form-group.col-md-5 {
         padding-top: 0;
+        height: 1.5em;
     }
 
     .card-body .form-group.col-md-5 span {
         position: absolute;
         margin-top: 0;
         top: 0;
+        font-size: 0.5em;
     }
 }
 

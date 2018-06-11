@@ -227,5 +227,8 @@ $(function() {
         e.preventDefault();
         selectTab(this.href);
     });
+});
 
+$(window).bind('hashchange', function() {
+    selectTab(location.href);
 });
