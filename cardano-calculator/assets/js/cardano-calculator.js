@@ -166,7 +166,6 @@ function selectTab(url) {
         $('.nav a').filter('[href="#' + target[1] + '"]').tab('show');
         window.scrollTo(0, 0);
         history.pushState("", document.title, url);
-        console.log(target);
         window.CardanoCalculatorState.tab = target[1]
     }
 }
@@ -200,7 +199,21 @@ $(function() {
         }
     });
 
-    new Swiper('.swiper-container', {
+    $(window).keydown(function() {
+        let char = event.which || event.keyCode;
+        if ((char === 37 || char === 39) && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
+            let el = document.activeElement;
+            if (!el || el.tagName !== 'INPUT') {
+                if (char === 37) {
+                    window.CardanoCalculatorSwiper.slidePrev();
+                } else if (char === 39) {
+                    window.CardanoCalculatorSwiper.slideNext();
+                }
+            }
+        }
+    });
+
+    window['CardanoCalculatorSwiper'] = new Swiper('.swiper-container', {
         loop: false,
         autoHeight: true,
         simulateTouch: false,
