@@ -37,6 +37,21 @@ body {
     margin-top: 5rem;
 }
 
+.codeblock {
+    border: 1px solid lightgrey;
+    background: #eeeeee;
+    padding: 2px 10px 5px;
+    border-radius: 4px;
+    width: fit-content;
+    margin-bottom: 15px;
+}
+
+code {
+    background: #eeeeee;
+    padding: 2px 2px 2px;
+    border-radius: 3px;
+}
+
 @media (max-width: 767.99px) {
 
     .swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet {

@@ -200,7 +200,7 @@ $(function() {
         }
     });
 
-    let swiper = new Swiper('.swiper-container', {
+    new Swiper('.swiper-container', {
         loop: false,
         autoHeight: true,
         simulateTouch: false,

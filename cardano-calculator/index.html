@@ -24,7 +24,7 @@
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
 
-            <a class="navbar-brand" href="#">Cardano Calculator</a>
+            <a class="navbar-brand" href=".">Cardano Calculator</a>
 
             <button class="navbar-toggler my-2" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -473,22 +473,8 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * inflation
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-2">
-
-                                                    <code>
+                                                        MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * inflation<br/>
+                                                        FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
                                                         RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE
                                                     </code>
 
@@ -496,7 +482,8 @@
 
                                                 <h3>Detailed explanation:</h3>
 
-                                                <p class="bold">Minted coins</p>
+                                                <h4>Minted coins</h4>
+
                                                 <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
 
                                                 <div class="codeblock mb-3">
@@ -528,35 +515,14 @@
                                                 be issued to reward people. But there are also fees that users pay to send coins or execute any
                                                 transactions. Total fees for the whole year are calculated like this:</p>
 
-                                                <p class="bold">Fees</p>
+                                                <h4>Fees</h4>
 
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        TX_YEAR = 73 * TX_EPOCH
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        FIXED_FEES = TX_YEAR * 0.155381
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        TX_YEAR = 73 * TX_EPOCH<br/>
+                                                        FIXED_FEES = TX_YEAR * 0.155381<br/>
+                                                        SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
                                                         FEES = FIXED_FEES + SIZE_FEES
                                                     </code>
 
@@ -582,48 +548,20 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        TX_YEAR = 73 * 15,000 = 1,095,000
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        TX_YEAR = 73 * 15,000 = 1,095,000<br/>
+                                                        FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
+                                                        SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174<br/>
                                                         FEES = 170,142.195 + 9,624.174 = 179,766.369
                                                     </code>
 
                                                 </div>
 
-                                                <p class="bold">Tax</p>
+                                                <h4>Tax</h4>
 
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        UNTAXED_REWARD = MINT + FEES
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        UNTAXED_REWARD = MINT + FEES<br/>
                                                         TAXED_REWARD = UNTAXED_REWARD - TAX
                                                     </code>
 
@@ -640,32 +578,9 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
-                                                        TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547
-                                                    </code>
-
-                                                </div>
-
-                                                <p class="bold">Share by stake</p>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SHARE = STAKE / TOTAL_STAKE
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684<br/>
+                                                        TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547<br/>
+                                                        SHARE = STAKE / TOTAL_STAKE<br/>
                                                         REWARD_SHARE = TAXED_REWARD * SHARE
                                                     </code>
 
@@ -686,13 +601,6 @@
 
                                                     <code>
                                                         SHARE = 42,000 / 15,000,000,000 = 0.0000028
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
                                                         REWARD_SHARE = 527,869,396.547 * 0.0000028 = 1478.0343
                                                     </code>
 
@@ -701,7 +609,7 @@
                                                 <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
                                                 about 1478.0343 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
 
-                                                <p class="bold">Pools fees</p>
+                                                <h4>Pools fees</h4>
 
                                                 <div class="codeblock mb-3">
 
