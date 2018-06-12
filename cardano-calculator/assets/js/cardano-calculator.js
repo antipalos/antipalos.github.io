@@ -214,7 +214,7 @@ $(function() {
     });
 
     window['CardanoCalculatorSwiper'] = new Swiper('.swiper-container', {
-        loop: false,
+        loop: true,
         autoHeight: true,
         simulateTouch: false,
         pagination: {
