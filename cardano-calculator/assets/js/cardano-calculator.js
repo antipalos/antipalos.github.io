@@ -201,7 +201,7 @@ $(function() {
 
     $(window).keydown(function() {
         let char = event.which || event.keyCode;
-        if ((char === 37 || char === 39) && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
+        if ((char === 37 || char === 39) && window.CardanoCalculatorSwiper && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
             let el = document.activeElement;
             if (!el || el.tagName !== 'INPUT') {
                 if (char === 37) {
