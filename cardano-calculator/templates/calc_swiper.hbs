@@ -1,0 +1,165 @@
+<div class="col-md-12">
+
+    <h2 class="mb-3">Calculator</h2>
+
+    <div class="row">
+
+        <div class="col-md-6">
+
+            <p class="mb-3" style="color: grey; font-size: 0.8em">
+                For a detailed explanation of how this whole thing works visit the 'Formula' tab in the top menu.
+                Or visit the 'FAQ' page to find some common answers.
+            </p>
+
+            <h3>Define parameters:</h3>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <p class="mb-3" style="color: grey; font-size: 0.8em">
+                ( <kbd>&larr;</kbd> <kbd>&rarr;</kbd> arrow keys may be used to slide groups)<br/>
+                ( <kbd>&uarr;</kbd> <kbd>&darr;</kbd> arrow keys may be used in the input fields)<br/>
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <div class="swiper-container">
+
+                <div class="swiper-pagination"></div>
+
+                <div class="swiper-wrapper">
+
+                    {{#each groups}}
+                        <div class="swiper-slide" data-parametergroup="{{{title}}}">
+
+                            <div class="mb-2 parameter-info">{{{tip}}}</div>
+
+                            <div class="card mb-5">
+
+                                <div class="card-body">
+
+                                    {{#each params}}
+                                        <div class="form-row">
+
+                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="{{{tip}}}">
+                                                <label for="inp_{{{id}}}">{{{title}}}: </label>
+                                            </div>
+
+                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="{{{inp_tip}}}">
+                                                <input id="inp_{{{id}}}" class="inp-param form-control {{#if is_cleave}}cleave-num{{/if}}"
+                                                       type="{{#if is_cleave}}text{{else}}number{{/if}}"
+                                                       min="{{{min}}}"
+                                                       {{#if max}} max="{{{max}}}" {{/if}}
+                                                       {{#if step}} step="{{{step}}}" {{/if}}
+                                                       value="{{{value}}}"
+                                                       valtype="{{{value_type}}}">
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+
+                                            <div class="form-group col-md-5 text-md-left pt-2" data-toggle="tooltip" data-placement="top" title="{{{ctx_tip}}}">
+                                                <span id="ctx_{{{id}}}" class="inp-ctx"></span>
+                                            </div>
+
+                                        </div>
+
+                                    {{/each}}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {{/each}}
+                </div>
+
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+
+            <h4 class="mb-4">Your <u>APPROXIMATE</u> profits:</h4>
+
+            <div class="form-row">
+
+                <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much profit a person will already have IF they've staked for ALL previous years">
+                    <b>At the start of the year:</b>
+                </div>
+
+                <div class="form-group col-xs-4">
+                    <span id="resultAtYearStart"></span>
+                </div>
+
+                <div class="form-group col-xs-5 text-md-left" data-toggle="tooltip">
+                    <span id="ctx_resultAtYearStart" class="result-ctx"></span>
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much APPROXIMATE profit a person will receive ON AVERAGE if they stake for the whole year
+                                                            IF all the parameters are ON AVERAGE the same as you have selected above.">
+                    <b>During this year:</b>
+                </div>
+
+                <div class="form-group col-xs-4">
+                    <span id="resultThisYear"></span>
+                </div>
+
+                <div class="form-group col-xs-5 text-md-left" data-toggle="tooltip">
+                    <span id="ctx_resultThisYear" class="result-ctx"></span>
+                </div>
+
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much profit a person will have at the end of this (selected) year
+                                                            IF they've staked for ALL previous years AND if actual system behaviour are somewhat
+                                                            similar to all the selected parameters.">
+                    <b>At the end of the year</b>
+                </div>
+
+                <div class="form-group col-xs-4">
+                    <span id="resultAtYearEnd"></span>
+                </div>
+
+                <div class="form-group col-xs-5 text-md-left" data-toggle="tooltip">
+                    <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
+                </div>
+
+            </div>
+
+            <div class="alert alert-secondary my-5" role="alert">
+                <p>
+                    <strong>Warning!</strong> Presented results <b>are not</b> a promise of future profits!
+                    All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
+                    in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
+                    would somewhat match WITH PARAMETERS SELECTED ABOVE!
+                </p>
+                <p>
+                    These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
+                    to the one that will be used in the Cardano reward calculation protocol.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

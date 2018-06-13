@@ -170,51 +170,13 @@ function selectTab(url) {
     }
 }
 
-$(function() {
-
-    window['CardanoCalculatorState'] = {};
-    window['CardanoCalculatorParams'] = {};
-
-    selectTab(location.href);
-    initParamsContext();
-
+function initTooltips() {
     $('[data-toggle="tooltip"]').tooltip();
+}
 
-    $('.inp-param').on("change paste keyup", function() {
-        paramUpdate(this);
-    });
-
-    $('.cleave-num').each(function() {
-        let cleave = new Cleave(this, {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand'
-        });
-    });
-
-    $('.inp-param.cleave-num').keydown(function() {
-        let char = event.which || event.keyCode;
-        if (char === 38 || char === 40) {
-            shift = 39 - char;
-            paramUpdate(this, shift);
-        }
-    });
-
-    $(window).keydown(function() {
-        let char = event.which || event.keyCode;
-        if ((char === 37 || char === 39) && window.CardanoCalculatorSwiper && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
-            let el = document.activeElement;
-            if (!el || el.tagName !== 'INPUT') {
-                if (char === 37) {
-                    window.CardanoCalculatorSwiper.slidePrev();
-                } else if (char === 39) {
-                    window.CardanoCalculatorSwiper.slideNext();
-                }
-            }
-        }
-    });
-
+function initSwiper() {
     window['CardanoCalculatorSwiper'] = new Swiper('.swiper-container', {
-        loop: true,
+        loop: false,
         autoHeight: true,
         simulateTouch: false,
         pagination: {
@@ -235,6 +197,70 @@ $(function() {
             prevEl: '.swiper-button-prev'
         }
     });
+    $(window).keydown(function() {
+        let char = event.which || event.keyCode;
+        if ((char === 37 || char === 39) && window.CardanoCalculatorSwiper && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
+            let el = document.activeElement;
+            if (!el || el.tagName !== 'INPUT') {
+                if (char === 37) {
+                    window.CardanoCalculatorSwiper.slidePrev();
+                } else if (char === 39) {
+                    window.CardanoCalculatorSwiper.slideNext();
+                }
+            }
+        }
+    });
+}
+
+function initCleave() {
+    $('.cleave-num').each(function() {
+        let cleave = new Cleave(this, {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand'
+        });
+    });
+    $('.inp-param.cleave-num').keydown(function() {
+        let char = event.which || event.keyCode;
+        if (char === 38 || char === 40) {
+            shift = 39 - char;
+            paramUpdate(this, shift);
+        }
+    });
+}
+
+function initInputFieldEvents() {
+    $('.inp-param').on("change paste keyup", function() {
+        paramUpdate(this);
+    });
+}
+
+$(function() {
+
+    (function getTemplateAjax(dataFile, templateFile) {
+        $.getJSON(dataFile, function(dataContent) {
+            console.log(dataContent);
+            $.ajax({
+                url: templateFile,
+                cache: true,
+                success: function(templateContent) {
+                    let template  = Handlebars.compile(templateContent);
+                    let renderedHtml = template(dataContent);
+                    console.log(renderedHtml);
+                    $('#calc-row').html(renderedHtml);
+                    initTooltips();
+                    initSwiper();
+                    initCleave();
+                    initInputFieldEvents()
+                    initParamsContext();
+                }
+            });
+        });
+    })('assets/calc_parameters.json', 'templates/calc_swiper.hbs');
+
+    window['CardanoCalculatorState'] = {};
+    window['CardanoCalculatorParams'] = {};
+
+    selectTab(location.href);
 
     $(document).on('click', '.activate-tab', function(e) {
         e.preventDefault();
