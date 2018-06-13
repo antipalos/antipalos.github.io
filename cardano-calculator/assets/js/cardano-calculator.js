@@ -250,7 +250,7 @@ $(function() {
                     initTooltips();
                     initSwiper();
                     initCleave();
-                    initInputFieldEvents()
+                    initInputFieldEvents();
                     initParamsContext();
                 }
             });
