@@ -255,7 +255,7 @@ $(function() {
                 }
             });
         });
-    })('assets/calc_parameters.json', 'templates/calc_swiper.hbs');
+    })('assets/calc_parameters.json', 'assets/hbs/calc_swiper.hbs');
 
     window['CardanoCalculatorState'] = {};
     window['CardanoCalculatorParams'] = {};
