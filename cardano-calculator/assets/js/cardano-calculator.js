@@ -234,8 +234,33 @@ function initInputFieldEvents() {
     });
 }
 
-$(function() {
+function selectLayout() {
+    let w = window.innerWidth;
+    return w < 768 ? 'assets/hbs/calc_swiper.hbs' : 'assets/hbs/calc_table.hbs';
+}
 
+function loadHandlebarsPartials(filemap = {}, callback) {
+    let keys = Object.keys(filemap);
+    (function loadPartial(idx) {
+        if (idx >= keys.length) {
+            if (callback) {
+                return callback();
+            }
+            return null;
+        }
+        let key = keys[idx];
+        $.ajax({
+            url: filemap[key],
+            cache: true,
+            success: function(partialContent) {
+                Handlebars.registerPartial(key, partialContent);
+                loadPartial(idx + 1)
+            }
+        });
+    })(0);
+}
+
+function initCalcLayout() {
     (function getTemplateAjax(dataFile, templateFile) {
         $.getJSON(dataFile, function(dataContent) {
             console.log(dataContent);
@@ -255,7 +280,15 @@ $(function() {
                 }
             });
         });
-    })('assets/calc_parameters.json', 'assets/hbs/calc_swiper.hbs');
+    })('assets/calc_parameters.json', selectLayout());
+}
+
+$(function() {
+
+    loadHandlebarsPartials({
+        'calc-alert': 'assets/hbs/partial/calc_alert.hbs',
+        'calc-result': 'assets/hbs/partial/calc_result.hbs',
+    }, initCalcLayout);
 
     window['CardanoCalculatorState'] = {};
     window['CardanoCalculatorParams'] = {};
