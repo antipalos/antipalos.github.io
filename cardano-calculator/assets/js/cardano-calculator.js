@@ -313,27 +313,36 @@ function initCalcLayout(layout = null) {
     if (window.CardanoCalculatorLayout) {
         window.CardanoCalculatorLayout.destroy();
     }
-    (function getTemplateAjax(dataFile, templateFile) {
+    function initTemplate(templateFile, dataContent) {
+        $.ajax({
+            url: templateFile,
+            cache: true,
+            success: function (templateContent) {
+                let template = Handlebars.compile(templateContent);
+                let renderedHtml = template(dataContent);
+                $('#calc-row').html(renderedHtml);
+                initTooltips();
+                if (window.CardanoCalculatorLayout) {
+                    window.CardanoCalculatorLayout.init();
+                }
+                initCleave();
+                initInputFieldEvents();
+                updateCalculations();
+            }
+        });
+    }
+    function initParamsJson(dataFile, templateFile) {
         $.getJSON(dataFile, function(dataContent) {
             initParams(dataContent);
-            $.ajax({
-                url: templateFile,
-                cache: true,
-                success: function(templateContent) {
-                    let template  = Handlebars.compile(templateContent);
-                    let renderedHtml = template(dataContent);
-                    $('#calc-row').html(renderedHtml);
-                    initTooltips();
-                    if (window.CardanoCalculatorLayout) {
-                        window.CardanoCalculatorLayout.init();
-                    }
-                    initCleave();
-                    initInputFieldEvents();
-                    updateCalculations();
-                }
-            });
+            initTemplate(templateFile, dataContent);
         });
-    })('assets/calc_parameters.json', initLayout(layout));
+    }
+    let templateFile = initLayout(layout);
+    if (window.CardanoCalculatorParamGroups) {
+        initTemplate(templateFile, window.CardanoCalculatorParamGroups);
+    } else {
+        initParamsJson('assets/calc_parameters.json', templateFile);
+    }
 }
 
 $(function() {
