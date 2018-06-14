@@ -215,19 +215,22 @@ function initSwiper() {
             prevEl: '.swiper-button-prev'
         }
     });
-    $(window).keydown(function() {
-        let char = event.which || event.keyCode;
-        if ((char === 37 || char === 39) && window.CardanoCalculatorSwiper && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
-            let el = document.activeElement;
-            if (!el || el.tagName !== 'INPUT') {
-                if (char === 37) {
-                    window.CardanoCalculatorSwiper.slidePrev();
-                } else if (char === 39) {
-                    window.CardanoCalculatorSwiper.slideNext();
+    if (!window.CardanoCalcSwiperKeysListener) {
+        window['CardanoCalcSwiperKeysListener'] = function() {
+            let char = event.which || event.keyCode;
+            if ((char === 37 || char === 39) && window.CardanoCalculatorSwiper && !event.shiftKey && $('#calculator-tab').hasClass('active')) {
+                let el = document.activeElement;
+                if (!el || el.tagName !== 'INPUT') {
+                    if (char === 37) {
+                        window.CardanoCalculatorSwiper.slidePrev();
+                    } else if (char === 39) {
+                        window.CardanoCalculatorSwiper.slideNext();
+                    }
                 }
             }
-        }
-    });
+        };
+        $(window).keydown(window.CardanoCalcSwiperKeysListener);
+    }
 }
 
 function initCleave() {
@@ -255,19 +258,32 @@ function initInputFieldEvents() {
 let Layouts = Object.freeze({
     TABLE: {
         template: 'assets/hbs/calc_table.hbs',
-        init: function() {}
+        init: function() {},
+        destroy: function () {}
     },
     SWIPER: {
         template: 'assets/hbs/calc_swiper.hbs',
         init: function () {
             initSwiper();
+            $('#layout-switcher-swiper').prop('checked', true).parent().addClass('active');
+            $('#layout-switcher-table').prop('checked', false).parent().removeClass('active');
+        },
+        destroy: function () {
+            if (window.CardanoCalculatorSwiper) {
+                window.CardanoCalculatorSwiper.destroy();
+                window.CardanoCalculatorSwiper = null;
+            }
         }
     }
 });
 
-function initLayout() {
-    let w = window.innerWidth;
-    window.CardanoCalculatorLayout = w < 768 ? Layouts.SWIPER : Layouts.TABLE;
+function initLayout(layout) {
+    if (layout && Object.values(Layouts).indexOf(layout) > -1) {
+        window.CardanoCalculatorLayout = layout
+    } else {
+        let w = window.innerWidth;
+        window.CardanoCalculatorLayout = w < 768 ? Layouts.SWIPER : Layouts.TABLE;
+    }
     return window.CardanoCalculatorLayout.template;
 }
 
@@ -292,7 +308,10 @@ function loadHandlebarsPartials(filemap = {}, callback) {
     })(0);
 }
 
-function initCalcLayout() {
+function initCalcLayout(layout = null) {
+    if (window.CardanoCalculatorLayout) {
+        window.CardanoCalculatorLayout.destroy();
+    }
     (function getTemplateAjax(dataFile, templateFile) {
         $.getJSON(dataFile, function(dataContent) {
             $.ajax({
@@ -312,7 +331,7 @@ function initCalcLayout() {
                 }
             });
         });
-    })('assets/calc_parameters.json', initLayout());
+    })('assets/calc_parameters.json', initLayout(layout));
 }
 
 $(function() {
@@ -327,6 +346,11 @@ $(function() {
     window['CardanoCalculatorParams'] = {};
 
     selectTab(location.href);
+
+    $('#layout-switcher input').change(function () {
+        initCalcLayout(Layouts[$(this).attr('layout')]);
+    });
+
 
     $(document).on('click', '.activate-tab', function(e) {
         e.preventDefault();
