@@ -48,15 +48,16 @@ function parseParamIntoContext(el, shift = 0) {
     if (!id.startsWith("inp_")) {
         return null;
     }
-    param = id.substr(4);
-    valtype = el.attr('valtype');
-    parser = valtype === 'int' ? parseInt : valtype === 'float' ? parseFloat : (x) => x;
-    let parsedValue = parser(el.val().replace(/,/g, ''));
+    param = window.CardanoCalculatorParams[id.substr(4)];
+    if (!param) {
+        return null;
+    }
+    let parsedValue = param.parse(el.val().replace(/,/g, ''));
     if (shift) {
         parsedValue += shift;
-        el.val(commify(frmt(parsedValue, valtype === 'float' ? 1 : 0)));
+        el.val(commify(frmt(parsedValue, param.value_type === 'float' ? 1 : 0)));
     }
-    window.CardanoCalculatorParams[param] = parsedValue;
+    param.value = parsedValue;
     return parsedValue
 
 }
@@ -92,31 +93,28 @@ function markError(id, msg) {
 
 function updateCalculations() {
     clearErrors();
-    let userStake = window.CardanoCalculatorParams.STAKE;
-    let totalStake = window.CardanoCalculatorParams.TOTAL_STAKE;
-    let negativeErrors = Object.entries(window.CardanoCalculatorParams).map(function(e) {
-        let el = $('#inp_' + e[0]),
-            min = parseInt(el.attr('min')),
-            max = parseInt(el.attr('max'));
-        if (e[1] < min) {
-            return markError(e[0], 'Cannot be less than ' + min);
-        } else if (e[1] > max) {
-            return markError(e[0], 'Cannot be more than ' + max);
+    let negativeErrors = Object.values(window.CardanoCalculatorParams).map(function(p) {
+        if (p.value < p.min) {
+            return markError(p.id, 'Cannot be less than ' + p.min);
+        } else if (p.value > p.max) {
+            return markError(p.id, 'Cannot be more than ' + p.max);
         }
     }).filter((x) => x);
     if (negativeErrors.length > 0) {
         return;
     }
+    let userStake = window.CardanoCalculatorParams.STAKE.value;
+    let totalStake = window.CardanoCalculatorParams.TOTAL_STAKE.value;
     if (userStake > totalStake) {
         return (markError('STAKE', 'Stake cannot be greater than TOTAL stake'),
             markError('TOTAL_STAKE', 'Total stake cannot be less than user stake'));
     }
-    let year = window.CardanoCalculatorParams.YEAR - 2019;
-    let infl = (window.CardanoCalculatorParams.INFL / 100);
-    let txEpoch = window.CardanoCalculatorParams.TX_EPOCH;
-    let txSize = window.CardanoCalculatorParams.TX_SIZE;
-    let tax = (window.CardanoCalculatorParams.TAX / 100);
-    let poolFee = (window.CardanoCalculatorParams.POOL_FEE / 100);
+    let year = window.CardanoCalculatorParams.YEAR.value - 2019;
+    let infl = (window.CardanoCalculatorParams.INFL.value / 100);
+    let txEpoch = window.CardanoCalculatorParams.TX_EPOCH.value;
+    let txSize = window.CardanoCalculatorParams.TX_SIZE.value;
+    let tax = (window.CardanoCalculatorParams.TAX.value / 100);
+    let poolFee = (window.CardanoCalculatorParams.POOL_FEE.value / 100);
     let initialTotalSupply = 31112484646;
     let initialReserve = 13887515354;
     let txFeeFixed = 0.155381;
@@ -169,13 +167,6 @@ function paramUpdate(e, shift = 0) {
     if (parseParamIntoContext($(e), shift) != null) {
         updateCalculations();
     }
-}
-
-function initParamsContext() {
-    $('.inp-param').each(function() {
-        parseParamIntoContext($(this))
-    });
-    updateCalculations()
 }
 
 function selectTab(url) {
@@ -308,12 +299,23 @@ function loadHandlebarsPartials(filemap = {}, callback) {
     })(0);
 }
 
+function initParams(paramsData) {
+    window.CardanoCalculatorParamGroups = paramsData;
+    let flatParams = [].concat.apply([], paramsData.groups.map((g) => g.params));
+    window.CardanoCalculatorParams = flatParams.reduce((r, p) => {r[p.id] = p;return r;}, {});
+    flatParams.forEach((p) => p.parse =
+        p.value_type === 'float' ? parseFloat
+        : p.value_type === 'int' ? parseInt
+        : (x) => x);
+}
+
 function initCalcLayout(layout = null) {
     if (window.CardanoCalculatorLayout) {
         window.CardanoCalculatorLayout.destroy();
     }
     (function getTemplateAjax(dataFile, templateFile) {
         $.getJSON(dataFile, function(dataContent) {
+            initParams(dataContent);
             $.ajax({
                 url: templateFile,
                 cache: true,
@@ -327,7 +329,7 @@ function initCalcLayout(layout = null) {
                     }
                     initCleave();
                     initInputFieldEvents();
-                    initParamsContext();
+                    updateCalculations();
                 }
             });
         });
