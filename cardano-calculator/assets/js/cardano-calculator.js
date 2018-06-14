@@ -318,6 +318,7 @@ function initCalcLayout() {
 $(function() {
 
     loadHandlebarsPartials({
+        'calc-header': 'assets/hbs/partial/calc_header.hbs',
         'calc-alert': 'assets/hbs/partial/calc_alert.hbs',
         'calc-result': 'assets/hbs/partial/calc_result.hbs',
     }, initCalcLayout);
