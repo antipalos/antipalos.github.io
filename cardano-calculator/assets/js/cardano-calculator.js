@@ -387,19 +387,23 @@ function initLocale() {
         }
         return null;
     }
-    function selectLocale() {
-        return checkLocale($.urlParam('loc'), 'url')
-            || checkLocale(detectBrowserLocale(), 'browser')
-            || (function foo() {
-                let defaultLocale = 'en-US';
-                console.log('Default locale is used: ' + defaultLocale);
-                return defaultLocale;
-            })();
+    function selectLocales() {
+        let defaultLocale = 'en';
+        let locales = [
+            checkLocale($.urlParam('loc'), 'url'),
+            checkLocale(detectBrowserLocale(), 'browser'),
+            defaultLocale
+        ].filter((x) => x);
+        if (locales.length === 1) {
+            console.log('Default locale is used: ' + defaultLocale)
+        }
+        return locales;
     }
-    let locale = selectLocale();
+    let locales = selectLocales();
+    console.log('Available locales: ' + locales);
     window.CardanoCalculatorLocale = Object.freeze({
-        locale: locale,
-        separators: getSeparatorsByLocale(locale)
+        locales: locales,
+        separators: getSeparatorsByLocale(locales[0])
     });
 }
 
