@@ -11,8 +11,8 @@
                 <tr class="calc-table-group-title-row">
                     <td colspan="3">
                         <div class="calc-table-group-title-span">
-                            <span data-toggle="tooltip" title="{{{tip}}}">
-                                <b>{{{title}}}</b></span>
+                            <span data-toggle="tooltip" title="{{{str tip}}}">
+                                <b>{{{str title}}}</b></span>
                         </div>
                     </td>
                 </tr>
@@ -22,13 +22,13 @@
                         <label for="inp_{{{id}}}"
                             class="calc-table-param-title-label"
                             data-toggle="tooltip"
-                            title="{{{tip}}}">
-                            {{{title}}}: </label>
+                            title="{{{str tip}}}">
+                            {{{str title}}}: </label>
                     </td>
                     <td>
                         <input id="inp_{{{id}}}" class="inp-param {{#if is_cleave}}cleave-num{{/if}}"
                                data-toggle="tooltip"
-                               title="{{{inp_tip}}}"
+                               title="{{{str inp_tip}}}"
                                style="width: 15ch;"
                                type="{{#if is_cleave}}text{{else}}number{{/if}}"
                                min="{{{min}}}"
@@ -40,7 +40,7 @@
                     <td>
                         <span id="ctx_{{{id}}}"
                               data-toggle="tooltip"
-                              title="{{{ctx_tip}}}"
+                              title="{{{str ctx_tip}}}"
                               class="inp-ctx"></span>
                     </td>
                 </tr>
