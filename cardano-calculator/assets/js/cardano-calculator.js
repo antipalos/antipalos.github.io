@@ -261,6 +261,16 @@ function initInputFieldEvents() {
     $('.inp-param').on("change paste keyup", function() {
         paramUpdate(this);
     });
+    let decimalSeparators = ['.', ',', '\''];
+    $('.inp-param[valtype=float]').on("keyup", function(e) {
+        let decimal = window.CardanoCalculatorLocale.separators.decimal;
+        if (decimalSeparators.indexOf(e.key) > -1 && e.key !== decimal) {
+            let el = $(this), val = el.val();
+            if (!val.includes(decimal)) {
+                el.val(val + decimal);
+            }
+        }
+    });
 }
 
 function toggleLayoutSwitcher(layoutName) {
@@ -389,7 +399,6 @@ $(function() {
         initCalcLayout(layoutName);
         Cookies.set('layout', layoutName);
     });
-
 
     $(document).on('click', '.activate-tab', function(e) {
         e.preventDefault();
