@@ -1,0 +1,151 @@
+{
+    "_string_array_comment": [
+        "String arrays can be used in place of long strings,",
+        "since JSON doesn't support multi-line strings by itself.",
+        "We register custom `str` helper in Handlebars",
+        "that pre-processes all strings and joins arrays by a single whitespace."
+    ],
+    "groups": [
+        {
+            "title": "User parameters",
+            "tip": "Parameters that only depend on the user",
+            "params": [
+                {
+                    "id": "STAKE",
+                    "title": "<b>Your</b> stake (in coins)",
+                    "tip": "How much total coins you will send to a pool",
+                    "is_cleave": true,
+                    "inp_tip": "Cannot be bigger than the total stake",
+                    "min": 1,
+                    "max": 45000000000,
+                    "value": 1000,
+                    "value_type": "int",
+                    "ctx_tip": "Share of total stake"
+                },
+                {
+                    "id": "YEAR",
+                    "title": "Year",
+                    "tip": "The year is used in calculations, since inflation decreases each year so number of issued coins changes.",
+                    "is_cleave": false,
+                    "inp_tip": "Max allowed year - 2519",
+                    "min": 2019,
+                    "max": 2519,
+                    "value": 2019,
+                    "value_type": "int",
+                    "ctx_tip": "Total supply at the start of this year (Remaining reserve at the start of this year)"
+                }
+            ]
+        },
+        {
+            "title": "Environment parameters",
+            "tip": "Parameters that aren't directly set by anyone but may (and will) fluctuate with system popularity",
+            "params": [
+                {
+                    "id": "TOTAL_STAKE",
+                    "title": "<b>Total</b> stake (in coins)",
+                    "tip": [
+                        "How much total coins there are staked in the system.",
+                        "This values is completely guessed at 15 billion (around 50% of total supply).",
+                        "In real life it might turn out to be anything and also will change with time."
+                    ],
+                    "is_cleave": true,
+                    "inp_tip": "Cannot be smaller than your stake",
+                    "min": 1,
+                    "max": 45000000000,
+                    "value": 15000000000,
+                    "value_type": "int",
+                    "ctx_tip": "Share of total supply this year"
+                },
+                {
+                    "id": "TX_EPOCH",
+                    "title": "Transactions <b>in epoch</b>",
+                    "tip": [
+                        "Average number of transactions in each epoch (5 days).",
+                        "Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'"
+                    ],
+                    "is_cleave": true,
+                    "inp_tip": "Cannot be less than 0",
+                    "min": 0,
+                    "value": 15000,
+                    "value_type": "int",
+                    "ctx_tip": "Average transactions per second with a 5 day epoch and 20 second slot"
+                },
+                {
+                    "id": "TX_SIZE",
+                    "title": "Transaction size (bytes)",
+                    "tip": [
+                        "Average transaction size in byte.",
+                        "The number of 200 bytes if taken from the staking explanation post."
+                    ],
+                    "is_cleave": false,
+                    "inp_tip": "Cannot be less than 1",
+                    "min": 1,
+                    "value": 200,
+                    "value_type": "int",
+                    "ctx_tip": "Average translation fee (Average taxed block reward)"
+                }
+            ]
+        },
+        {
+            "title": "System parameters",
+            "tip": "Parameters defined by the system, but yet unknown until the 'Shelley' (staking) is released",
+            "params": [
+                {
+                    "id": "INFL",
+                    "title": "Yearly reserve decrease (%)",
+                    "tip": [
+                        "Percent of reserved coins issued each year. The number of 5% is taken from the official",
+                        "staking explanation post. But generally is considered to be only an 'arbitrary example'"
+                    ],
+                    "is_cleave": false,
+                    "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
+                    "min": 0,
+                    "max": 100,
+                    "value": 5,
+                    "step": "0.1",
+                    "value_type": "float",
+                    "ctx_tip": "New coins issued this year (+ Total supply inflation)"
+                },
+                {
+                    "id": "TAX",
+                    "title": "Treasury tax (%)",
+                    "tip": [
+                        "The percent of ALL profits in the system that is automatically submitted into the treasury.",
+                        "The number of 20% is speculative and approximate. There's no definite information yet,",
+                        "but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC."
+                    ],
+                    "is_cleave": false,
+                    "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
+                    "min": 0,
+                    "max": 100,
+                    "value": 20,
+                    "step": "0.1",
+                    "value_type": "float",
+                    "ctx_tip": "Coins in treasury at the start of this year (+ coins added this year)"
+                }
+            ]
+        },
+        {
+            "title": "Pool parameters",
+            "tip": "Parameters that may change based on your pool selection",
+            "params": [
+                {
+                    "id": "POOL_FEE",
+                    "title": "Pool fee (%)",
+                    "tip": [
+                        "The percent of ALL profits in a pool that this pool will take for itself as fees.",
+                        "The 5% number is completely arbitrary. Market will show what this number gonna actually be on average."
+                    ],
+                    "is_cleave": false,
+                    "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
+                    "min": 0,
+                    "max": 100,
+                    "value": 5,
+                    "step": "0.1",
+                    "value_type": "float",
+                    "ctx_tip": "How much coins will pool earn from YOUR stake in a year"
+                }
+            ]
+        }
+    ]
+}

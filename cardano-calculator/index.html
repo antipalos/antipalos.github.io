@@ -24,7 +24,7 @@
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
 
-            <a class="navbar-brand" href="#">Cardano Calculator</a>
+            <a class="navbar-brand" href=".">Cardano Calculator</a>
 
             <button class="navbar-toggler my-2" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -35,23 +35,23 @@
                 <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
 
                     <li class="nav-item">
-                        <a class="nav-link active" id="calculator-tab" data-toggle="tab" href="#calculator" role="tab" aria-controls="calculator" aria-selected="true">Calculator</a>
+                        <a class="nav-link activate-tab active" id="calculator-tab" data-toggle="tab" href="#calculator" role="tab" aria-controls="calculator" aria-selected="true">Calculator</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="false">Formula</a>
+                        <a class="nav-link activate-tab" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="false">Formula</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" id="faq-tab" data-toggle="tab" href="#faq" role="tab" aria-controls="faq" aria-selected="false">FAQ</a>
+                        <a class="nav-link activate-tab" id="faq-tab" data-toggle="tab" href="#faq" role="tab" aria-controls="faq" aria-selected="false">FAQ</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" id="roadmap-tab" data-toggle="tab" href="#roadmap" role="tab" aria-controls="roadmap" aria-selected="false">Roadmap</a>
+                        <a class="nav-link activate-tab" id="roadmap-tab" data-toggle="tab" href="#roadmap" role="tab" aria-controls="roadmap" aria-selected="false">Roadmap</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" id="about-tab" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="false">About</a>
+                        <a class="nav-link activate-tab" id="about-tab" data-toggle="tab" href="#about" role="tab" aria-controls="about" aria-selected="false">About</a>
                     </li>
 
                 </ul>
@@ -106,335 +106,19 @@
 
                                     <div class="tab-pane fade show active" id="calculator" role="tabpanel" aria-labelledby="calculator-tab">
 
-                                        <div class="row">
-
-                                            <div class="col-md-12">
-
-                                                <h2 class="mb-3">Calculator</h2>
-
-                                                <div class="row">
-
-                                                    <div class="col-md-6">
-
-                                                        <p class="mb-3" style="color: grey; font-size: 0.8em">
-                                                            For a detailed explanation of how this whole thing works visit the 'Formula' tab in the top menu.<br/>
-                                                            Or visit the 'FAQ' page to find some common answers.
-                                                        </p>
-
-                                                        <h3>Define parameters:</h3>
-
-                                                    </div>
-
-                                                    <div class="col-md-6">
-
-                                                        <p class="mb-3" style="color: grey; font-size: 0.8em">
-                                                            ( <kbd>&uarr;</kbd> <kbd>&darr;</kbd> arrow keys may be used in the input fields)
-                                                        </p>
-
-                                                    </div>
-
-                                                </div>
-
-                                                <div class="row">
-
-                                                    <div class="col-md-12">
-
-                                                        <div class="swiper-container">
-
-                                                            <div class="swiper-pagination"></div>
-
-                                                            <div class="swiper-wrapper">
-
-                                                                <div class="swiper-slide" data-parametergroup="User parameters">
-
-                                                                    <div class="mb-2 parameter-info">Parameters that only depend on the user</div>
-
-                                                                    <div class="card mb-5">
-
-                                                                        <div class="card-body">
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="How much total coins you will send to a pool">
-                                                                                    <label for="inp_STAKE"><b>Your</b> stake (in coins):</label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be bigger than the total stake">
-                                                                                    <input id="inp_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="1000" valtype="int">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total stake">
-                                                                                    <span id="ctx_STAKE" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The year is used in calculations,
-                                                                                since inflation decreases each year so number of issued coins changes.">
-                                                                                    <label for="inp_YEAR">Year: </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Max allowed year - 2519">
-                                                                                    <input id="inp_YEAR" class="inp-param form-control" type="number" min="2019" max="2519" value="2019" valtype="int">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Total supply at the start of this year (Remaining reserve at the start of this year)">
-                                                                                    <span id="ctx_YEAR" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                                <div class="swiper-slide" data-parametergroup="Environment parameters">
-
-                                                                    <div class="mb-2 parameter-info">Parameters that aren't directly set by anyone but may (and will) fluctuate with system popularity</div>
-
-                                                                    <div class="card mb-5">
-
-                                                                        <div class="card-body">
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="How much total coins there are staked in the system.
-                                                                                This values is completely guessed at 10 billion (around 30% of total supply).
-                                                                                In real life it might turn out to be anything and also will change with time.">
-                                                                                    <label for="inp_TOTAL_STAKE"><b>Total</b> stake (in coins): </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be smaller than your stake">
-                                                                                    <input id="inp_TOTAL_STAKE" class="inp-param cleave-num form-control" type="text" min="1" max="45000000000" value="15000000000" valtype="int">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Share of total supply this year">
-                                                                                    <span id="ctx_TOTAL_STAKE" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Average number of transactions in each epoch (5 days).
-                                                                                Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'">
-                                                                                    <label for="inp_TX_EPOCH">Transactions <b>in epoch</b>: </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be less than 0">
-                                                                                    <input id="inp_TX_EPOCH" class="inp-param cleave-num form-control" type="text" min="0" value="15000" valtype="int">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Average transactions per second with a 5 day epoch and 20 second slot">
-                                                                                    <span id="ctx_TX_EPOCH" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Average transaction size in byte.
-                                                                                The number of 200 bytes if taken from the staking explanation post.">
-                                                                                    <label for="inp_TX_SIZE">Transaction size (bytes): </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Cannot be less than 1">
-                                                                                    <input id="inp_TX_SIZE" class="inp-param form-control" type="number" min="1" value="200" valtype="int">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Average translation fee (Average taxed block reward)">
-                                                                                    <span id="ctx_TX_SIZE" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                                <div class="swiper-slide" data-parametergroup="System parameters">
-
-                                                                    <div class="mb-2 parameter-info">Parameters defined by the system, but yet unknown until the 'Shelley' (staking) is released</div>
-
-                                                                    <div class="card mb-5">
-
-                                                                        <div class="card-body">
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="Percent of reserved coins issued each year.
-                                                                                The number of 5% is taken from the official staking explanation post.
-                                                                                But generally is considered to be only an 'arbitrary example'">
-                                                                                    <label for="inp_INFL">Yearly reserve decrease (%): </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
-                                                                                    <input id="inp_INFL" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="New coins issued this year (+ Total supply inflation)">
-                                                                                    <span id="ctx_INFL" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The percent of ALL profits in the system that is automatically submitted into the treasury.
-                                                                                The number of 20% is speculative and approximate. There's no definite information yet,
-                                                                                but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.">
-                                                                                    <label for="inp_TAX">Treasury tax (%): </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
-                                                                                    <input id="inp_TAX" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="20" valtype="float">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="Coins in treasury at the start of this year (+ coins added this year)">
-                                                                                    <span id="ctx_TAX" class="inp-ctx">
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                                <div class="swiper-slide" data-parametergroup="Pool parameters">
-
-                                                                    <div class="mb-2 parameter-info">Parameters that may change based on your pool selection</div>
-
-                                                                    <div class="card mb-5">
-
-                                                                        <div class="card-body">
-
-                                                                            <div class="form-row">
-
-                                                                                <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="The percent of ALL profits in a pool that this pool will take for itself as fees.
-                                                                                The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.">
-                                                                                    <label for="inp_POOL_FEE">Pool fee (%): </label>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="Should be in between 0% and 100% with a 0.1% step">
-                                                                                    <input id="inp_POOL_FEE" class="inp-param form-control" type="number" min="0" max="100" step="0.1" value="5" valtype="float">
-                                                                                    <div class="invalid-feedback"></div>
-                                                                                </div>
-
-                                                                                <div class="form-group col-md-5 text-md-center pt-2" data-toggle="tooltip" data-placement="top" title="How much coins will pool earn from YOUR stake in a year">
-                                                                                    <span id="ctx_POOL_FEE" class="inp-ctx"></span>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                            </div>
-
-                                                            <div class="swiper-button-prev"></div>
-                                                            <div class="swiper-button-next"></div>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                                <div class="row">
-
-                                                    <div class="col-md-12">
-
-                                                        <h4 class="mb-5">Your <u>APPROXIMATE</u> profits:</h4>
-
-                                                        <div class="form-row">
-
-                                                            <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much profit a person will already have IF they've staked for ALL previous years">
-                                                                <b>At the start of the year:</b>
-                                                            </div>
-
-                                                            <div class="form-group col-xs-4">
-                                                                <span id="resultAtYearStart"></span>
-                                                            </div>
-
-                                                            <div class="form-group col-xs-5 text-md-center" data-toggle="tooltip">
-                                                                <span id="ctx_resultAtYearStart" class="result-ctx"></span>
-                                                            </div>
-
-                                                        </div>
-
-                                                        <div class="form-row">
-
-                                                            <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much APPROXIMATE profit a person will receive ON AVERAGE if they stake for the whole year
-                                                            IF all the parameters are ON AVERAGE the same as you have selected above.">
-                                                                <b>During this year:</b>
-                                                            </div>
-
-                                                            <div class="form-group col-xs-4">
-                                                                <span id="resultThisYear"></span>
-                                                            </div>
-
-                                                            <div class="form-group col-xs-5 text-md-center" data-toggle="tooltip">
-                                                                <span id="ctx_resultThisYear" class="result-ctx"></span>
-                                                            </div>
-
-                                                        </div>
-
-                                                        <div class="form-row">
-
-                                                            <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much profit a person will have at the end of this (selected) year
-                                                            IF they've staked for ALL previous years AND if actual system behaviour are somewhat
-                                                            similar to all the selected parameters.">
-                                                                <b>At the end of the year</b>
-                                                            </div>
-
-                                                            <div class="form-group col-xs-4">
-                                                                <span id="resultAtYearEnd"></span>
-                                                            </div>
-
-                                                            <div class="form-group col-xs-5 text-md-center" data-toggle="tooltip">
-                                                                <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
-                                                            </div>
-
-                                                        </div>
-
-                                                        <div class="alert alert-secondary my-5" role="alert">
-                                                            <p>
-                                                                <strong>Warning!</strong> Presented results <b>are not</b> a promise of future profits!
-                                                                All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
-                                                                in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
-                                                                would somewhat match WITH PARAMETERS SELECTED ABOVE!
-                                                            </p>
-                                                            <p>
-                                                                These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
-                                                                to the one that will be used in the Cardano reward calculation protocol.
-                                                            </p>
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
+                                        <h2 class="mb-1">Calculator</h2>
+
+                                        <div id="layout-switcher" role="group" aria-label="Layout switcher"
+                                             class="mb-2 btn-group-sm btn-group-toggle" data-toggle="buttons">
+                                            <label class="btn btn-light">
+                                                <input type="radio" name="options" id="layout-switcher-table" layout="TABLE" autocomplete="off"> Table
+                                            </label>
+                                            <label class="btn btn-light">
+                                                <input type="radio" name="options" id="layout-switcher-swiper" layout="SWIPER" autocomplete="off"> Swiper
+                                            </label>
                                         </div>
+
+                                        <div class="row" id="calc-row"></div>
 
                                     </div>
 
@@ -473,22 +157,8 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * inflation
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-2">
-
-                                                    <code>
+                                                        MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * inflation<br/>
+                                                        FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
                                                         RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE
                                                     </code>
 
@@ -496,7 +166,8 @@
 
                                                 <h3>Detailed explanation:</h3>
 
-                                                <p class="bold">Minted coins</p>
+                                                <h4>Minted coins</h4>
+
                                                 <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
 
                                                 <div class="codeblock mb-3">
@@ -528,35 +199,14 @@
                                                 be issued to reward people. But there are also fees that users pay to send coins or execute any
                                                 transactions. Total fees for the whole year are calculated like this:</p>
 
-                                                <p class="bold">Fees</p>
+                                                <h4>Fees</h4>
 
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        TX_YEAR = 73 * TX_EPOCH
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        FIXED_FEES = TX_YEAR * 0.155381
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        TX_YEAR = 73 * TX_EPOCH<br/>
+                                                        FIXED_FEES = TX_YEAR * 0.155381<br/>
+                                                        SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
                                                         FEES = FIXED_FEES + SIZE_FEES
                                                     </code>
 
@@ -582,48 +232,20 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        TX_YEAR = 73 * 15,000 = 1,095,000
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        TX_YEAR = 73 * 15,000 = 1,095,000<br/>
+                                                        FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
+                                                        SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174<br/>
                                                         FEES = 170,142.195 + 9,624.174 = 179,766.369
                                                     </code>
 
                                                 </div>
 
-                                                <p class="bold">Tax</p>
+                                                <h4>Tax</h4>
 
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        UNTAXED_REWARD = MINT + FEES
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        UNTAXED_REWARD = MINT + FEES<br/>
                                                         TAXED_REWARD = UNTAXED_REWARD - TAX
                                                     </code>
 
@@ -640,32 +262,9 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
-                                                        TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547
-                                                    </code>
-
-                                                </div>
-
-                                                <p class="bold">Share by stake</p>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SHARE = STAKE / TOTAL_STAKE
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684<br/>
+                                                        TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547<br/>
+                                                        SHARE = STAKE / TOTAL_STAKE<br/>
                                                         REWARD_SHARE = TAXED_REWARD * SHARE
                                                     </code>
 
@@ -685,14 +284,7 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        SHARE = 42,000 / 15,000,000,000 = 0.0000028
-                                                    </code>
-
-                                                </div>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
+                                                        SHARE = 42,000 / 15,000,000,000 = 0.0000028<br/>
                                                         REWARD_SHARE = 527,869,396.547 * 0.0000028 = 1478.0343
                                                     </code>
 
@@ -701,7 +293,7 @@
                                                 <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
                                                 about 1478.0343 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
 
-                                                <p class="bold">Pools fees</p>
+                                                <h4>Pools fees</h4>
 
                                                 <div class="codeblock mb-3">
 
@@ -754,7 +346,7 @@
                                                 <p class="mb-5">That's it. All those parameters are <span class="text-danger">required</span> to derive the final value.
                                                 And there's no definite value for them exist yet (or ever) like with the fixed fee cost.</p>
 
-                                                <h5>What's up with the design, eh?</h3>
+                                                <h5>What's up with the design, eh?</h5>
 
                                                 <p class="mb-5">I couldn't care less, it works. See the <a href="#about" class="activate-tab"><b>About</b></a> section.</p>
 
@@ -1005,6 +597,8 @@
         <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="node_modules/swiper/dist/js/swiper.min.js"></script>
         <script src="node_modules/cleave.js/dist/cleave.min.js"></script>
+        <script src="node_modules/handlebars/dist/handlebars.min.js"></script>
+        <script src="node_modules/js-cookie/src/js.cookie.js"></script>
         <script src="assets/js/cardano-calculator.js"></script>
 
     </body>

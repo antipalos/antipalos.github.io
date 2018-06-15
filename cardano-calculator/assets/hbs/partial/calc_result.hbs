@@ -1,0 +1,58 @@
+<div class="col-md-12">
+
+    <h4 class="mb-4">Your <u>APPROXIMATE</u> profits:</h4>
+
+    <div class="form-row">
+
+        <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much profit a person will already have IF they've staked for ALL previous years">
+            <b>At the start of the year:</b>
+        </div>
+
+        <div class="form-group col-xs-4">
+            <span id="resultAtYearStart"></span>
+        </div>
+
+        <div class="form-group col-xs-5 text-md-left" data-toggle="tooltip">
+            <span id="ctx_resultAtYearStart" class="result-ctx"></span>
+        </div>
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much APPROXIMATE profit a person will receive ON AVERAGE if they stake for the whole year
+                                                            IF all the parameters are ON AVERAGE the same as you have selected above.">
+            <b>During this year:</b>
+        </div>
+
+        <div class="form-group col-xs-4">
+            <span id="resultThisYear"></span>
+        </div>
+
+        <div class="form-group col-xs-5 text-md-left" data-toggle="tooltip">
+            <span id="ctx_resultThisYear" class="result-ctx"></span>
+        </div>
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="form-group col-xs-3" data-toggle="tooltip" data-placement="top" title="How much profit a person will have at the end of this (selected) year
+                                                            IF they've staked for ALL previous years AND if actual system behaviour are somewhat
+                                                            similar to all the selected parameters.">
+            <b>At the end of the year</b>
+        </div>
+
+        <div class="form-group col-xs-4">
+            <span id="resultAtYearEnd"></span>
+        </div>
+
+        <div class="form-group col-xs-5 text-md-left" data-toggle="tooltip">
+            <span id="ctx_resultAtYearEnd" class="result-ctx"></span>
+        </div>
+
+    </div>
+
+    {{> calc-alert}}
+
+</div>
