@@ -62,37 +62,57 @@ function parseParamIntoContext(el, shift = 0) {
 
 }
 
-function clearErrors() {
-    let inputs = $('.inp-param');
-    if (window.CardanoCalculatorLayout === Layouts.SWIPER) {
-        let invalidTextBox = inputs.parent().find('.invalid-feedback');
-        invalidTextBox.text('');
-        inputs.removeClass('is-invalid');
-    } else if (window.CardanoCalculatorLayout === Layouts.TABLE) {
-        inputs.removeClass('err-inp');
-        inputs.parent().tooltip('dispose');
-        $(document.activeElement).tooltip('show');
+let Layouts = Object.freeze({
+    TABLE: {
+        name: 'TABLE',
+        template: 'assets/hbs/calc_table.hbs',
+        init: function() {},
+        destroy: function () {},
+        markError: function(id,msg) {
+            let el = $('#inp_' + id);
+            el.addClass('err-inp');
+            el.tooltip('hide');
+            let parent = el.parent();
+            parent.attr('title',msg);
+            parent.tooltip('show');
+            return msg;
+        },
+        clearErrors: function () {
+            let inputs = $('.inp-param');
+            inputs.removeClass('err-inp');
+            inputs.parent().tooltip('dispose');
+            $(document.activeElement).tooltip('show');
+        }
+    },
+    SWIPER: {
+        name: 'SWIPER',
+        template: 'assets/hbs/calc_swiper.hbs',
+        init: function () {
+            initSwiper();
+        },
+        destroy: function () {
+            if (window.CardanoCalculatorSwiper) {
+                window.CardanoCalculatorSwiper.destroy();
+                window.CardanoCalculatorSwiper = null;
+            }
+        },
+        markError: function(id,msg) {
+            let el = $('#inp_' + id);
+            el.parent().find('.invalid-feedback').text(msg);
+            el.addClass('is-invalid');
+            return msg;
+        },
+        clearErrors: function () {
+            let inputs = $('.inp-param');
+            inputs.parent().find('.invalid-feedback').text('');
+            inputs.removeClass('is-invalid');
+        }
     }
-}
-
-function markError(id, msg) {
-    let el = $('#inp_' + id);
-    let parent = el.parent();
-    if (window.CardanoCalculatorLayout === Layouts.SWIPER) {
-        let invalidTextBox = parent.find('.invalid-feedback');
-        invalidTextBox.text(msg);
-        el.addClass('is-invalid');
-    } else if (window.CardanoCalculatorLayout === Layouts.TABLE) {
-        el.addClass('err-inp');
-        el.tooltip('hide');
-        parent.attr('title',msg);
-        parent.tooltip('show');
-    }
-    return msg;
-}
+});
 
 function updateCalculations() {
-    clearErrors();
+    window.CardanoCalculatorLayout.clearErrors();
+    let markError = window.CardanoCalculatorLayout.markError;
     let negativeErrors = Object.values(window.CardanoCalculatorParams).map(function(p) {
         if (p.value < p.min) {
             return markError(p.id, 'Cannot be less than ' + p.min);
@@ -250,28 +270,6 @@ function toggleLayoutSwitcher(layoutName) {
     $('#layout-switcher input').prop('checked', false).parent().removeClass('active');
     $('#layout-switcher input[layout=' + layoutName + ']').prop('checked', true).parent().addClass('active');
 }
-
-let Layouts = Object.freeze({
-    TABLE: {
-        name: 'TABLE',
-        template: 'assets/hbs/calc_table.hbs',
-        init: function() {},
-        destroy: function () {}
-    },
-    SWIPER: {
-        name: 'SWIPER',
-        template: 'assets/hbs/calc_swiper.hbs',
-        init: function () {
-            initSwiper();
-        },
-        destroy: function () {
-            if (window.CardanoCalculatorSwiper) {
-                window.CardanoCalculatorSwiper.destroy();
-                window.CardanoCalculatorSwiper = null;
-            }
-        }
-    }
-});
 
 function initLayout(layoutName) {
     if (layoutName && Object.keys(Layouts).indexOf(layoutName) > -1) {
