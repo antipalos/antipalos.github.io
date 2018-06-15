@@ -24,12 +24,15 @@
                                     {{#each params}}
                                         <div class="form-row">
 
-                                            <div class="form-group col-md-3 pt-2" data-toggle="tooltip" data-placement="top" title="{{{str tip}}}">
-                                                <label for="inp_{{{id}}}">{{{str title}}}: </label>
+                                            <div class="form-group col-md-3 pt-2">
+                                                <label for="inp_{{{id}}}"
+                                                       data-toggle="tooltip" data-placement="top" title="{{{str tip}}}">
+                                                    {{{str title}}}: </label>
                                             </div>
 
-                                            <div class="form-group col-md-4" data-toggle="tooltip" data-placement="top" title="{{{str inp_tip}}}">
+                                            <div class="form-group col-md-4">
                                                 <input id="inp_{{{id}}}" class="inp-param form-control {{#if is_cleave}}cleave-num{{/if}}"
+                                                       data-toggle="tooltip" data-placement="top" title="{{{str inp_tip}}}"
                                                        type="{{#if is_cleave}}text{{else}}number{{/if}}"
                                                        min="{{{min}}}"
                                                        {{#if max}} max="{{{max}}}" {{/if}}
@@ -39,8 +42,9 @@
                                                 <div class="invalid-feedback"></div>
                                             </div>
 
-                                            <div class="form-group col-md-5 text-md-left pt-2" data-toggle="tooltip" data-placement="top" title="{{{str ctx_tip}}}">
-                                                <span id="ctx_{{{id}}}" class="inp-ctx"></span>
+                                            <div class="form-group col-md-5 text-md-left pt-2">
+                                                <span id="ctx_{{{id}}}" class="inp-ctx"
+                                                      data-toggle="tooltip" data-placement="top" title="{{{str ctx_tip}}}"></span>
                                             </div>
 
                                         </div>
