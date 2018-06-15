@@ -1,4 +1,4 @@
-function browserLocale () {
+function detectBrowserLocale () {
     if (navigator.languages && navigator.languages.length) {
         // latest versions of Chrome and Firefox set this correctly
         return navigator.languages[0]
@@ -14,6 +14,15 @@ function browserLocale () {
 function escapeRegExp(str) {
     // noinspection RegExpRedundantEscape
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
+function isValidLocale(loc) {
+    try {
+        (1000).toLocaleString(loc);
+        return true;
+    } catch (err) {
+        return false;
+    }
 }
 
 function getSeparatorsByLocale(locale) {
@@ -368,12 +377,36 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
 }
 
 function initLocale() {
-    let locale = browserLocale() || 'en-US';
+    function checkLocale(loc, source) {
+        if (loc) {
+            if (isValidLocale(loc)) {
+                console.log('Valid locale found in %s: %s', source, loc);
+                return loc;
+            }
+            console.error('Invalid locale in %s: %s', source, loc);
+        }
+        return null;
+    }
+    function selectLocale() {
+        return checkLocale($.urlParam('loc'), 'url')
+            || checkLocale(detectBrowserLocale(), 'browser')
+            || (function foo() {
+                let defaultLocale = 'en-US';
+                console.log('Default locale is used: ' + defaultLocale);
+                return defaultLocale;
+            })();
+    }
+    let locale = selectLocale();
     window.CardanoCalculatorLocale = Object.freeze({
         locale: locale,
         separators: getSeparatorsByLocale(locale)
     });
 }
+
+$.urlParam = function(name, def = null){
+    let parse = new RegExp('[\?&]' + name + '=([^&#]*)').exec(location.href);
+    return parse ? parse[1] : def;
+};
 
 $(function() {
 
