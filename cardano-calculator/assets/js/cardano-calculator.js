@@ -368,7 +368,6 @@ $(function() {
 
     $('#layout-switcher input').change(function () {
         let layoutName = $(this).attr('layout');
-        console.log(Cookies.get('layout'));
         initCalcLayout(layoutName);
         Cookies.set('layout', layoutName);
     });
