@@ -1,5 +1,22 @@
+function escapeRegExp(str) {
+    // noinspection RegExpRedundantEscape
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
+function getSeparatorsByLocale(locale) {
+    let orderStr = (1000).toLocaleString(locale);
+    let order = orderStr.length > 4 ? orderStr.substr(1,1) : '';
+    let decimal = (1.1).toLocaleString(locale).substr(1,1);
+    return Object.freeze({
+        order: order,
+        order_reg: new RegExp(escapeRegExp(order), 'g'),
+        decimal: decimal,
+        decimal_reg: new RegExp(escapeRegExp(decimal), 'g')
+    })
+}
+
 function frmt(num, scale = 6) {
-    return Number(num.toFixed(scale)).toLocaleString('en-US', {
+    return Number(num.toFixed(scale)).toLocaleString(window.CardanoCalculatorLocale.locale, {
         'maximumFractionDigits': scale
     })
 }
@@ -13,10 +30,12 @@ function parseParamIntoContext(el, shift = 0) {
     if (!param) {
         return null;
     }
-    let parsedValue = param.parse(el.val().replace(/,/g, ''));
+    let parsedValue = param.parse(el.val()
+        .replace(window.CardanoCalculatorLocale.separators.order_reg, '')
+        .replace(window.CardanoCalculatorLocale.separators.decimal_reg, '.'));
     if (shift) {
-        parsedValue += shift;
-        el.val(frmt(parsedValue, param.value_type === 'float' ? 1 : 0));
+        parsedValue += ((param.step || 1) * shift);
+        el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
     return parsedValue
@@ -204,12 +223,17 @@ function initSwiper() {
     }
 }
 
-function initCleave() {
-    $('.cleave-num').each(function() {
-        let cleave = new Cleave(this, {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand'
-        });
+function initCleave(delimiter = ',', decimalMark = '.') {
+    Object.values(window.CardanoCalculatorParams).forEach(function (p) {
+        if (p.is_cleave) {
+            new Cleave($('#inp_' + p.id), {
+                delimiter: delimiter,
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: p.scale,
+                numeralDecimalMark: decimalMark
+            });
+        }
     });
     $('.inp-param.cleave-num').keydown(function() {
         let char = event.which || event.keyCode;
@@ -266,10 +290,18 @@ function initParams(paramsData) {
     window.CardanoCalculatorParamGroups = paramsData;
     let flatParams = [].concat.apply([], paramsData.groups.map((g) => g.params));
     window.CardanoCalculatorParams = flatParams.reduce((r, p) => {r[p.id] = p;return r;}, {});
-    flatParams.forEach((p) => p.parse =
-        p.value_type === 'float' ? parseFloat
-        : p.value_type === 'int' ? parseInt
-        : (x) => x);
+    flatParams.forEach((p) => {
+        if (p.value_type === 'float') {
+            p.parse = parseFloat;
+            p.scale = 1;
+        } else if (p.value_type === 'int') {
+            p.parse = parseInt;
+            p.scale = 0;
+        } else {
+            p.parse = (x) => x;
+            p.scale = 0;
+        }
+    });
 }
 
 function initCalcLayout(layoutName = Cookies.get('layout')) {
@@ -289,7 +321,10 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
                     window.CardanoCalculatorLayout.init();
                     toggleLayoutSwitcher(window.CardanoCalculatorLayout.name);
                 }
-                initCleave();
+                initCleave(
+                    window.CardanoCalculatorLocale.separators.order,
+                    window.CardanoCalculatorLocale.separators.decimal
+                );
                 initInputFieldEvents();
                 updateCalculations();
             }
@@ -309,7 +344,17 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
     }
 }
 
+function initLocale() {
+    let locale = 'en-US';
+    window.CardanoCalculatorLocale = Object.freeze({
+        locale: locale,
+        separators: getSeparatorsByLocale(locale)
+    });
+}
+
 $(function() {
+
+    initLocale();
 
     Handlebars.registerHelper('str', function (str) {
         return Array.isArray(str) ? str.join(' ') : str;

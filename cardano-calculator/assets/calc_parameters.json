@@ -97,12 +97,12 @@
                         "Percent of reserved coins issued each year. The number of 5% is taken from the official",
                         "staking explanation post. But generally is considered to be only an 'arbitrary example'"
                     ],
-                    "is_cleave": false,
+                    "is_cleave": true,
                     "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
                     "min": 0,
                     "max": 100,
                     "value": 5,
-                    "step": "0.1",
+                    "step": 0.1,
                     "value_type": "float",
                     "ctx_tip": "New coins issued this year (+ Total supply inflation)"
                 },
@@ -114,12 +114,12 @@
                         "The number of 20% is speculative and approximate. There's no definite information yet,",
                         "but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC."
                     ],
-                    "is_cleave": false,
+                    "is_cleave": true,
                     "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
                     "min": 0,
                     "max": 100,
                     "value": 20,
-                    "step": "0.1",
+                    "step": 0.1,
                     "value_type": "float",
                     "ctx_tip": "Coins in treasury at the start of this year (+ coins added this year)"
                 }
@@ -136,12 +136,12 @@
                         "The percent of ALL profits in a pool that this pool will take for itself as fees.",
                         "The 5% number is completely arbitrary. Market will show what this number gonna actually be on average."
                     ],
-                    "is_cleave": false,
+                    "is_cleave": true,
                     "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
                     "min": 0,
                     "max": 100,
                     "value": 5,
-                    "step": "0.1",
+                    "step": 0.1,
                     "value_type": "float",
                     "ctx_tip": "How much coins will pool earn from YOUR stake in a year"
                 }
