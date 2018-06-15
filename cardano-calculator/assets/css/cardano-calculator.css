@@ -33,6 +33,11 @@ code {
     border-radius: 3px;
 }
 
+#locale-selector-div {
+    border-left: 2px solid #eeeeee;
+    padding-left: 5px;
+}
+
 /**************
  * CALC TABLE *
  **************/

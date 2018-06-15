@@ -393,7 +393,7 @@ function initLocale() {
             checkLocale($.urlParam('loc'), 'url'),
             checkLocale(detectBrowserLocale(), 'browser'),
             defaultLocale
-        ].filter((x) => x);
+        ].filter((v,i,a) => v && a.indexOf(v) === i);
         if (locales.length === 1) {
             console.log('Default locale is used: ' + defaultLocale)
         }
@@ -407,6 +407,12 @@ function initLocale() {
         });
     }));
     console.log('Available locales:', window.CardanoCalculatorLocaleList);
+    if (window.CardanoCalculatorLocaleList.length > 1) {
+        $('#locale-selector-div').css('display', 'inline');
+        $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
+            $('#locale-selector').append($('<option></option>').text(loc.locale));
+        });
+    }
     window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
 }
 
