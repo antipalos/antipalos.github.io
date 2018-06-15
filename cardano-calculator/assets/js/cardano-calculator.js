@@ -246,18 +246,23 @@ function initInputFieldEvents() {
     });
 }
 
+function toggleLayoutSwitcher(layoutName) {
+    $('#layout-switcher input').prop('checked', false).parent().removeClass('active');
+    $('#layout-switcher input[layout=' + layoutName + ']').prop('checked', true).parent().addClass('active');
+}
+
 let Layouts = Object.freeze({
     TABLE: {
+        name: 'TABLE',
         template: 'assets/hbs/calc_table.hbs',
         init: function() {},
         destroy: function () {}
     },
     SWIPER: {
+        name: 'SWIPER',
         template: 'assets/hbs/calc_swiper.hbs',
         init: function () {
             initSwiper();
-            $('#layout-switcher-swiper').prop('checked', true).parent().addClass('active');
-            $('#layout-switcher-table').prop('checked', false).parent().removeClass('active');
         },
         destroy: function () {
             if (window.CardanoCalculatorSwiper) {
@@ -268,9 +273,9 @@ let Layouts = Object.freeze({
     }
 });
 
-function initLayout(layout) {
-    if (layout && Object.values(Layouts).indexOf(layout) > -1) {
-        window.CardanoCalculatorLayout = layout
+function initLayout(layoutName) {
+    if (layoutName && Object.keys(Layouts).indexOf(layoutName) > -1) {
+        window.CardanoCalculatorLayout = Layouts[layoutName];
     } else {
         let w = window.innerWidth;
         window.CardanoCalculatorLayout = w < 768 ? Layouts.SWIPER : Layouts.TABLE;
@@ -309,7 +314,7 @@ function initParams(paramsData) {
         : (x) => x);
 }
 
-function initCalcLayout(layout = null) {
+function initCalcLayout(layoutName = Cookies.get('layout')) {
     if (window.CardanoCalculatorLayout) {
         window.CardanoCalculatorLayout.destroy();
     }
@@ -324,6 +329,7 @@ function initCalcLayout(layout = null) {
                 initTooltips();
                 if (window.CardanoCalculatorLayout) {
                     window.CardanoCalculatorLayout.init();
+                    toggleLayoutSwitcher(window.CardanoCalculatorLayout.name);
                 }
                 initCleave();
                 initInputFieldEvents();
@@ -337,7 +343,7 @@ function initCalcLayout(layout = null) {
             initTemplate(templateFile, dataContent);
         });
     }
-    let templateFile = initLayout(layout);
+    let templateFile = initLayout(layoutName);
     if (window.CardanoCalculatorParamGroups) {
         initTemplate(templateFile, window.CardanoCalculatorParamGroups);
     } else {
@@ -359,7 +365,10 @@ $(function() {
     selectTab(location.href);
 
     $('#layout-switcher input').change(function () {
-        initCalcLayout(Layouts[$(this).attr('layout')]);
+        let layoutName = $(this).attr('layout');
+        console.log(Cookies.get('layout'));
+        initCalcLayout(layoutName);
+        Cookies.set('layout', layoutName);
     });
 
 
