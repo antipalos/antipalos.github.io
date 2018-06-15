@@ -4,14 +4,6 @@ function frmt(num, scale = 6) {
     })
 }
 
-function commify(numStr) {
-    let len = numStr.indexOf('.') || numStr.length;
-    for (let i = len - 3; i > 0; i -= 3) {
-        numStr = numStr.slice(0, i) + ',' + numStr.slice(i);
-    }
-    return numStr;
-}
-
 function parseParamIntoContext(el, shift = 0) {
     let id = el.attr('id');
     if (!id.startsWith("inp_")) {
@@ -24,11 +16,10 @@ function parseParamIntoContext(el, shift = 0) {
     let parsedValue = param.parse(el.val().replace(/,/g, ''));
     if (shift) {
         parsedValue += shift;
-        el.val(commify(frmt(parsedValue, param.value_type === 'float' ? 1 : 0)));
+        el.val(frmt(parsedValue, param.value_type === 'float' ? 1 : 0));
     }
     param.value = parsedValue;
     return parsedValue
-
 }
 
 let Layouts = Object.freeze({
