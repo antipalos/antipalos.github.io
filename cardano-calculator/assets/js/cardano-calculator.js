@@ -400,11 +400,14 @@ function initLocale() {
         return locales;
     }
     let locales = selectLocales();
-    console.log('Available locales: ' + locales);
-    window.CardanoCalculatorLocale = Object.freeze({
-        locales: locales,
-        separators: getSeparatorsByLocale(locales[0])
-    });
+    window.CardanoCalculatorLocaleList = Object.freeze(locales.map((loc) => {
+        return Object.freeze({
+            locale: loc,
+            separators: getSeparatorsByLocale(loc)
+        });
+    }));
+    console.log('Available locales:', window.CardanoCalculatorLocaleList);
+    window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
 }
 
 $.urlParam = function(name, def = null){
