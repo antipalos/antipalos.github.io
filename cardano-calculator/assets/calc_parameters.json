@@ -1,4 +1,10 @@
 {
+    "_string_array_comment": [
+        "String arrays can be used in place of long strings,",
+        "since JSON doesn't support multi-line strings by itself.",
+        "We register custom `str` helper in Handlebars",
+        "that pre-processes all strings and joins arrays by a single whitespace."
+    ],
     "groups": [
         {
             "title": "User parameters",
@@ -37,7 +43,11 @@
                 {
                     "id": "TOTAL_STAKE",
                     "title": "<b>Total</b> stake (in coins)",
-                    "tip": "How much total coins there are staked in the system. This values is completely guessed at 10 billion (around 30% of total supply). In real life it might turn out to be anything and also will change with time.",
+                    "tip": [
+                        "How much total coins there are staked in the system.",
+                        "This values is completely guessed at 10 billion (around 30% of total supply).",
+                        "In real life it might turn out to be anything and also will change with time."
+                    ],
                     "is_cleave": true,
                     "inp_tip": "Cannot be smaller than your stake",
                     "min": 1,
@@ -49,7 +59,10 @@
                 {
                     "id": "TX_EPOCH",
                     "title": "Transactions <b>in epoch</b>",
-                    "tip": "Average number of transactions in each epoch (5 days). Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'",
+                    "tip": [
+                        "Average number of transactions in each epoch (5 days).",
+                        "Value of 15K is taken by approximate analysis of stats at 'adatracker.com/charts'"
+                    ],
                     "is_cleave": true,
                     "inp_tip": "Cannot be less than 0",
                     "min": 0,
@@ -60,7 +73,10 @@
                 {
                     "id": "TX_SIZE",
                     "title": "Transaction size (bytes)",
-                    "tip": "Average transaction size in byte. The number of 200 bytes if taken from the staking explanation post.",
+                    "tip": [
+                        "Average transaction size in byte.",
+                        "The number of 200 bytes if taken from the staking explanation post."
+                    ],
                     "is_cleave": false,
                     "inp_tip": "Cannot be less than 1",
                     "min": 1,
@@ -77,7 +93,10 @@
                 {
                     "id": "INFL",
                     "title": "Yearly reserve decrease (%)",
-                    "tip": "Percent of reserved coins issued each year. The number of 5% is taken from the official staking explanation post. But generally is considered to be only an 'arbitrary example'",
+                    "tip": [
+                        "Percent of reserved coins issued each year. The number of 5% is taken from the official",
+                        "staking explanation post. But generally is considered to be only an 'arbitrary example'"
+                    ],
                     "is_cleave": false,
                     "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
                     "min": 0,
@@ -90,7 +109,11 @@
                 {
                     "id": "TAX",
                     "title": "Treasury tax (%)",
-                    "tip": "The percent of ALL profits in the system that is automatically submitted into the treasury. The number of 20% is speculative and approximate. There's no definite information yet, but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC.",
+                    "tip": [
+                        "The percent of ALL profits in the system that is automatically submitted into the treasury.",
+                        "The number of 20% is speculative and approximate. There's no definite information yet,",
+                        "but all discussions was around the 20% - 25% numbers. IOHK proposed 20% tax for ETC."
+                    ],
                     "is_cleave": false,
                     "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
                     "min": 0,
@@ -109,7 +132,10 @@
                 {
                     "id": "POOL_FEE",
                     "title": "Pool fee (%)",
-                    "tip": "The percent of ALL profits in a pool that this pool will take for itself as fees. The 5% number is completely arbitrary. Market will show what this number gonna be actually be on average.",
+                    "tip": [
+                        "The percent of ALL profits in a pool that this pool will take for itself as fees.",
+                        "The 5% number is completely arbitrary. Market will show what this number gonna actually be on average."
+                    ],
                     "is_cleave": false,
                     "inp_tip": "Should be in between 0% and 100% with a 0.1% step",
                     "min": 0,

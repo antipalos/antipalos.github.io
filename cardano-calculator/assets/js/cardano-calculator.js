@@ -353,6 +353,10 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
 
 $(function() {
 
+    Handlebars.registerHelper('str', function (str) {
+        return Array.isArray(str) ? str.join(' ') : str;
+    });
+
     loadHandlebarsPartials({
         'calc-header': 'assets/hbs/partial/calc_header.hbs',
         'calc-alert': 'assets/hbs/partial/calc_alert.hbs',
