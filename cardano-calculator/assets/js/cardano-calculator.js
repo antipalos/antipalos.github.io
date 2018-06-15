@@ -4,37 +4,6 @@ function frmt(num, scale = 6) {
     })
 }
 
-function parseHash(hash) {
-    let sLocationAndParams = hash.split(/\?(.+)/);
-    let sLocation = sLocationAndParams[0];
-    if (sLocation.startsWith('#')) {
-        sLocation = sLocation.substr(1)
-    }
-    let result = {
-        'location': sLocation
-    };
-    if (sLocationAndParams.length > 1) {
-        result['params'] = {};
-        let sParamStr = sLocationAndParams[1];
-        let sParams = sParamStr.split('&');
-        for (let i = 0; i < sParams.length; i++) {
-            let sParamPair = sParams[i].split(/=(.*)/);
-            let value = sParamPair.length > 1 ? sParamPair[1] : true;
-            if (result.params[sParamPair[0]]) {
-                let oldValue = result.params[sParamPair[0]];
-                if (Array.isArray(oldValue)) {
-                    oldValue += value;
-                } else {
-                    result.params[sParamPair[0]] = [oldValue, value]
-                }
-            } else {
-                result.params[sParamPair[0]] = value;
-            }
-        }
-    }
-    return result;
-}
-
 function commify(numStr) {
     let len = numStr.indexOf('.') || numStr.length;
     for (let i = len - 3; i > 0; i -= 3) {
