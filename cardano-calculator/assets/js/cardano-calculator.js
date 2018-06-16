@@ -245,10 +245,12 @@ function initSwiper() {
     }
 }
 
-function initCleave(delimiter = ',', decimalMark = '.') {
+function initCleave(loc) {
+    let delimiter = loc ? loc.separators.order : ',',
+        decimalMark = loc ? loc.separators.decimal : '.';
     Object.values(window.CardanoCalculatorParams).forEach(function (p) {
         if (p.is_cleave) {
-            new Cleave($('#inp_' + p.id), {
+            p.cleave = new Cleave($('#inp_' + p.id), {
                 delimiter: delimiter,
                 numeral: true,
                 numeralThousandsGroupStyle: 'thousand',
@@ -257,13 +259,27 @@ function initCleave(delimiter = ',', decimalMark = '.') {
             });
         }
     });
-    $('.inp-param.cleave-num').keydown(function() {
-        let char = event.which || event.keyCode;
-        if (char === 38 || char === 40) {
-            shift = 39 - char;
-            paramUpdate(this, shift);
+    if (!window.CardanoCalcCleaveKeysListener) {
+        window['CardanoCalcCleaveKeysListener'] = function() {
+            let char = event.which || event.keyCode;
+            if (char === 38 || char === 40) {
+                shift = 39 - char;
+                paramUpdate(this, shift);
+            }
+        };
+        $('.inp-param.cleave-num').keydown(window.CardanoCalcCleaveKeysListener);
+    }
+}
+
+function restartCleave(loc) {
+    Object.values(window.CardanoCalculatorParams).forEach(function (p) {
+        if (p.cleave) {
+            p.cleave.destroy();
+            p.cleave = null;
+            $('#inp_' + p.id).val(p.value.toLocaleString(loc.locale));
         }
     });
+    initCleave(loc);
 }
 
 function initInputFieldEvents() {
@@ -353,10 +369,7 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
                     window.CardanoCalculatorLayout.init();
                     toggleLayoutSwitcher(window.CardanoCalculatorLayout.name);
                 }
-                initCleave(
-                    window.CardanoCalculatorLocale.separators.order,
-                    window.CardanoCalculatorLocale.separators.decimal
-                );
+                initCleave(window.CardanoCalculatorLocale);
                 initInputFieldEvents();
                 updateCalculations();
             }
@@ -411,6 +424,17 @@ function initLocale() {
         $('#locale-selector-div').css('display', 'inline');
         $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
             $('#locale-selector').append($('<option></option>').text(loc.locale));
+        });
+        $('#locale-selector').change(function (e) {
+            let selectedLocaleName = this.value;
+            let selectedLocale = window.CardanoCalculatorLocaleList
+                .filter((x) => x.locale === selectedLocaleName)[0];
+            if (selectedLocale) {
+                console.log('New locale selected:', selectedLocale);
+                window.CardanoCalculatorLocale = selectedLocale;
+                restartCleave(selectedLocale);
+                updateCalculations();
+            }
         });
     }
     window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
