@@ -389,6 +389,10 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
     }
 }
 
+function arrayIfNot(x) {
+    return Array.isArray(x) ? x : [x];
+}
+
 function initLocale() {
     function checkLocale(loc, source) {
         if (loc) {
@@ -400,13 +404,16 @@ function initLocale() {
         }
         return null;
     }
+    function getUrlLocales() {
+        return arrayIfNot($.urlParam('loc'))
+            .map((x) => checkLocale(x, 'url'));
+    }
     function selectLocales() {
         let defaultLocale = 'en';
-        let locales = [
-            checkLocale($.urlParam('loc'), 'url'),
+        let locales = getUrlLocales().concat([
             checkLocale(detectBrowserLocale(), 'browser'),
             defaultLocale
-        ].filter((v,i,a) => v && a.indexOf(v) === i);
+        ]).filter((v,i,a) => v && a.indexOf(v) === i);
         if (locales.length === 1) {
             console.log('Default locale is used: ' + defaultLocale)
         }
@@ -440,9 +447,23 @@ function initLocale() {
     window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
 }
 
+function yieldWhile(f) {
+    let res = [];
+    let m;
+    do {
+        m = f();
+        if (m) {
+            res.push(m);
+        }
+    } while (m);
+    return res;
+}
+
 $.urlParam = function(name, def = null){
-    let parse = new RegExp('[\?&]' + name + '=([^&#]*)').exec(location.href);
-    return parse ? parse[1] : def;
+    let regExp = new RegExp('[\?&]' + name + '=([^&#]*)', "g");
+    let res = yieldWhile(() => regExp.exec(location.href)).map((v) => v[1]);
+    console.log(res);
+    return res ? res.length > 1 ? res : res[0] : def;
 };
 
 $(function() {
