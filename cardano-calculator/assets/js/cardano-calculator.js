@@ -411,6 +411,7 @@ function initLocale() {
     function selectLocales() {
         let defaultLocale = 'en';
         let locales = getUrlLocales().concat([
+            checkLocale(Cookies.get('locale'), 'cookies'),
             checkLocale(detectBrowserLocale(), 'browser'),
             defaultLocale
         ]).filter((v,i,a) => v && a.indexOf(v) === i);
@@ -438,6 +439,7 @@ function initLocale() {
                 .filter((x) => x.locale === selectedLocaleName)[0];
             if (selectedLocale) {
                 console.log('New locale selected:', selectedLocale);
+                Cookies.set('locale', selectedLocaleName);
                 window.CardanoCalculatorLocale = selectedLocale;
                 restartCleave(selectedLocale);
                 updateCalculations();
@@ -462,7 +464,6 @@ function yieldWhile(f) {
 $.urlParam = function(name, def = null){
     let regExp = new RegExp('[\?&]' + name + '=([^&#]*)', "g");
     let res = yieldWhile(() => regExp.exec(location.href)).map((v) => v[1]);
-    console.log(res);
     return res ? res.length > 1 ? res : res[0] : def;
 };
 
