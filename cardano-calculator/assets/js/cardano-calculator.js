@@ -1,15 +1,4 @@
-function detectBrowserLocale () {
-    if (navigator.languages && navigator.languages.length) {
-        // latest versions of Chrome and Firefox set this correctly
-        return navigator.languages[0]
-    } else if (navigator.userLanguage) {
-        // IE only
-        return navigator.userLanguage
-    } else {
-        // latest versions of Chrome, Firefox, and Safari set this correctly
-        return navigator.language
-    }
-}
+import {Utils} from "./utils";
 
 function escapeRegExp(str) {
     // noinspection RegExpRedundantEscape
@@ -418,7 +407,7 @@ function initLocale() {
         let defaultLocale = 'en';
         let locales = getUrlLocales().concat([
             checkLocale(Cookies.get('locale'), 'cookies'),
-            checkLocale(detectBrowserLocale(), 'browser'),
+            checkLocale(Utils.detectBrowserLocale(), 'browser'),
             defaultLocale
         ]).filter((v,i,a) => v && a.indexOf(v) === i);
         if (locales.length === 1) {
