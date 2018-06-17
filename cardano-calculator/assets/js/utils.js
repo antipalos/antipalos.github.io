@@ -11,6 +11,6 @@ function detectBrowserLocale () {
     }
 }
 
-export const Utils = Object.freeze({
+const Utils = Object.freeze({
     detectBrowserLocale: detectBrowserLocale
 });

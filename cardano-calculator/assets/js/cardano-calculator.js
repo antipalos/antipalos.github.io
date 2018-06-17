@@ -1,5 +1,3 @@
-import {Utils} from "./utils";
-
 function escapeRegExp(str) {
     // noinspection RegExpRedundantEscape
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
