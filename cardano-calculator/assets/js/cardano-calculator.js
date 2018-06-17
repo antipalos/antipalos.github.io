@@ -428,13 +428,18 @@ function initLocale() {
         });
     }));
     console.log('Available locales:', window.CardanoCalculatorLocaleList);
-    if (window.CardanoCalculatorLocaleList.length > 1) {
-        $('#locale-selector-div').css('display', 'inline');
+    if (window.CardanoCalculatorLocaleList.length > 0) {
+        let locSelector = $('#locale-selector');
+        if (window.CardanoCalculatorLocaleList.length === 1) {
+            locSelector.attr('disabled', true);
+        }
         $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
-            $('#locale-selector').append($('<option></option>').text(loc.locale));
+            locSelector.append($('<option></option>')
+                .attr('key', loc.locale)
+                .text(loc.locale + ': ' + (1234.5).toLocaleString(loc.locale)));
         });
-        $('#locale-selector').change(function (e) {
-            let selectedLocaleName = this.value;
+        locSelector.change(function (e) {
+            let selectedLocaleName = $(this).children('option:selected').attr('key');
             let selectedLocale = window.CardanoCalculatorLocaleList
                 .filter((x) => x.locale === selectedLocaleName)[0];
             if (selectedLocale) {
