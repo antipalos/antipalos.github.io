@@ -1,26 +1,12 @@
-function escapeRegExp(str) {
-    // noinspection RegExpRedundantEscape
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-}
-
-function isValidLocale(loc) {
-    try {
-        (1000).toLocaleString(loc);
-        return true;
-    } catch (err) {
-        return false;
-    }
-}
-
 function getSeparatorsByLocale(locale) {
     let orderStr = (1000).toLocaleString(locale);
     let order = orderStr.length > 4 ? orderStr.substr(1,1) : '';
     let decimal = (1.1).toLocaleString(locale).substr(1,1);
     return Object.freeze({
         order: order,
-        order_reg: new RegExp(escapeRegExp(order), 'g'),
+        order_reg: new RegExp(Utils.escapeRegExp(order), 'g'),
         decimal: decimal,
-        decimal_reg: new RegExp(escapeRegExp(decimal), 'g')
+        decimal_reg: new RegExp(Utils.escapeRegExp(decimal), 'g')
     })
 }
 
@@ -376,14 +362,10 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
     }
 }
 
-function arrayIfNot(x) {
-    return Array.isArray(x) ? x : [x];
-}
-
 function initLocale() {
     function checkLocale(loc, source) {
         if (loc) {
-            if (isValidLocale(loc)) {
+            if (Utils.isValidLocale(loc)) {
                 console.log('Valid locale found in %s: %s', source, loc);
                 return loc;
             }
@@ -393,8 +375,8 @@ function initLocale() {
     }
     function getUrlLocales() {
         let validator = (x) => checkLocale(x, 'url');
-        let locs1 = arrayIfNot($.urlParam('loc!')).map(validator).filter((x) => x);
-        let locs2 = arrayIfNot($.urlParam('loc')).map(validator).filter((x) => x);
+        let locs1 = Utils.arrayIfNot(Utils.urlParam('loc!')).map(validator).filter((x) => x);
+        let locs2 = Utils.arrayIfNot(Utils.urlParam('loc')).map(validator).filter((x) => x);
         if (locs1.length > 0) {
             console.log('Storing the URL locale: ' + locs1[0]);
             Cookies.set('locale', locs1[0]);
@@ -446,24 +428,6 @@ function initLocale() {
     }
     window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
 }
-
-function yieldWhile(f) {
-    let res = [];
-    let m;
-    do {
-        m = f();
-        if (m) {
-            res.push(m);
-        }
-    } while (m);
-    return res;
-}
-
-$.urlParam = function(name, def = null){
-    let regExp = new RegExp('[\?&]' + name + '=([^&#]*)', "g");
-    let res = yieldWhile(() => regExp.exec(location.href)).map((v) => v[1]);
-    return res ? res.length > 1 ? res : res[0] : def;
-};
 
 $(function() {
 
