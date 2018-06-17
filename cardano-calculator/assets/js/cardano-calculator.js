@@ -405,8 +405,14 @@ function initLocale() {
         return null;
     }
     function getUrlLocales() {
-        return arrayIfNot($.urlParam('loc'))
-            .map((x) => checkLocale(x, 'url'));
+        let validator = (x) => checkLocale(x, 'url');
+        let locs1 = arrayIfNot($.urlParam('loc!')).map(validator).filter((x) => x);
+        let locs2 = arrayIfNot($.urlParam('loc')).map(validator).filter((x) => x);
+        if (locs1.length > 0) {
+            console.log('Storing the URL locale: ' + locs1[0]);
+            Cookies.set('locale', locs1[0]);
+        }
+        return locs1.concat(locs2);
     }
     function selectLocales() {
         let defaultLocale = 'en';
