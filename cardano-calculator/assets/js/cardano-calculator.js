@@ -1,8 +1,33 @@
-function getSeparatorsByLocale(locale) {
-    let orderStr = (1000).toLocaleString(locale);
-    let order = orderStr.length > 4 ? orderStr.substr(1,1) : '';
+function getDigitsByLocale(locale) {
+    let map = {};
+    let digits = [];
+    for (let i = 0; i < 10; i++) {
+        let a = '' + i;
+        let b = (i).toLocaleString(locale);
+        if (a !== b) {
+            map[b] = a;
+            digits.push(b);
+        }
+    }
+    let reg = new RegExp('[' + digits.join('') + ']', 'g');
+    return Object.freeze({
+        isEmpty: digits.length === 0,
+        map: Object.freeze(map),
+        reg: reg,
+        fixString: function(s) {
+            return digits.length === 0 ? s
+                : s.replace(reg, (c) => map[c] || c);
+        }
+    });
+}
+
+function getSeparatorsByLocale(locale, digits) {
+    let orderStr = (111111).toLocaleString(locale);
+    let orderSeparators = digits.fixString(orderStr).replace(/1/g, '');
+    let order = orderSeparators.length > 0 ? orderSeparators.charAt(0) : '';
     let decimal = (1.1).toLocaleString(locale).substr(1,1);
     return Object.freeze({
+        weird_order: orderSeparators.length !== 1,
         order: order,
         order_reg: new RegExp(Utils.escapeRegExp(order), 'g'),
         decimal: decimal,
@@ -10,10 +35,9 @@ function getSeparatorsByLocale(locale) {
     })
 }
 
-function frmt(num, scale = 6) {
-    return Number(num.toFixed(scale)).toLocaleString(window.CardanoCalculatorLocale.locale, {
-        'maximumFractionDigits': scale
-    })
+function frmt(num, scale = 6, loc = window.CardanoCalculatorLocale) {
+    return loc.digits.fixString(
+        Number(num.toFixed(scale)).toLocaleString(loc.locale, {'maximumFractionDigits': scale}));
 }
 
 function parseParamIntoContext(el, shift = 0) {
@@ -27,9 +51,23 @@ function parseParamIntoContext(el, shift = 0) {
     }
     let parsedValue = param.parse(el.val()
         .replace(window.CardanoCalculatorLocale.separators.order_reg, '')
-        .replace(window.CardanoCalculatorLocale.separators.decimal_reg, '.'));
+        .replace(window.CardanoCalculatorLocale.separators.decimal_reg, '.') || '0');
     if (shift) {
-        parsedValue += ((param.step || 1) * shift);
+        let newValue = parsedValue + ((param.step || 1) * shift);
+        if (parsedValue < param.min) {
+            if (newValue < parsedValue) {
+                return;
+            }
+        } else if (parsedValue > param.max) {
+            if (newValue > parsedValue) {
+                return;
+            }
+        } else if (newValue < param.min || newValue > param.max) {
+            return;
+        }
+        parsedValue = newValue;
+    }
+    if (window.CardanoCalculatorLocale.separators.weird_order && param.is_cleave && param.scale === 0) {
         el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
@@ -223,13 +261,15 @@ function initCleave(loc) {
         decimalMark = loc ? loc.separators.decimal : '.';
     Object.values(window.CardanoCalculatorParams).forEach(function (p) {
         if (p.is_cleave) {
-            p.cleave = new Cleave($('#inp_' + p.id), {
-                delimiter: delimiter,
+            let el = $('#inp_' + p.id);
+            p.cleave = new Cleave(el, {
+                delimiter: p.scale > 0 ? '' : delimiter,
                 numeral: true,
                 numeralThousandsGroupStyle: 'thousand',
                 numeralDecimalScale: p.scale,
                 numeralDecimalMark: decimalMark
             });
+            el.val(frmt(p.value, p.scale));
         }
     });
     if (!window.CardanoCalcCleaveKeysListener) {
@@ -397,12 +437,20 @@ function initLocale() {
     }
     let locales = selectLocales();
     window.CardanoCalculatorLocaleList = Object.freeze(locales.map((loc) => {
+        let digits = getDigitsByLocale(loc);
         return Object.freeze({
             locale: loc,
-            separators: getSeparatorsByLocale(loc)
+            digits: digits,
+            separators: getSeparatorsByLocale(loc, digits)
         });
     }));
     console.log('Available locales:', window.CardanoCalculatorLocaleList);
+    function setCurrentLocale(loc) {
+        window.CardanoCalculatorLocale = loc;
+        if (!loc.digits.isEmpty) {
+            console.log('Non-arabic numeral system is detected. Using mapping:', loc.digits.map);
+        }
+    }
     if (window.CardanoCalculatorLocaleList.length > 0) {
         let locSelector = $('#locale-selector');
         if (window.CardanoCalculatorLocaleList.length === 1) {
@@ -411,7 +459,7 @@ function initLocale() {
         $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
             locSelector.append($('<option></option>')
                 .attr('key', loc.locale)
-                .text(loc.locale + ': ' + (1234.5).toLocaleString(loc.locale)));
+                .text(loc.locale + ': ' + frmt(loc.separators.weird_order ? 1234567.8 : 1234.5, 1, loc)));
         });
         locSelector.change(function (e) {
             let selectedLocaleName = $(this).children('option:selected').attr('key');
@@ -420,13 +468,13 @@ function initLocale() {
             if (selectedLocale) {
                 console.log('New locale selected:', selectedLocale);
                 Cookies.set('locale', selectedLocaleName);
-                window.CardanoCalculatorLocale = selectedLocale;
+                setCurrentLocale(selectedLocale);
                 restartCleave(selectedLocale);
                 updateCalculations();
             }
         });
     }
-    window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
+    setCurrentLocale(window.CardanoCalculatorLocaleList[0]);
 }
 
 $(function() {
