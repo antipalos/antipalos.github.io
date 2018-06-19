@@ -2,6 +2,21 @@ function frmt(num, scale = 6) {
     return window.CardanoCalculatorLocale.frmt(num, scale);
 }
 
+function isNewValuesAllowedForParam(oldValue, newValue, param) {
+    if (oldValue < param.min) {
+        if (newValue < oldValue) {
+            return false;
+        }
+    } else if (oldValue > param.max) {
+        if (newValue > oldValue) {
+            return false;
+        }
+    } else if (newValue < param.min || newValue > param.max) {
+        return false;
+    }
+    return true;
+}
+
 function parseParamIntoContext(el, shift = 0) {
     let id = el.attr('id');
     if (!id.startsWith("inp_")) {
@@ -16,15 +31,7 @@ function parseParamIntoContext(el, shift = 0) {
         .replace(window.CardanoCalculatorLocale.separators.decimal_reg, '.') || '0');
     if (shift) {
         let newValue = parsedValue + ((param.step || 1) * shift);
-        if (parsedValue < param.min) {
-            if (newValue < parsedValue) {
-                return;
-            }
-        } else if (parsedValue > param.max) {
-            if (newValue > parsedValue) {
-                return;
-            }
-        } else if (newValue < param.min || newValue > param.max) {
+        if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
             return;
         }
         parsedValue = newValue;
