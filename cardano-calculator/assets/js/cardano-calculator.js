@@ -1,43 +1,5 @@
-function getDigitsByLocale(locale) {
-    let map = {};
-    let digits = [];
-    for (let i = 0; i < 10; i++) {
-        let a = '' + i;
-        let b = (i).toLocaleString(locale);
-        if (a !== b) {
-            map[b] = a;
-            digits.push(b);
-        }
-    }
-    let reg = new RegExp('[' + digits.join('') + ']', 'g');
-    return Object.freeze({
-        isEmpty: digits.length === 0,
-        map: Object.freeze(map),
-        reg: reg,
-        fixString: function(s) {
-            return digits.length === 0 ? s
-                : s.replace(reg, (c) => map[c] || c);
-        }
-    });
-}
-
-function getSeparatorsByLocale(locale, digits) {
-    let orderStr = (111111).toLocaleString(locale);
-    let orderSeparators = digits.fixString(orderStr).replace(/1/g, '');
-    let order = orderSeparators.length > 0 ? orderSeparators.charAt(0) : '';
-    let decimal = (1.1).toLocaleString(locale).substr(1,1);
-    return Object.freeze({
-        weird_order: orderSeparators.length !== 1,
-        order: order,
-        order_reg: new RegExp(Utils.escapeRegExp(order), 'g'),
-        decimal: decimal,
-        decimal_reg: new RegExp(Utils.escapeRegExp(decimal), 'g')
-    })
-}
-
-function frmt(num, scale = 6, loc = window.CardanoCalculatorLocale) {
-    return loc.digits.fixString(
-        Number(num.toFixed(scale)).toLocaleString(loc.locale, {'maximumFractionDigits': scale}));
+function frmt(num, scale = 6) {
+    return window.CardanoCalculatorLocale.frmt(num, scale);
 }
 
 function parseParamIntoContext(el, shift = 0) {
@@ -403,47 +365,7 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
 }
 
 function initLocale() {
-    function checkLocale(loc, source) {
-        if (loc) {
-            if (Utils.isValidLocale(loc)) {
-                console.log('Valid locale found in %s: %s', source, loc);
-                return loc;
-            }
-            console.error('Invalid locale in %s: %s', source, loc);
-        }
-        return null;
-    }
-    function getUrlLocales() {
-        let validator = (x) => checkLocale(x, 'url');
-        let locs1 = Utils.arrayIfNot(Utils.urlParam('loc!')).map(validator).filter((x) => x);
-        let locs2 = Utils.arrayIfNot(Utils.urlParam('loc')).map(validator).filter((x) => x);
-        if (locs1.length > 0) {
-            console.log('Storing the URL locale: ' + locs1[0]);
-            Cookies.set('locale', locs1[0]);
-        }
-        return locs1.concat(locs2);
-    }
-    function selectLocales() {
-        let defaultLocale = 'en';
-        let locales = getUrlLocales().concat([
-            checkLocale(Cookies.get('locale'), 'cookies'),
-            checkLocale(Utils.detectBrowserLocale(), 'browser'),
-            defaultLocale
-        ]).filter((v,i,a) => v && a.indexOf(v) === i);
-        if (locales.length === 1) {
-            console.log('Default locale is used: ' + defaultLocale)
-        }
-        return locales;
-    }
-    let locales = selectLocales();
-    window.CardanoCalculatorLocaleList = Object.freeze(locales.map((loc) => {
-        let digits = getDigitsByLocale(loc);
-        return Object.freeze({
-            locale: loc,
-            digits: digits,
-            separators: getSeparatorsByLocale(loc, digits)
-        });
-    }));
+    window.CardanoCalculatorLocaleList = Locales.createLocaleContext();
     console.log('Available locales:', window.CardanoCalculatorLocaleList);
     function setCurrentLocale(loc) {
         window.CardanoCalculatorLocale = loc;
@@ -459,7 +381,7 @@ function initLocale() {
         $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
             locSelector.append($('<option></option>')
                 .attr('key', loc.locale)
-                .text(loc.locale + ': ' + frmt(loc.separators.weird_order ? 1234567.8 : 1234.5, 1, loc)));
+                .text(loc.locale + ': ' + loc.frmt(loc.separators.weird_order ? 1234567.8 : 1234.5, 1)));
         });
         locSelector.change(function (e) {
             let selectedLocaleName = $(this).children('option:selected').attr('key');
