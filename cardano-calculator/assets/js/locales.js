@@ -67,7 +67,6 @@ function LocalesConstructor() {
 
     function checkLocale(loc, source) {
         if (loc) {
-            // noinspection JSPotentiallyInvalidUsageOfThis
             if (Locales.isValidLocale(loc)) {
                 console.log('Valid locale found in %s: %s', source, loc);
                 return loc;
