@@ -1,46 +1,20 @@
 function frmt(num, scale = 6) {
-    return Number(num.toFixed(scale)).toLocaleString('en-US', {
-        'maximumFractionDigits': scale
-    })
+    return window.CardanoCalculatorLocale.frmt(num, scale);
 }
 
-function parseHash(hash) {
-    let sLocationAndParams = hash.split(/\?(.+)/);
-    let sLocation = sLocationAndParams[0];
-    if (sLocation.startsWith('#')) {
-        sLocation = sLocation.substr(1)
-    }
-    let result = {
-        'location': sLocation
-    };
-    if (sLocationAndParams.length > 1) {
-        result['params'] = {};
-        let sParamStr = sLocationAndParams[1];
-        let sParams = sParamStr.split('&');
-        for (let i = 0; i < sParams.length; i++) {
-            let sParamPair = sParams[i].split(/=(.*)/);
-            let value = sParamPair.length > 1 ? sParamPair[1] : true;
-            if (result.params[sParamPair[0]]) {
-                let oldValue = result.params[sParamPair[0]];
-                if (Array.isArray(oldValue)) {
-                    oldValue += value;
-                } else {
-                    result.params[sParamPair[0]] = [oldValue, value]
-                }
-            } else {
-                result.params[sParamPair[0]] = value;
-            }
+function isNewValuesAllowedForParam(oldValue, newValue, param) {
+    if (oldValue < param.min) {
+        if (newValue < oldValue) {
+            return false;
         }
+    } else if (oldValue > param.max) {
+        if (newValue > oldValue) {
+            return false;
+        }
+    } else if (newValue < param.min || newValue > param.max) {
+        return false;
     }
-    return result;
-}
-
-function commify(numStr) {
-    let len = numStr.indexOf('.') || numStr.length;
-    for (let i = len - 3; i > 0; i -= 3) {
-        numStr = numStr.slice(0, i) + ',' + numStr.slice(i);
-    }
-    return numStr;
+    return true;
 }
 
 function parseParamIntoContext(el, shift = 0) {
@@ -52,14 +26,22 @@ function parseParamIntoContext(el, shift = 0) {
     if (!param) {
         return null;
     }
-    let parsedValue = param.parse(el.val().replace(/,/g, ''));
+    let localeSeparators = window.CardanoCalculatorLocale.separators;
+    let parsedValue = param.parse(el.val()
+        .replace(localeSeparators.order_reg, '')
+        .replace(localeSeparators.decimal_reg, '.') || '0');
     if (shift) {
-        parsedValue += shift;
-        el.val(commify(frmt(parsedValue, param.value_type === 'float' ? 1 : 0)));
+        let newValue = parsedValue + ((param.step || 1) * shift);
+        if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
+            return;
+        }
+        parsedValue = newValue;
+    }
+    if (shift || (localeSeparators.weird_order && param.is_cleave && param.scale === 0)) {
+        el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
     return parsedValue
-
 }
 
 let Layouts = Object.freeze({
@@ -244,25 +226,58 @@ function initSwiper() {
     }
 }
 
-function initCleave() {
-    $('.cleave-num').each(function() {
-        let cleave = new Cleave(this, {
-            numeral: true,
-            numeralThousandsGroupStyle: 'thousand'
-        });
-    });
-    $('.inp-param.cleave-num').keydown(function() {
-        let char = event.which || event.keyCode;
-        if (char === 38 || char === 40) {
-            shift = 39 - char;
-            paramUpdate(this, shift);
+function initCleave(loc) {
+    let delimiter = loc ? loc.separators.order : ',',
+        decimalMark = loc ? loc.separators.decimal : '.';
+    Object.values(window.CardanoCalculatorParams).forEach(function (p) {
+        if (p.is_cleave) {
+            let el = $('#inp_' + p.id);
+            p.cleave = new Cleave(el, {
+                delimiter: p.scale > 0 ? '' : delimiter,
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: p.scale,
+                numeralDecimalMark: decimalMark
+            });
+            el.val(frmt(p.value, p.scale));
         }
     });
+    if (!window.CardanoCalcCleaveKeysListener) {
+        window['CardanoCalcCleaveKeysListener'] = function() {
+            let char = event.which || event.keyCode;
+            if (char === 38 || char === 40) {
+                shift = 39 - char;
+                paramUpdate(this, shift);
+            }
+        };
+        $('.inp-param.cleave-num').keydown(window.CardanoCalcCleaveKeysListener);
+    }
+}
+
+function restartCleave(loc) {
+    Object.values(window.CardanoCalculatorParams).forEach(function (p) {
+        if (p.cleave) {
+            p.cleave.destroy();
+            p.cleave = null;
+            $('#inp_' + p.id).val(p.value.toLocaleString(loc.locale));
+        }
+    });
+    initCleave(loc);
 }
 
 function initInputFieldEvents() {
     $('.inp-param').on("change paste keyup", function() {
         paramUpdate(this);
+    });
+    let decimalSeparators = ['.', ',', '\''];
+    $('.inp-param[valtype=float]').on("keyup", function(e) {
+        let decimal = window.CardanoCalculatorLocale.separators.decimal;
+        if (decimalSeparators.indexOf(e.key) > -1 && e.key !== decimal) {
+            let el = $(this), val = el.val();
+            if (!val.includes(decimal)) {
+                el.val(val + decimal);
+            }
+        }
     });
 }
 
@@ -306,10 +321,18 @@ function initParams(paramsData) {
     window.CardanoCalculatorParamGroups = paramsData;
     let flatParams = [].concat.apply([], paramsData.groups.map((g) => g.params));
     window.CardanoCalculatorParams = flatParams.reduce((r, p) => {r[p.id] = p;return r;}, {});
-    flatParams.forEach((p) => p.parse =
-        p.value_type === 'float' ? parseFloat
-        : p.value_type === 'int' ? parseInt
-        : (x) => x);
+    flatParams.forEach((p) => {
+        if (p.value_type === 'float') {
+            p.parse = parseFloat;
+            p.scale = 1;
+        } else if (p.value_type === 'int') {
+            p.parse = parseInt;
+            p.scale = 0;
+        } else {
+            p.parse = (x) => x;
+            p.scale = 0;
+        }
+    });
 }
 
 function initCalcLayout(layoutName = Cookies.get('layout')) {
@@ -329,7 +352,7 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
                     window.CardanoCalculatorLayout.init();
                     toggleLayoutSwitcher(window.CardanoCalculatorLayout.name);
                 }
-                initCleave();
+                initCleave(window.CardanoCalculatorLocale);
                 initInputFieldEvents();
                 updateCalculations();
             }
@@ -349,7 +372,44 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
     }
 }
 
+function initLocale() {
+    window.CardanoCalculatorLocaleList = Locales.createLocaleContext();
+    console.log('Available locales:', window.CardanoCalculatorLocaleList);
+    function setCurrentLocale(loc) {
+        window.CardanoCalculatorLocale = loc;
+        if (!loc.digits.isEmpty) {
+            console.log('Non-arabic numeral system is detected. Using mapping:', loc.digits.map);
+        }
+    }
+    if (window.CardanoCalculatorLocaleList.length > 0) {
+        let locSelector = $('#locale-selector');
+        if (window.CardanoCalculatorLocaleList.length === 1) {
+            locSelector.attr('disabled', true);
+        }
+        $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
+            locSelector.append($('<option></option>')
+                .attr('key', loc.locale)
+                .text(loc.locale + ': ' + loc.frmt(loc.separators.weird_order ? 1234567.8 : 1234.5, 1)));
+        });
+        locSelector.change(function (e) {
+            let selectedLocaleName = $(this).children('option:selected').attr('key');
+            let selectedLocale = window.CardanoCalculatorLocaleList
+                .filter((x) => x.locale === selectedLocaleName)[0];
+            if (selectedLocale) {
+                console.log('New locale selected:', selectedLocale);
+                Cookies.set('locale', selectedLocaleName);
+                setCurrentLocale(selectedLocale);
+                restartCleave(selectedLocale);
+                updateCalculations();
+            }
+        });
+    }
+    setCurrentLocale(window.CardanoCalculatorLocaleList[0]);
+}
+
 $(function() {
+
+    initLocale();
 
     Handlebars.registerHelper('str', function (str) {
         return Array.isArray(str) ? str.join(' ') : str;
@@ -371,7 +431,6 @@ $(function() {
         initCalcLayout(layoutName);
         Cookies.set('layout', layoutName);
     });
-
 
     $(document).on('click', '.activate-tab', function(e) {
         e.preventDefault();
