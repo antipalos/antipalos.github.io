@@ -1,19 +1,20 @@
-function getSeparatorsByLocale(locale) {
-    let orderStr = (1000).toLocaleString(locale);
-    let order = orderStr.length > 4 ? orderStr.substr(1,1) : '';
-    let decimal = (1.1).toLocaleString(locale).substr(1,1);
-    return Object.freeze({
-        order: order,
-        order_reg: new RegExp(Utils.escapeRegExp(order), 'g'),
-        decimal: decimal,
-        decimal_reg: new RegExp(Utils.escapeRegExp(decimal), 'g')
-    })
+function frmt(num, scale = 6) {
+    return window.CardanoCalculatorLocale.frmt(num, scale);
 }
 
-function frmt(num, scale = 6) {
-    return Number(num.toFixed(scale)).toLocaleString(window.CardanoCalculatorLocale.locale, {
-        'maximumFractionDigits': scale
-    })
+function isNewValuesAllowedForParam(oldValue, newValue, param) {
+    if (oldValue < param.min) {
+        if (newValue < oldValue) {
+            return false;
+        }
+    } else if (oldValue > param.max) {
+        if (newValue > oldValue) {
+            return false;
+        }
+    } else if (newValue < param.min || newValue > param.max) {
+        return false;
+    }
+    return true;
 }
 
 function parseParamIntoContext(el, shift = 0) {
@@ -25,11 +26,18 @@ function parseParamIntoContext(el, shift = 0) {
     if (!param) {
         return null;
     }
+    let localeSeparators = window.CardanoCalculatorLocale.separators;
     let parsedValue = param.parse(el.val()
-        .replace(window.CardanoCalculatorLocale.separators.order_reg, '')
-        .replace(window.CardanoCalculatorLocale.separators.decimal_reg, '.'));
+        .replace(localeSeparators.order_reg, '')
+        .replace(localeSeparators.decimal_reg, '.') || '0');
     if (shift) {
-        parsedValue += ((param.step || 1) * shift);
+        let newValue = parsedValue + ((param.step || 1) * shift);
+        if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
+            return;
+        }
+        parsedValue = newValue;
+    }
+    if (shift || (localeSeparators.weird_order && param.is_cleave && param.scale === 0)) {
         el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
@@ -223,13 +231,15 @@ function initCleave(loc) {
         decimalMark = loc ? loc.separators.decimal : '.';
     Object.values(window.CardanoCalculatorParams).forEach(function (p) {
         if (p.is_cleave) {
-            p.cleave = new Cleave($('#inp_' + p.id), {
-                delimiter: delimiter,
+            let el = $('#inp_' + p.id);
+            p.cleave = new Cleave(el, {
+                delimiter: p.scale > 0 ? '' : delimiter,
                 numeral: true,
                 numeralThousandsGroupStyle: 'thousand',
                 numeralDecimalScale: p.scale,
                 numeralDecimalMark: decimalMark
             });
+            el.val(frmt(p.value, p.scale));
         }
     });
     if (!window.CardanoCalcCleaveKeysListener) {
@@ -363,46 +373,14 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
 }
 
 function initLocale() {
-    function checkLocale(loc, source) {
-        if (loc) {
-            if (Utils.isValidLocale(loc)) {
-                console.log('Valid locale found in %s: %s', source, loc);
-                return loc;
-            }
-            console.error('Invalid locale in %s: %s', source, loc);
-        }
-        return null;
-    }
-    function getUrlLocales() {
-        let validator = (x) => checkLocale(x, 'url');
-        let locs1 = Utils.arrayIfNot(Utils.urlParam('loc!')).map(validator).filter((x) => x);
-        let locs2 = Utils.arrayIfNot(Utils.urlParam('loc')).map(validator).filter((x) => x);
-        if (locs1.length > 0) {
-            console.log('Storing the URL locale: ' + locs1[0]);
-            Cookies.set('locale', locs1[0]);
-        }
-        return locs1.concat(locs2);
-    }
-    function selectLocales() {
-        let defaultLocale = 'en';
-        let locales = getUrlLocales().concat([
-            checkLocale(Cookies.get('locale'), 'cookies'),
-            checkLocale(Utils.detectBrowserLocale(), 'browser'),
-            defaultLocale
-        ]).filter((v,i,a) => v && a.indexOf(v) === i);
-        if (locales.length === 1) {
-            console.log('Default locale is used: ' + defaultLocale)
-        }
-        return locales;
-    }
-    let locales = selectLocales();
-    window.CardanoCalculatorLocaleList = Object.freeze(locales.map((loc) => {
-        return Object.freeze({
-            locale: loc,
-            separators: getSeparatorsByLocale(loc)
-        });
-    }));
+    window.CardanoCalculatorLocaleList = Locales.createLocaleContext();
     console.log('Available locales:', window.CardanoCalculatorLocaleList);
+    function setCurrentLocale(loc) {
+        window.CardanoCalculatorLocale = loc;
+        if (!loc.digits.isEmpty) {
+            console.log('Non-arabic numeral system is detected. Using mapping:', loc.digits.map);
+        }
+    }
     if (window.CardanoCalculatorLocaleList.length > 0) {
         let locSelector = $('#locale-selector');
         if (window.CardanoCalculatorLocaleList.length === 1) {
@@ -411,7 +389,7 @@ function initLocale() {
         $.each(window.CardanoCalculatorLocaleList, function (idx, loc) {
             locSelector.append($('<option></option>')
                 .attr('key', loc.locale)
-                .text(loc.locale + ': ' + (1234.5).toLocaleString(loc.locale)));
+                .text(loc.locale + ': ' + loc.frmt(loc.separators.weird_order ? 1234567.8 : 1234.5, 1)));
         });
         locSelector.change(function (e) {
             let selectedLocaleName = $(this).children('option:selected').attr('key');
@@ -420,13 +398,13 @@ function initLocale() {
             if (selectedLocale) {
                 console.log('New locale selected:', selectedLocale);
                 Cookies.set('locale', selectedLocaleName);
-                window.CardanoCalculatorLocale = selectedLocale;
+                setCurrentLocale(selectedLocale);
                 restartCleave(selectedLocale);
                 updateCalculations();
             }
         });
     }
-    window.CardanoCalculatorLocale = window.CardanoCalculatorLocaleList[0];
+    setCurrentLocale(window.CardanoCalculatorLocaleList[0]);
 }
 
 $(function() {
