@@ -26,9 +26,10 @@ function parseParamIntoContext(el, shift = 0) {
     if (!param) {
         return null;
     }
+    let localeSeparators = window.CardanoCalculatorLocale.separators;
     let parsedValue = param.parse(el.val()
-        .replace(window.CardanoCalculatorLocale.separators.order_reg, '')
-        .replace(window.CardanoCalculatorLocale.separators.decimal_reg, '.') || '0');
+        .replace(localeSeparators.order_reg, '')
+        .replace(localeSeparators.decimal_reg, '.') || '0');
     if (shift) {
         let newValue = parsedValue + ((param.step || 1) * shift);
         if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
@@ -36,7 +37,7 @@ function parseParamIntoContext(el, shift = 0) {
         }
         parsedValue = newValue;
     }
-    if (window.CardanoCalculatorLocale.separators.weird_order && param.is_cleave && param.scale === 0) {
+    if (shift || (localeSeparators.weird_order && param.is_cleave && param.scale === 0)) {
         el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
