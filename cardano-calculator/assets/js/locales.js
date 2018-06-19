@@ -78,8 +78,8 @@ function LocalesConstructor() {
 
     function getUrlLocales() {
         let validator = (x) => checkLocale(x, 'url');
-        let locs1 = Utils.arrayIfNot(Utils.urlParam('loc!')).map(validator).filter((x) => x);
-        let locs2 = Utils.arrayIfNot(Utils.urlParam('loc')).map(validator).filter((x) => x);
+        let locs1 = Utils.urlParamsArray('loc!').map(validator).filter((x) => x);
+        let locs2 = Utils.urlParamsArray('loc').map(validator).filter((x) => x);
         if (locs1.length > 0) {
             console.log('Storing the URL locale: ' + locs1[0]);
             Cookies.set('locale', locs1[0]);
