@@ -88,8 +88,9 @@ function LocalesConstructor() {
     }
 
     this.createLocaleContext = function(defaultLocale = 'en') {
+        let cookieLocale = checkLocale(Cookies.get('locale'), 'cookies');
         let locales = getUrlLocales().concat([
-            checkLocale(Cookies.get('locale'), 'cookies'),
+            cookieLocale,
             checkLocale(this.detectBrowserLocale(), 'browser'),
             defaultLocale
         ]).filter((v,i,a) => v && a.indexOf(v) === i);
