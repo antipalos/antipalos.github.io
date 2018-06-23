@@ -65,13 +65,51 @@ code {
  * SMALL SCREENS AND SWIPER *
  ****************************/
 
+.swiper-container {
+    width: 100%;
+    margin-top: 2rem;
+}
+.swiper-pagination {
+    position: relative!important;
+}
+.swiper-slide {
+    padding: 2rem 3rem 0 3rem;
+}
+.swiper-pagination-bullet {
+    width: calc(25% - 10px)!important;
+    height: auto!important;
+    margin: 0 5px!important;
+    padding: 5px 0!important;
+    border-bottom: 2px solid #ccc;
+    background: #fff!important;
+    border-radius: 0!important;
+    outline: 0!important;
+}
+.swiper-pagination-bullet-active {
+    background: #fff!important;
+    border-bottom: 2px solid #007bff!important;
+}
+.swiper-button-next, .swiper-button-prev {
+    outline: 0;
+}
+
 @media (max-width: 767.99px) {
 
     .swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet {
         font-size: 12px;
     }
+    .swiper-button-prev, .swiper-container-rtl .swiper-button-next {
+        left: 0;
+    }
+    .swiper-button-next, .swiper-container-rtl .swiper-button-prev {
+        right: 0;
+    }
     .swiper-slide {
         padding: 2rem 1.5rem;
+    }
+
+    .no-padding-mobile {
+        padding: 0;
     }
 
     .card-body .form-group.col-md-3 {
@@ -108,31 +146,30 @@ code {
     }
 }
 
-.swiper-container {
+/**************
+ * Numpad Overwrites *
+ **************/
+ .nmpd-grid {
+    max-width: 100%;
+}
+.nmpd-grid button {
     width: 100%;
-    margin-top: 2rem;
 }
-.swiper-pagination {
-    position: relative!important;
-}
-.swiper-slide {
-    padding: 2rem 3rem 0 3rem;
-}
-.swiper-pagination-bullet {
-    width: calc(25% - 10px)!important;
-    height: auto!important;
-    margin: 0 5px!important;
-    padding: 5px 0!important;
-    border-bottom: 2px solid #ccc;
-    background: #fff!important;
-    border-radius: 0!important;
-    outline: 0!important;
-}
-.swiper-pagination-bullet-active {
-    background: #fff!important;
-    border-bottom: 2px solid #007bff!important;
-}
-.swiper-button-next, .swiper-button-prev {
-    outline: 0;
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, .5);
 }
 
+@media (max-width: 767.99px) {
+
+    .nmpd-grid {
+        width: 100%;
+    }
+
+}
+
+/**************
+ * Tooltip Overwrites *
+ **************/
+.tooltip {
+    z-index: 1029!important;
+}

@@ -65,7 +65,6 @@ function initNumpad() {
     $.fn.numpad.defaults.textCancel = 'Cancel'; // TODO: tranlate button
     $.fn.numpad.defaults.decimalSeparator = decimalMark;
     $.fn.numpad.defaults.hidePlusMinusButton = true;
-    $.fn.numpad.defaults.positionY = 'bottom';
 
     $('.inp-param').each(function() {
 
