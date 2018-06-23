@@ -470,7 +470,7 @@ function initLocale() {
                 Cookies.set('locale', selectedLocaleName);
                 setCurrentLocale(selectedLocale);
                 restartCleave(selectedLocale);
-                initNumpad();
+                ($.isMobile) ? initNumpad() : null;
                 updateCalculations();
             }
         });
