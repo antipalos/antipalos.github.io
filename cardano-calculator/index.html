@@ -144,6 +144,7 @@
                                                     <!--<li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>-->
                                                     <li><a href="https://forum.cardano.org/t/summary-pos-delegation-incentives-lars-brunjes/11880">Cardano staking explained</a></li>
                                                     <li><a href="https://adatracker.com/charts">AdaTracker charts (to approximate transaction number)</a></li>
+                                                    <li><a href="https://cardanoexplorer.com">Official Cardano explorer, to calculate average transaction size</a></li>
                                                 </ol>
 
                                                 <h3>Parameters require for calculations:</h3>
@@ -233,7 +234,7 @@
 
                                                 <p class="zero-margin">For example: if we take current average number of transaction from
                                                 <a href="https://adatracker.com/charts">the actual tracker</a> it would be around 15,000.
-                                                And if we take an average transaction size to be 200 byte, as described in the staking explanation post.
+                                                And if we take an average transaction size to be 350 byte, as can be seen in the explorer.
                                                 Then we could calculate:</p>
 
                                                 <div class="codeblock">
@@ -241,8 +242,8 @@
                                                     <code>
                                                         TX_YEAR = 73 * 15,000 = 1,095,000<br/>
                                                         FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
-                                                        SIZE_FEES = 1,095,000 * 200 * 0.000043946 = 9,624.174<br/>
-                                                        FEES = 170,142.195 + 9,624.174 = 179,766.369
+                                                        SIZE_FEES = 1,095,000 * 350 * 0.000043946 = 16,842.3045<br/>
+                                                        FEES = 170,142.195 + 16,842.3045 = 186,984.4995
                                                     </code>
 
                                                 </div>
@@ -269,8 +270,8 @@
                                                 <div class="codeblock">
 
                                                     <code>
-                                                        UNTAXED_REWARD = 659,656,979.315 + 179,766.369 = 659,836,745.684<br/>
-                                                        TAXED_REWARD = 659,836,745.684 - 20% = 527,869,396.547<br/>
+                                                        UNTAXED_REWARD = 659,656,979.315 + 186,984.4995 = 659,843,963.815<br/>
+                                                        TAXED_REWARD = 659,843,963.815 - 20% = 527,875,171.052<br/>
                                                         SHARE = STAKE / TOTAL_STAKE<br/>
                                                         REWARD_SHARE = TAXED_REWARD * SHARE
                                                     </code>
@@ -292,20 +293,20 @@
 
                                                     <code>
                                                         SHARE = 42,000 / 15,000,000,000 = 0.0000028<br/>
-                                                        REWARD_SHARE = 527,869,396.547 * 0.0000028 = 1478.0343
+                                                        REWARD_SHARE = 527,875,171.052 * 0.0000028 = 1,478.05047
                                                     </code>
 
                                                 </div>
 
                                                 <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
-                                                about 1478.0343 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
+                                                about 1,478.05047 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
 
                                                 <h4>Pools fees</h4>
 
                                                 <div class="codeblock mb-3">
 
                                                     <code>
-                                                        RESULT_REWARD = 1478.0343 - 5% = 1404.1325
+                                                        RESULT_REWARD = 1,478.05047 - 5% = 1,404.14794
                                                     </code>
 
                                                 </div>
@@ -314,7 +315,7 @@
                                                 of the pool registration. For example: if we take a <b>completely arbitrary</b> number of 5%,
                                                 then calculations would go like:</p>
 
-                                                <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 1404.1325 for a 42K stake, or 3.34%.</p>
+                                                <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 1,404.14794 for a 42K stake, or 3.34%.</p>
 
                                             </div>
 
