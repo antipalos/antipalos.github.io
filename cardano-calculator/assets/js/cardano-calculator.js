@@ -54,96 +54,6 @@ function parseParamIntoContext(el, shift = 0, needsFormatting = false) {
     return parsedValue
 }
 
-function initNumpad() {
-
-    $('.nmpd-wrapper').remove();
-
-    let delimiter = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.order : "'",
-    decimalMark = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.decimal : '.';
-
-    $.fn.numpad.defaults.gridTpl = '<div class="modal-content"></div>';
-    $.fn.numpad.defaults.backgroundTpl = '<div class="modal-backdrop in"></div>';
-    $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control">';
-    $.fn.numpad.defaults.rowTpl = '<div class="row mb-2"></div>';
-    $.fn.numpad.defaults.rowFooter = '<div class="row mb-2"><div class="col-12"><div class="numpad-footer input-group d-flex justify-content-around border-top" style="padding-top: 5px"></div></div></div>';
-    $.fn.numpad.defaults.displayCellTpl = '<div class="col-12"></div>';
-    $.fn.numpad.defaults.cellTpl = '<div class="col-3"></div>';
-    $.fn.numpad.defaults.footerClass = '.numpad-footer';
-    $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
-    $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn"></button>';
-    $.fn.numpad.defaults.buttonFooterTpl = '<button type="button" class="btn" style="width: 40%"></button>';
-    $.fn.numpad.defaults.textDone = '✓';
-    $.fn.numpad.defaults.textDelete = '⬅';
-    $.fn.numpad.defaults.textShiftUp = '⬆';
-    $.fn.numpad.defaults.textShiftDown = '⬇';
-    $.fn.numpad.defaults.textClear = '⎵';
-    $.fn.numpad.defaults.textCancel = '🚫';
-    $.fn.numpad.defaults.decimalSeparator = decimalMark;
-    $.fn.numpad.defaults.orderDelimiter = delimiter;
-    $.fn.numpad.defaults.hidePlusMinusButton = true;
-
-    $('.inp-param').each(function() {
-
-        let target = $(this);
-        let isFloat = target.attr('valtype') === 'float';
-        let isCleaveField = target.hasClass('cleave-num');
-        let param = getParamForInput(target);
-
-        target.parent().find('.inp-param-numpad-btn').numpad({
-            target: $('<span></span>'),
-            hideDecimalButton: !isFloat,
-            onKeypadCreate: function() {
-                $(this).find('.done').addClass('btn-primary');
-            },
-            onKeypadOpen: function() {
-                let display = $(this).find('.nmpd-display');
-                display.attr('readonly', true);
-                let val = target.val();
-                display.val(val);
-            },
-            onKeypadClose: function(e, isDone) {
-                if (isDone) {
-                    let el = $(this).find('.nmpd-display');
-                    let val = el.val();
-                    if (target.val() !== val) {
-                        target.val(val);
-                        target.trigger('change');
-                    }
-                }
-            },
-            onChange: function() {
-                let $this = $(this);
-                let el = $this.find('.nmpd-display');
-                let val = el.val();
-                let decimalMarkIndex = val.indexOf(decimalMark);
-                if (val.endsWith(decimalMark)) {
-                    if (decimalMarkIndex !== (val.length - 1)) {
-                        el.val(val.substr(0,val.length-1));
-                    }
-                }
-                else if (isCleaveField) {
-                    el.val(frmt(parseLocalizedValueForParam(param, el.val()), param.scale));
-                }
-                if (decimalMarkIndex > 0 && decimalMarkIndex === (val.length - (param.scale + 1))) {
-                    $this.find('.numero').attr('disabled', true);
-                } else {
-                    $this.find('.numero').attr('disabled', false);
-                }
-            },
-            shiftFn: function (val, direction) {
-                let parsedValue = parseLocalizedValueForParam(param, val);
-                let newValue = (param.step || 1) * direction + parsedValue;
-                if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
-                    return null;
-                }
-                return '' + newValue;
-            }
-        });
-
-    });
-
-}
-
 let Layouts = Object.freeze({
     TABLE: {
         name: 'TABLE',
@@ -344,6 +254,95 @@ function initCleave(loc) {
     });
 }
 
+function initNumpad() {
+
+    $('.nmpd-wrapper').remove();
+
+    let delimiter = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.order : "'",
+        decimalMark = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.decimal : '.';
+
+    $.fn.numpad.defaults.gridTpl = '<div class="modal-content"></div>';
+    $.fn.numpad.defaults.backgroundTpl = '<div class="modal-backdrop in"></div>';
+    $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control">';
+    $.fn.numpad.defaults.rowTpl = '<div class="row mb-2"></div>';
+    $.fn.numpad.defaults.rowFooter = '<div class="row mb-2"><div class="col-12"><div class="numpad-footer input-group d-flex justify-content-around border-top" style="padding-top: 5px"></div></div></div>';
+    $.fn.numpad.defaults.displayCellTpl = '<div class="col-12"></div>';
+    $.fn.numpad.defaults.cellTpl = '<div class="col-3"></div>';
+    $.fn.numpad.defaults.footerClass = '.numpad-footer';
+    $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
+    $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn"></button>';
+    $.fn.numpad.defaults.buttonFooterTpl = '<button type="button" class="btn" style="width: 40%"></button>';
+    $.fn.numpad.defaults.textDone = '✓';
+    $.fn.numpad.defaults.textDelete = '⬅';
+    $.fn.numpad.defaults.textShiftUp = '⬆';
+    $.fn.numpad.defaults.textShiftDown = '⬇';
+    $.fn.numpad.defaults.textClear = '⎵';
+    $.fn.numpad.defaults.textCancel = '🚫';
+    $.fn.numpad.defaults.decimalSeparator = decimalMark;
+    $.fn.numpad.defaults.orderDelimiter = delimiter;
+    $.fn.numpad.defaults.hidePlusMinusButton = true;
+
+    $('.inp-param').each(function() {
+
+        let target = $(this);
+        let isFloat = target.attr('valtype') === 'float';
+        let isCleaveField = target.hasClass('cleave-num');
+        let param = getParamForInput(target);
+
+        target.parent().find('.inp-param-numpad-btn').numpad({
+            target: $('<span></span>'),
+            hideDecimalButton: !isFloat,
+            onKeypadCreate: function() {
+                $(this).find('.done').addClass('btn-primary');
+            },
+            onKeypadOpen: function() {
+                let display = $(this).find('.nmpd-display');
+                display.attr('readonly', true);
+                let val = target.val();
+                display.val(val);
+            },
+            onKeypadClose: function(e, isDone) {
+                if (isDone) {
+                    let el = $(this).find('.nmpd-display');
+                    let val = el.val();
+                    if (target.val() !== val) {
+                        target.val(val);
+                        target.trigger('change');
+                    }
+                }
+            },
+            onChange: function() {
+                let $this = $(this);
+                let el = $this.find('.nmpd-display');
+                let val = el.val();
+                let decimalMarkIndex = val.indexOf(decimalMark);
+                if (val.endsWith(decimalMark)) {
+                    if (decimalMarkIndex !== (val.length - 1)) {
+                        el.val(val.substr(0,val.length-1));
+                    }
+                }
+                else if (isCleaveField) {
+                    el.val(frmt(parseLocalizedValueForParam(param, el.val()), param.scale));
+                }
+                if (decimalMarkIndex > 0 && decimalMarkIndex === (val.length - (param.scale + 1))) {
+                    $this.find('.numero').attr('disabled', true);
+                } else {
+                    $this.find('.numero').attr('disabled', false);
+                }
+            },
+            shiftFn: function (val, direction) {
+                let parsedValue = parseLocalizedValueForParam(param, val);
+                let newValue = (param.step || 1) * direction + parsedValue;
+                if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
+                    return null;
+                }
+                return '' + newValue;
+            }
+        });
+
+    });
+}
+
 function restartCleave(loc) {
     Object.values(window.CardanoCalculatorParams).forEach(function (p) {
         if (p.cleave) {
@@ -455,9 +454,9 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
                     toggleLayoutSwitcher(window.CardanoCalculatorLayout.name);
                 }
                 initCleave(window.CardanoCalculatorLocale);
+                ($.isMobile) ? initNumpad() : null;
                 initInputFieldEvents();
                 updateCalculations();
-                ($.isMobile) ? initNumpad() : null;
             }
         });
     }
