@@ -91,9 +91,12 @@
                         ))
 					).append(
 					$(options.rowTpl)
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(/*'&plusmn;'*/ '').addClass('neg').click(function(){
-							nmpd.setValue(nmpd.getValue() * (-1));
-						})))
+						.append(
+						    $(options.cellTpl)
+                            // .append($(options.buttonFunctionTpl).html('&plusmn;').addClass('neg').click(function(){
+                            //     nmpd.setValue(nmpd.getValue() * (-1));
+                            // }))
+                        )
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(0).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.decimalSeparator).addClass('sep').click(function(){
 							nmpd.setValue(nmpd.getValue().toString() + options.decimalSeparator);
