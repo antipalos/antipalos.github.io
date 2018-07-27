@@ -81,20 +81,31 @@
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(1).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(2).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(3).addClass('numero')))
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textCancel).addClass('cancel').click(function(){
-							nmpd.close(false);
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftUp).addClass('up').click(function(){
+							nmpd.shift(1);
 						})))
 					).append(
 					$(options.rowTpl)
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html('&plusmn;').addClass('neg').click(function(){
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(/*'&plusmn;'*/ '').addClass('neg').click(function(){
 							nmpd.setValue(nmpd.getValue() * (-1));
 						})))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(0).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.decimalSeparator).addClass('sep').click(function(){
 							nmpd.setValue(nmpd.getValue().toString() + options.decimalSeparator);
 						})))
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textDone).addClass('done')))
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftDown).addClass('down').click(function () {
+                            nmpd.shift(-1);
+                        })))
 					);
+				var footer = $(options.rowFooter);
+				footer.find(options.footerClass)
+                    .append($(options.buttonFooterTpl).html(options.textCancel).addClass('cancel').click(function(){
+                        nmpd.close(false);
+                    }))
+                    .append(
+                        $(options.buttonFooterTpl).html(options.textDone).addClass('done')
+                    );
+				table.append(footer);
 				// Create the backdrop of the numpad - an overlay for the main page
 				nmpd.append($(options.backgroundTpl).addClass('nmpd-overlay').click(function(){nmpd.close(false);}));
 				// Append the grid table to the nmpd element
@@ -201,6 +212,10 @@
 				}
 				return nmpd;
 			};
+
+			nmpd.shift = function(direction) {
+			    nmpd.setValue(options.shiftFn(nmpd.getValue(), direction));
+            };
 
 			/**
 			* Opens the numpad for a given target element optionally filling it with a given value

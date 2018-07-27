@@ -65,14 +65,19 @@ function initNumpad() {
     $.fn.numpad.defaults.backgroundTpl = '<div class="modal-backdrop in"></div>';
     $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control">';
     $.fn.numpad.defaults.rowTpl = '<div class="row mb-2"></div>';
+    $.fn.numpad.defaults.rowFooter = '<div class="row mb-2"><div class="col-12"><div class="numpad-footer input-group d-flex justify-content-around border-top" style="padding-top: 5px"></div></div></div>';
     $.fn.numpad.defaults.displayCellTpl = '<div class="col-12"></div>';
     $.fn.numpad.defaults.cellTpl = '<div class="col-3"></div>';
+    $.fn.numpad.defaults.footerClass = '.numpad-footer';
     $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
-    $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn" style="width: 100%;"></button>';
-    $.fn.numpad.defaults.textDone = 'Done'; // TODO: tranlate button
-    $.fn.numpad.defaults.textDelete = 'Del'; // TODO: tranlate button
-    $.fn.numpad.defaults.textClear = 'Clear'; // TODO: tranlate button
-    $.fn.numpad.defaults.textCancel = 'Cancel'; // TODO: tranlate button
+    $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn"></button>';
+    $.fn.numpad.defaults.buttonFooterTpl = '<button type="button" class="btn" style="width: 40%"></button>';
+    $.fn.numpad.defaults.textDone = '✓'; // TODO: tranlate button
+    $.fn.numpad.defaults.textDelete = '⬅'; // TODO: tranlate button
+    $.fn.numpad.defaults.textShiftUp = '⬆'; // TODO: tranlate button
+    $.fn.numpad.defaults.textShiftDown = '⬇'; // TODO: tranlate button
+    $.fn.numpad.defaults.textClear = '⎵'; // TODO: tranlate button
+    $.fn.numpad.defaults.textCancel = '🚫'; // TODO: tranlate button
     $.fn.numpad.defaults.decimalSeparator = decimalMark;
     $.fn.numpad.defaults.orderDelimiter = delimiter;
     $.fn.numpad.defaults.hidePlusMinusButton = true;
@@ -124,6 +129,10 @@ function initNumpad() {
                 } else {
                     $this.find('.numero').attr('disabled', false);
                 }
+            },
+            shiftFn: function (val, direction) {
+                let parsed = parseLocalizedValueForParam(param, val);
+                return '' + ((param.step || 1) * direction + parsed);
             }
         });
 
