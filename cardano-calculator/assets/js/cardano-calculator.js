@@ -512,7 +512,7 @@ function initLocale() {
 
 $(function() {
 
-    $.isMobile = true; //window.innerWidth < 768;
+    $.isMobile = window.innerWidth < 768;
 
     initLocale();
 
