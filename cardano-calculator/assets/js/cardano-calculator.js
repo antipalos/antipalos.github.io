@@ -74,6 +74,7 @@ function initNumpad() {
     $.fn.numpad.defaults.textClear = 'Clear'; // TODO: tranlate button
     $.fn.numpad.defaults.textCancel = 'Cancel'; // TODO: tranlate button
     $.fn.numpad.defaults.decimalSeparator = decimalMark;
+    $.fn.numpad.defaults.orderDelimiter = delimiter;
     $.fn.numpad.defaults.hidePlusMinusButton = true;
 
     $('.inp-param').each(function() {
@@ -100,6 +101,7 @@ function initNumpad() {
                     let val = el.val();
                     if (target.val() !== val) {
                         target.val(val);
+                        target.trigger('change');
                     }
                 }
             },

@@ -159,7 +159,9 @@
 			* @return string | number
 			*/
 			nmpd.getValue = function(){
-                return isNaN(nmpd.display.val().replace(options.decimalSeparator, ".")) ? 0 : nmpd.display.val();
+                let val = nmpd.display.val();
+                let num = val.replace(options.decimalSeparator, ".").replace(new RegExp(options.orderDelimiter, 'g'), '');
+                return isNaN(num) ? 0 : val;
 			};
 
 			/**
