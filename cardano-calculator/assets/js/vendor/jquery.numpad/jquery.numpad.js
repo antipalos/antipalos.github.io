@@ -81,9 +81,14 @@
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(1).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(2).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(3).addClass('numero')))
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftUp).addClass('up').click(function(){
-							nmpd.shift(1);
-						})))
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftUp).addClass('up')
+                            .mousedown(function() {
+                                this.interval = setInterval(() => nmpd.shift(1), 300);
+                            })
+                            .mouseup(function () {
+                                clearInterval(this.interval);
+                            })
+                        ))
 					).append(
 					$(options.rowTpl)
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(/*'&plusmn;'*/ '').addClass('neg').click(function(){
@@ -93,9 +98,14 @@
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.decimalSeparator).addClass('sep').click(function(){
 							nmpd.setValue(nmpd.getValue().toString() + options.decimalSeparator);
 						})))
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftDown).addClass('down').click(function () {
-                            nmpd.shift(-1);
-                        })))
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftDown).addClass('down')
+                            .mousedown(function() {
+                                this.interval = setInterval(() => nmpd.shift(-1), 300);
+                            })
+                            .mouseup(function () {
+                                clearInterval(this.interval);
+                            })
+                        ))
 					);
 				var footer = $(options.rowFooter);
 				footer.find(options.footerClass)
@@ -214,7 +224,10 @@
 			};
 
 			nmpd.shift = function(direction) {
-			    nmpd.setValue(options.shiftFn(nmpd.getValue(), direction));
+                let value = options.shiftFn(nmpd.getValue(), direction);
+                if (value) {
+                    nmpd.setValue(value);
+                }
             };
 
 			/**

@@ -131,8 +131,12 @@ function initNumpad() {
                 }
             },
             shiftFn: function (val, direction) {
-                let parsed = parseLocalizedValueForParam(param, val);
-                return '' + ((param.step || 1) * direction + parsed);
+                let parsedValue = parseLocalizedValueForParam(param, val);
+                let newValue = (param.step || 1) * direction + parsedValue;
+                if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
+                    return null;
+                }
+                return '' + newValue;
             }
         });
 
