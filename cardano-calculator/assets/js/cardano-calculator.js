@@ -2,6 +2,23 @@ function frmt(num, scale = 6) {
     return window.CardanoCalculatorLocale.frmt(num, scale);
 }
 
+function getParamForInput(el) {
+    let id = el.attr('id');
+    return id.startsWith("inp_") ? window.CardanoCalculatorParams[id.substr(4)] : null;
+}
+
+function parseLocalizedValueForParam(param, val) {
+    let localeSeparators = window.CardanoCalculatorLocale.separators;
+    return param.parse(val
+        .replace(localeSeparators.order_reg, '')
+        .replace(localeSeparators.decimal_reg, '.') || '0');
+}
+
+function parseValueForInputField(el, val = el.val()) {
+    let param = getParamForInput(el);
+    return param ? [parseLocalizedValueForParam(param, val), param] : [null, null];
+}
+
 function isNewValuesAllowedForParam(oldValue, newValue, param) {
     if (oldValue < param.min) {
         if (newValue < oldValue) {
@@ -18,18 +35,10 @@ function isNewValuesAllowedForParam(oldValue, newValue, param) {
 }
 
 function parseParamIntoContext(el, shift = 0, needsFormatting = false) {
-    let id = el.attr('id');
-    if (!id.startsWith("inp_")) {
-        return null;
-    }
-    param = window.CardanoCalculatorParams[id.substr(4)];
+    let [parsedValue, param] = parseValueForInputField(el);
     if (!param) {
         return null;
     }
-    let localeSeparators = window.CardanoCalculatorLocale.separators;
-    let parsedValue = param.parse(el.val()
-        .replace(localeSeparators.order_reg, '')
-        .replace(localeSeparators.decimal_reg, '.') || '0');
     if (shift) {
         let newValue = parsedValue + ((param.step || 1) * shift);
         if (!isNewValuesAllowedForParam(parsedValue, newValue, param)) {
@@ -37,7 +46,8 @@ function parseParamIntoContext(el, shift = 0, needsFormatting = false) {
         }
         parsedValue = newValue;
     }
-    if ((shift && needsFormatting) || (localeSeparators.weird_order && param.is_cleave && param.scale === 0)) {
+    let isWeirdOrder = window.CardanoCalculatorLocale.separators.weird_order;
+    if ((shift && needsFormatting) || (isWeirdOrder && param.is_cleave && param.scale === 0)) {
         el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
@@ -73,6 +83,7 @@ function initNumpad() {
         let isCleaveField = target.hasClass('cleave-num');
 
         target.parent().find('.inp-param-numpad-btn').numpad({
+            target: $('<span></span>'),
             hideDecimalButton: !isFloat,
             onKeypadCreate: function() {
                 $(this).find('.done').addClass('btn-primary');
@@ -80,20 +91,24 @@ function initNumpad() {
             onKeypadOpen: function() {
                 let display = $(this).find('.nmpd-display');
                 display.attr('readonly', true);
-                display.val(target.val());
+                let val = target.val();
+                display.val(val);
             },
-            onKeypadClose: function() {
-                let el = $(this).find('.nmpd-display');
-                if (isCleaveField) {
-                    let unformatted = accounting.unformat(el.val(), decimalMark);
-                    let formatted = accounting.formatNumber(unformatted, 2, delimiter, decimalMark);
-                    target.val(formatted);
+            onKeypadClose: function(e, isDone) {
+                if (isDone) {
+                    let el = $(this).find('.nmpd-display');
+                    let val = el.val();
+                    if (target.val() !== val) {
+                        target.val(val);
+                    }
                 }
             },
             onChange: function() {
                 let el = $(this).find('.nmpd-display');
+                let val = el.val();
                 if (isCleaveField) {
-                    // TODO: format numpads display field
+                    let [parsedVal, param] = parseValueForInputField(target, el.val());
+                    el.val(frmt(parsedVal, param.scale));
                 }
             }
         });
@@ -224,7 +239,6 @@ function updateCalculations() {
 }
 
 function paramUpdate(e, shift = 0, needsFormatting = false) {
-    console.log(e, shift);
     if (parseParamIntoContext($(e), shift, needsFormatting) != null) {
         updateCalculations();
     }
@@ -318,7 +332,7 @@ function initInputFieldEvents() {
     let inpFields = $('.inp-param');
     inpFields.on("change paste keyup", function() {
         let char = event.which || event.keyCode;
-        if (char.between(37,40)) {
+        if (char && char.between(37,40)) {
             return;
         }
         paramUpdate(this);
@@ -404,6 +418,7 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
             url: templateFile,
             cache: true,
             success: function (templateContent) {
+                dataContent['isMobile'] = $.isMobile;
                 let template = Handlebars.compile(templateContent);
                 let renderedHtml = template(dataContent);
                 $('#calc-row').html(renderedHtml);
@@ -471,7 +486,7 @@ function initLocale() {
 
 $(function() {
 
-    $.isMobile = window.innerWidth < 768;
+    $.isMobile = true; //window.innerWidth < 768;
 
     initLocale();
 

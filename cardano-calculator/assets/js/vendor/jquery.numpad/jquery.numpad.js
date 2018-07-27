@@ -191,7 +191,7 @@
 				}
 				// Hide the numpad and trigger numpad.close
 				nmpd.hide();
-				nmpd.trigger('numpad.close');
+				nmpd.trigger('numpad.close', [target]);
 				// Trigger a change event on the target element if the value has really been changed
 				// TODO check if the value has really been changed!
 				if (target && target.prop("tagName") == 'INPUT'){

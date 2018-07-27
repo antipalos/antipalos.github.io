@@ -40,12 +40,14 @@
                                                            {{#if step}} step="{{{step}}}" {{/if}}
                                                            value="{{{value}}}"
                                                            valtype="{{{value_type}}}">
-                                                    <span class="input-group-append">
-                                                        <button class="btn btn-light inp-param-numpad-btn" style="padding: 0">
-                                                            <img width="28px" src="assets/img/numpad.png"
-                                                                 style="opacity: 0.5"/>
-                                                        </button>
-                                                    </span>
+                                                    {{#if ../../isMobile}}
+                                                        <span class="input-group-append">
+                                                            <button class="btn btn-light inp-param-numpad-btn" style="padding: 0">
+                                                                <img width="28px" src="assets/img/numpad.png"
+                                                                     style="opacity: 0.5"/>
+                                                            </button>
+                                                        </span>
+                                                    {{/if}}
                                                 </div>
                                                 <div class="invalid-feedback"></div>
                                             </div>
