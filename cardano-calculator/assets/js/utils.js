@@ -19,6 +19,18 @@ function UtilsConstructor() {
         let res = Utils.yieldWhile(() => regExp.exec(location.href)).map((v) => v[1]);
         return res || def;
     };
+
+    Array.prototype.contains = function (x) {
+        return this.indexOf(x) > -1;
+    };
+
+    Number.prototype.between = function (a,b) {
+        return this >= a && this <= b;
+    };
+
+    Number.prototype.betweex = function (a,b) {
+        return this > a && this < b;
+    };
 }
 
 const Utils = Object.freeze(new UtilsConstructor());

@@ -17,7 +17,7 @@ function isNewValuesAllowedForParam(oldValue, newValue, param) {
     return true;
 }
 
-function parseParamIntoContext(el, shift = 0) {
+function parseParamIntoContext(el, shift = 0, needsFormatting = false) {
     let id = el.attr('id');
     if (!id.startsWith("inp_")) {
         return null;
@@ -37,7 +37,7 @@ function parseParamIntoContext(el, shift = 0) {
         }
         parsedValue = newValue;
     }
-    if (shift || (localeSeparators.weird_order && param.is_cleave && param.scale === 0)) {
+    if ((shift && needsFormatting) || (localeSeparators.weird_order && param.is_cleave && param.scale === 0)) {
         el.val(frmt(parsedValue, param.scale));
     }
     param.value = parsedValue;
@@ -223,8 +223,9 @@ function updateCalculations() {
     $('#ctx_resultAtYearEnd').text('(' + frmt((resultAtYearEnd * 100) / userStake, 3) + '%)');
 }
 
-function paramUpdate(e, shift = 0) {
-    if (parseParamIntoContext($(e), shift) != null) {
+function paramUpdate(e, shift = 0, needsFormatting = false) {
+    console.log(e, shift);
+    if (parseParamIntoContext($(e), shift, needsFormatting) != null) {
         updateCalculations();
     }
 }
@@ -300,16 +301,6 @@ function initCleave(loc) {
             el.val(frmt(p.value, p.scale));
         }
     });
-    if (!window.CardanoCalcCleaveKeysListener) {
-        window['CardanoCalcCleaveKeysListener'] = function() {
-            let char = event.which || event.keyCode;
-            if (char === 38 || char === 40) {
-                shift = 39 - char;
-                paramUpdate(this, shift);
-            }
-        };
-        $('.inp-param.cleave-num').keydown(window.CardanoCalcCleaveKeysListener);
-    }
 }
 
 function restartCleave(loc) {
@@ -324,13 +315,25 @@ function restartCleave(loc) {
 }
 
 function initInputFieldEvents() {
-    $('.inp-param').on("change paste keyup", function() {
+    let inpFields = $('.inp-param');
+    inpFields.on("change paste keyup", function() {
+        let char = event.which || event.keyCode;
+        if (char.between(37,40)) {
+            return;
+        }
         paramUpdate(this);
+    });
+    inpFields.keydown(function() {
+        let char = event.which || event.keyCode;
+        if (char === 38 || char === 40) {
+            shift = 39 - char;
+            paramUpdate(this, shift, $(this).hasClass('cleave-num'));
+        }
     });
     let decimalSeparators = ['.', ',', '\''];
     $('.inp-param[valtype=float]').on("keyup", function(e) {
         let decimal = window.CardanoCalculatorLocale.separators.decimal;
-        if (decimalSeparators.indexOf(e.key) > -1 && e.key !== decimal) {
+        if (decimalSeparators.contains(e.key) && e.key !== decimal) {
             let el = $(this), val = el.val();
             if (!val.includes(decimal)) {
                 el.val(val + decimal);
