@@ -152,7 +152,7 @@
 				// Special event for the numeric buttons
 				$('#'+id+' .numero').bind('click', function(){
 					var val;
-					if ($('#'+id+' .dirty').val() == '0'){
+					if (options.dirtyMode && $('#'+id+' .dirty').val() == '0'){
 						val = $(this).text();
 					} else {
 						val = nmpd.getValue() ? nmpd.getValue().toString() + $(this).text() : $(this).text();
