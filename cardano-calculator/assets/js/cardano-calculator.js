@@ -48,7 +48,7 @@ function initNumpad() {
 
     $('.nmpd-wrapper').remove();
 
-    let delimiter = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.order : ',',
+    let delimiter = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.order : "'",
     decimalMark = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.decimal : '.';
 
     $.fn.numpad.defaults.gridTpl = '<div class="modal-content"></div>';
@@ -69,43 +69,32 @@ function initNumpad() {
     $('.inp-param').each(function() {
 
         let target = $(this);
+        let isFloat = target.attr('valtype') === 'float';
         let isCleaveField = target.hasClass('cleave-num');
 
-        target.numpad({
-            hideDecimalButton: !isCleaveField,
+        target.parent().find('.inp-param-numpad-btn').numpad({
+            hideDecimalButton: !isFloat,
             onKeypadCreate: function() {
-
                 $(this).find('.done').addClass('btn-primary');
-
             },
             onKeypadOpen: function() {
-
-                let el = $(this).find('.nmpd-display');
-                el.attr('readonly', true);
-
+                let display = $(this).find('.nmpd-display');
+                display.attr('readonly', true);
+                display.val(target.val());
             },
             onKeypadClose: function() {
-
                 let el = $(this).find('.nmpd-display');
-
                 if (isCleaveField) {
-
                     let unformatted = accounting.unformat(el.val(), decimalMark);
                     let formatted = accounting.formatNumber(unformatted, 2, delimiter, decimalMark);
-
                     target.val(formatted);
-
                 }
-
             },
             onChange: function() {
-
                 let el = $(this).find('.nmpd-display');
-
                 if (isCleaveField) {
                     // TODO: format numpads display field
                 }
-
             }
         });
 
@@ -296,7 +285,7 @@ function initSwiper() {
 }
 
 function initCleave(loc) {
-    let delimiter = loc ? loc.separators.order : ',',
+    let delimiter = loc ? loc.separators.order : "'",
         decimalMark = loc ? loc.separators.decimal : '.';
     Object.values(window.CardanoCalculatorParams).forEach(function (p) {
         if (p.is_cleave) {

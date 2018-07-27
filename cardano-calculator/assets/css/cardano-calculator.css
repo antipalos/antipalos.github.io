@@ -93,6 +93,10 @@ code {
     outline: 0;
 }
 
+.inp-param-numpad-btn {
+    border: 1px solid #dddddd;
+}
+
 @media (max-width: 767.99px) {
 
     .swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet {
