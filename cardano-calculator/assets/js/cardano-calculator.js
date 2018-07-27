@@ -44,6 +44,75 @@ function parseParamIntoContext(el, shift = 0) {
     return parsedValue
 }
 
+function initNumpad() {
+
+    $('.nmpd-wrapper').remove();
+
+    let delimiter = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.order : ',',
+    decimalMark = window.CardanoCalculatorLocale ? window.CardanoCalculatorLocale.separators.decimal : '.';
+
+    $.fn.numpad.defaults.gridTpl = '<div class="modal-content"></div>';
+    $.fn.numpad.defaults.backgroundTpl = '<div class="modal-backdrop in"></div>';
+    $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control">';
+    $.fn.numpad.defaults.rowTpl = '<div class="row mb-2"></div>';
+    $.fn.numpad.defaults.displayCellTpl = '<div class="col-12"></div>';
+    $.fn.numpad.defaults.cellTpl = '<div class="col-3"></div>';
+    $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
+    $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn" style="width: 100%;"></button>';
+    $.fn.numpad.defaults.textDone = 'Done'; // TODO: tranlate button
+    $.fn.numpad.defaults.textDelete = 'Del'; // TODO: tranlate button
+    $.fn.numpad.defaults.textClear = 'Clear'; // TODO: tranlate button
+    $.fn.numpad.defaults.textCancel = 'Cancel'; // TODO: tranlate button
+    $.fn.numpad.defaults.decimalSeparator = decimalMark;
+    $.fn.numpad.defaults.hidePlusMinusButton = true;
+
+    $('.inp-param').each(function() {
+
+        let target = $(this);
+        let isCleaveField = target.hasClass('cleave-num');
+
+        target.numpad({
+            hideDecimalButton: !isCleaveField,
+            onKeypadCreate: function() {
+
+                $(this).find('.done').addClass('btn-primary');
+
+            },
+            onKeypadOpen: function() {
+
+                let el = $(this).find('.nmpd-display');
+                el.attr('readonly', true);
+
+            },
+            onKeypadClose: function() {
+
+                let el = $(this).find('.nmpd-display');
+
+                if (isCleaveField) {
+
+                    let unformatted = accounting.unformat(el.val(), decimalMark);
+                    let formatted = accounting.formatNumber(unformatted, 2, delimiter, decimalMark);
+
+                    target.val(formatted);
+
+                }
+
+            },
+            onChange: function() {
+
+                let el = $(this).find('.nmpd-display');
+
+                if (isCleaveField) {
+                    // TODO: format numpads display field
+                }
+
+            }
+        });
+
+    });
+
+}
+
 let Layouts = Object.freeze({
     TABLE: {
         name: 'TABLE',
@@ -290,8 +359,7 @@ function initLayout(layoutName) {
     if (layoutName && Object.keys(Layouts).indexOf(layoutName) > -1) {
         window.CardanoCalculatorLayout = Layouts[layoutName];
     } else {
-        let w = window.innerWidth;
-        window.CardanoCalculatorLayout = w < 768 ? Layouts.SWIPER : Layouts.TABLE;
+        window.CardanoCalculatorLayout = $.isMobile ? Layouts.SWIPER : Layouts.TABLE;
     }
     return window.CardanoCalculatorLayout.template;
 }
@@ -355,6 +423,7 @@ function initCalcLayout(layoutName = Cookies.get('layout')) {
                 initCleave(window.CardanoCalculatorLocale);
                 initInputFieldEvents();
                 updateCalculations();
+                ($.isMobile) ? initNumpad() : null;
             }
         });
     }
@@ -400,6 +469,7 @@ function initLocale() {
                 Cookies.set('locale', selectedLocaleName);
                 setCurrentLocale(selectedLocale);
                 restartCleave(selectedLocale);
+                ($.isMobile) ? initNumpad() : null;
                 updateCalculations();
             }
         });
@@ -408,6 +478,8 @@ function initLocale() {
 }
 
 $(function() {
+
+    $.isMobile = window.innerWidth < 768;
 
     initLocale();
 
