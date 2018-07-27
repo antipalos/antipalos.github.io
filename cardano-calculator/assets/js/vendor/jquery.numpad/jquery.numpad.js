@@ -83,6 +83,7 @@
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(3).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftUp).addClass('up')
                             .mousedown(function() {
+                                nmpd.shift(1);
                                 this.interval = setInterval(() => nmpd.shift(1), 300);
                             })
                             .mouseup(function () {
@@ -103,6 +104,7 @@
 						})))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftDown).addClass('down')
                             .mousedown(function() {
+                                nmpd.shift(-1);
                                 this.interval = setInterval(() => nmpd.shift(-1), 300);
                             })
                             .mouseup(function () {
