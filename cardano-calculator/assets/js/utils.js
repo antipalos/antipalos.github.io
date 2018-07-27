@@ -24,6 +24,10 @@ function UtilsConstructor() {
         return this.indexOf(x) > -1;
     };
 
+    String.prototype.contains = function (x) {
+        return this.indexOf(x) > -1;
+    };
+
     Number.prototype.between = function (a,b) {
         return this >= a && this <= b;
     };

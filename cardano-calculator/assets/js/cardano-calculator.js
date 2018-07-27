@@ -82,6 +82,7 @@ function initNumpad() {
         let target = $(this);
         let isFloat = target.attr('valtype') === 'float';
         let isCleaveField = target.hasClass('cleave-num');
+        let param = getParamForInput(target);
 
         target.parent().find('.inp-param-numpad-btn').numpad({
             target: $('<span></span>'),
@@ -106,11 +107,22 @@ function initNumpad() {
                 }
             },
             onChange: function() {
-                let el = $(this).find('.nmpd-display');
+                let $this = $(this);
+                let el = $this.find('.nmpd-display');
                 let val = el.val();
-                if (isCleaveField) {
-                    let [parsedVal, param] = parseValueForInputField(target, el.val());
-                    el.val(frmt(parsedVal, param.scale));
+                let decimalMarkIndex = val.indexOf(decimalMark);
+                if (val.endsWith(decimalMark)) {
+                    if (decimalMarkIndex !== (val.length - 1)) {
+                        el.val(val.substr(0,val.length-1));
+                    }
+                }
+                else if (isCleaveField) {
+                    el.val(frmt(parseLocalizedValueForParam(param, el.val()), param.scale));
+                }
+                if (decimalMarkIndex > 0 && decimalMarkIndex === (val.length - (param.scale + 1))) {
+                    $this.find('.numero').attr('disabled', true);
+                } else {
+                    $this.find('.numero').attr('disabled', false);
                 }
             }
         });
