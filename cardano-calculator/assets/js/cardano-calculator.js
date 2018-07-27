@@ -72,12 +72,12 @@ function initNumpad() {
     $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
     $.fn.numpad.defaults.buttonFunctionTpl = '<button type="button" class="btn"></button>';
     $.fn.numpad.defaults.buttonFooterTpl = '<button type="button" class="btn" style="width: 40%"></button>';
-    $.fn.numpad.defaults.textDone = '✓'; // TODO: tranlate button
-    $.fn.numpad.defaults.textDelete = '⬅'; // TODO: tranlate button
-    $.fn.numpad.defaults.textShiftUp = '⬆'; // TODO: tranlate button
-    $.fn.numpad.defaults.textShiftDown = '⬇'; // TODO: tranlate button
-    $.fn.numpad.defaults.textClear = '⎵'; // TODO: tranlate button
-    $.fn.numpad.defaults.textCancel = '🚫'; // TODO: tranlate button
+    $.fn.numpad.defaults.textDone = '✓';
+    $.fn.numpad.defaults.textDelete = '⬅';
+    $.fn.numpad.defaults.textShiftUp = '⬆';
+    $.fn.numpad.defaults.textShiftDown = '⬇';
+    $.fn.numpad.defaults.textClear = '⎵';
+    $.fn.numpad.defaults.textCancel = '🚫';
     $.fn.numpad.defaults.decimalSeparator = decimalMark;
     $.fn.numpad.defaults.orderDelimiter = delimiter;
     $.fn.numpad.defaults.hidePlusMinusButton = true;
