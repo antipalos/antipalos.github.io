@@ -68,7 +68,11 @@ function UtilsConstructor() {
                 _this.stopRepeated(this.repeaterCancelObject);
             }
         };
-    }
+    };
+
+    this.safeNull = function(x, def) {
+        return (x === undefined || x === null) ? def : x;
+    };
 }
 
 const Utils = Object.freeze(new UtilsConstructor());

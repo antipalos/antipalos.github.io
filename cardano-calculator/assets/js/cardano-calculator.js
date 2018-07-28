@@ -266,7 +266,7 @@ function initNumpad() {
     $.fn.numpad.defaults.displayTpl = '<input type="text" class="form-control">';
     $.fn.numpad.defaults.rowTpl = '<div class="row mb-2"></div>';
     $.fn.numpad.defaults.rowFooter = '<div class="row mb-2"><div class="col-12"><div class="numpad-footer input-group d-flex justify-content-around border-top" style="padding-top: 5px"></div></div></div>';
-    $.fn.numpad.defaults.displayCellTpl = '<div class="col-12"></div>';
+    $.fn.numpad.defaults.displayCellTpl = '<div class="col-12 form-group"></div>';
     $.fn.numpad.defaults.cellTpl = '<div class="col-3"></div>';
     $.fn.numpad.defaults.footerClass = '.numpad-footer';
     $.fn.numpad.defaults.buttonNumberTpl =  '<button type="button" class="btn btn-default"></button>';
@@ -296,10 +296,11 @@ function initNumpad() {
                 $(this).find('.done').addClass('btn-primary');
             },
             onKeypadOpen: function() {
-                let display = $(this).find('.nmpd-display');
-                display.attr('readonly', true);
+                let $display = $(this).find('.nmpd-display');
+                $display.css('background', 'white');
+                $display.attr('readonly', true);
                 let val = target.val();
-                display.val(val);
+                $display.val(val);
             },
             onKeypadClose: function(e, isDone) {
                 if (isDone) {
@@ -313,22 +314,27 @@ function initNumpad() {
             },
             onChange: function() {
                 let $this = $(this);
-                let el = $this.find('.nmpd-display');
-                let val = el.val();
+                let $display = $this.find('.nmpd-display');
+                let val = $display.val();
                 let decimalMarkIndex = val.indexOf(decimalMark);
                 if (val.endsWith(decimalMark)) {
                     if (decimalMarkIndex !== (val.length - 1)) {
-                        el.val(val.substr(0,val.length-1));
+                        $display.val(val.substr(0,val.length-1));
                     }
+                    return;
                 }
-                else if (isCleaveField) {
-                    el.val(frmt(parseLocalizedValueForParam(param, el.val()), param.scale));
+                let parsed = parseLocalizedValueForParam(param, $display.val());
+                if (isCleaveField) {
+                    $display.val(frmt(parsed, param.scale));
                 }
-                if (decimalMarkIndex > 0 && decimalMarkIndex === (val.length - (param.scale + 1))) {
-                    $this.find('.numero').attr('disabled', true);
-                } else {
-                    $this.find('.numero').attr('disabled', false);
-                }
+                let isValid = parsed.between(param.min, Utils.safeNull(param.max, Number.MAX_SAFE_INTEGER));
+                $display.css('background', isValid ? 'white' : 'red');
+                $display.parent().find('.invalid-feedback').text(isValid ? ''
+                    : param.id + ' must be between ' + param.min + ' and ' + Utils.safeNull(param.max, '∞'));
+                (isValid ? $display.removeClass : $display.addClass).call($display, 'is-invalid');
+                $this.find('.done').attr('disabled', !isValid);
+                let isDisabledNumbers = (decimalMarkIndex > 0 && decimalMarkIndex === (val.length - (param.scale + 1)));
+                $this.find('.numero').attr('disabled', isDisabledNumbers);
             },
             shiftFn: function (val, direction) {
                 let parsedValue = parseLocalizedValueForParam(param, val);
