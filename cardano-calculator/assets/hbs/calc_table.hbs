@@ -26,16 +26,26 @@
                             {{{str title}}}: </label>
                     </td>
                     <td>
-                        <input id="inp_{{{id}}}" class="inp-param {{#if is_cleave}}cleave-num{{/if}}"
-                               data-toggle="tooltip"
-                               title="{{{str inp_tip}}}"
-                               style="width: 15ch;"
-                               type="{{#if is_cleave}}text{{else}}number{{/if}}"
-                               min="{{{min}}}"
-                               {{#if max}} max="{{{max}}}" {{/if}}
-                               {{#if step}} step="{{{step}}}" {{/if}}
-                               value="{{{value}}}"
-                               valtype="{{{value_type}}}">
+                        <div class="input-group" style="padding-right: 3px">
+                            <input id="inp_{{{id}}}" class="inp-param {{#if is_cleave}}cleave-num{{/if}}"
+                                   data-toggle="tooltip"
+                                   title="{{{str inp_tip}}}"
+                                   style="width: 15ch;"
+                                   type="{{#if is_cleave}}text{{else}}number{{/if}}"
+                                   min="{{{min}}}"
+                                {{#if max}} max="{{{max}}}" {{/if}}
+                                {{#if step}} step="{{{step}}}" {{/if}}
+                                   value="{{{value}}}"
+                                   valtype="{{{value_type}}}">
+                            {{#if ../../isMobile}}
+                                <span class="input-group-append">
+                                    <button class="btn btn-light inp-param-numpad-btn" style="padding: 0">
+                                        <img width="24px" src="assets/img/numpad.png"
+                                             style="opacity: 0.5"/>
+                                    </button>
+                                </span>
+                            {{/if}}
+                        </div>
                     </td>
                     <td>
                         <span id="ctx_{{{id}}}"

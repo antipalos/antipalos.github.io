@@ -58,8 +58,13 @@
 				/** @var grid jQuery object containing the grid for the numpad: the display, the buttons, etc. */
 				var table = $(options.gridTpl).addClass('nmpd-grid');
 				nmpd.grid = table;
-				table.append($(options.rowTpl).append($(options.displayCellTpl).append(display).append($('<input type="hidden" class="dirty" value="0"></input>'))));
+				table.append($(options.rowTpl).append($(options.displayCellTpl)
+					.append(display)
+					.append($('<div class="invalid-feedback"></div>'))
+					.append($('<input type="hidden" class="dirty" value="0"></input>'))));
 				// Create rows and columns of the the grid with appropriate buttons
+				var upRepeater = Utils.repeater(() => nmpd.shift(1));
+				var downRepeater = Utils.repeater(() => nmpd.shift(-1));
 				table.append(
 					$(options.rowTpl)
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(7).addClass('numero')))
@@ -81,20 +86,36 @@
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(1).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(2).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(3).addClass('numero')))
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textCancel).addClass('cancel').click(function(){
-							nmpd.close(false);
-						})))
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftUp).addClass('up')
+							.mousedown(upRepeater.start)
+							.mouseup(upRepeater.stop)
+						))
 					).append(
 					$(options.rowTpl)
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html('&plusmn;').addClass('neg').click(function(){
-							nmpd.setValue(nmpd.getValue() * (-1));
-						})))
+						.append(
+							$(options.cellTpl)
+							// .append($(options.buttonFunctionTpl).html('&plusmn;').addClass('neg').click(function(){
+							//     nmpd.setValue(nmpd.getValue() * (-1));
+							// }))
+						)
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(0).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.decimalSeparator).addClass('sep').click(function(){
 							nmpd.setValue(nmpd.getValue().toString() + options.decimalSeparator);
 						})))
-						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textDone).addClass('done')))
+						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftDown).addClass('down')
+							.mousedown(downRepeater.start)
+							.mouseup(downRepeater.stop)
+						))
 					);
+				var footer = $(options.rowFooter);
+				footer.find(options.footerClass)
+					.append($(options.buttonFooterTpl).html(options.textCancel).addClass('cancel').click(function(){
+						nmpd.close(false);
+					}))
+					.append(
+						$(options.buttonFooterTpl).html(options.textDone).addClass('done')
+					);
+				table.append(footer);
 				// Create the backdrop of the numpad - an overlay for the main page
 				nmpd.append($(options.backgroundTpl).addClass('nmpd-overlay').click(function(){nmpd.close(false);}));
 				// Append the grid table to the nmpd element
@@ -126,7 +147,7 @@
 				// Special event for the numeric buttons
 				$('#'+id+' .numero').bind('click', function(){
 					var val;
-					if ($('#'+id+' .dirty').val() == '0'){
+					if (options.dirtyMode && $('#'+id+' .dirty').val() == '0'){
 						val = $(this).text();
 					} else {
 						val = nmpd.getValue() ? nmpd.getValue().toString() + $(this).text() : $(this).text();
@@ -159,7 +180,9 @@
 			* @return string | number
 			*/
 			nmpd.getValue = function(){
-                return isNaN(nmpd.display.val().replace(options.decimalSeparator, ".")) ? 0 : nmpd.display.val();
+				let val = nmpd.display.val();
+				let num = val.replace(options.decimalSeparator, ".").replace(new RegExp(options.orderDelimiter, 'g'), '');
+				return isNaN(num) ? 0 : val;
 			};
 
 			/**
@@ -191,13 +214,22 @@
 				}
 				// Hide the numpad and trigger numpad.close
 				nmpd.hide();
-				nmpd.trigger('numpad.close');
+				nmpd.trigger('numpad.close', [target]);
 				// Trigger a change event on the target element if the value has really been changed
 				// TODO check if the value has really been changed!
 				if (target && target.prop("tagName") == 'INPUT'){
 					target.trigger('change');
 				}
 				return nmpd;
+			};
+
+			nmpd.shift = function(direction) {
+				if (options.shiftFn) {
+					let value = options.shiftFn(nmpd.getValue(), direction);
+					if (value) {
+						nmpd.setValue(value);
+					}
+				}
 			};
 
 			/**

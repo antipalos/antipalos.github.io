@@ -31,14 +31,24 @@
                                             </div>
 
                                             <div class="form-group col-md-4">
-                                                <input id="inp_{{{id}}}" class="inp-param form-control {{#if is_cleave}}cleave-num{{/if}}"
-                                                       data-toggle="tooltip" data-placement="top" title="{{{str inp_tip}}}"
-                                                       type="{{#if is_cleave}}text{{else}}number{{/if}}"
-                                                       min="{{{min}}}"
-                                                       {{#if max}} max="{{{max}}}" {{/if}}
-                                                       {{#if step}} step="{{{step}}}" {{/if}}
-                                                       value="{{{value}}}"
-                                                       valtype="{{{value_type}}}">
+                                                <div class="input-group" style="padding-right: 3px">
+                                                    <input id="inp_{{{id}}}" class="inp-param form-control {{#if is_cleave}}cleave-num{{/if}}"
+                                                           data-toggle="tooltip" data-placement="top" title="{{{str inp_tip}}}"
+                                                           type="{{#if is_cleave}}text{{else}}number{{/if}}"
+                                                           min="{{{min}}}"
+                                                           {{#if max}} max="{{{max}}}" {{/if}}
+                                                           {{#if step}} step="{{{step}}}" {{/if}}
+                                                           value="{{{value}}}"
+                                                           valtype="{{{value_type}}}">
+                                                    {{#if ../../isMobile}}
+                                                        <span class="input-group-append">
+                                                            <button class="btn btn-light inp-param-numpad-btn" style="padding: 0">
+                                                                <img width="28px" src="assets/img/numpad.png"
+                                                                     style="opacity: 0.5"/>
+                                                            </button>
+                                                        </span>
+                                                    {{/if}}
+                                                </div>
                                                 <div class="invalid-feedback"></div>
                                             </div>
 
