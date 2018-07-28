@@ -180,9 +180,9 @@
 			* @return string | number
 			*/
 			nmpd.getValue = function(){
-                let val = nmpd.display.val();
-                let num = val.replace(options.decimalSeparator, ".").replace(new RegExp(options.orderDelimiter, 'g'), '');
-                return isNaN(num) ? 0 : val;
+				let val = nmpd.display.val();
+				let num = val.replace(options.decimalSeparator, ".").replace(new RegExp(options.orderDelimiter, 'g'), '');
+				return isNaN(num) ? 0 : val;
 			};
 
 			/**
