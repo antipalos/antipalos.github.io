@@ -35,6 +35,28 @@ function UtilsConstructor() {
     Number.prototype.betweex = function (a,b) {
         return this > a && this < b;
     };
+
+    this.repeated = function (f, {interval = 300, firstDelay = false, minInterval = 100, intervalStep = 50, counterStep = 10} = {}) {
+        if (!firstDelay) {
+            f()
+        }
+        let context = {id: null, counter: 0, interval: interval};
+        context.id = setInterval(function fun() {
+            f();
+            if (context.interval > minInterval && ++context.counter % counterStep === 0) {
+                clearInterval(context.id);
+                context.interval -= intervalStep;
+                context.id = setInterval(fun, context.interval);
+            }
+        }, interval);
+        return {isCancel: true, cancel: () => clearInterval(context.id)};
+    };
+
+    this.stopRepeated = function (cancel) {
+        if (cancel && cancel.cancel && cancel.isCancel) {
+            cancel.cancel();
+        }
+    };
 }
 
 const Utils = Object.freeze(new UtilsConstructor());
