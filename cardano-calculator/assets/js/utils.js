@@ -57,6 +57,18 @@ function UtilsConstructor() {
             cancel.cancel();
         }
     };
+
+    this.repeater = function(f, params) {
+        let _this = this;
+        return {
+            start: function () {
+                this.repeaterCancelObject = _this.repeated(f, params);
+            },
+            stop: function () {
+                _this.stopRepeated(this.repeaterCancelObject);
+            }
+        };
+    }
 }
 
 const Utils = Object.freeze(new UtilsConstructor());

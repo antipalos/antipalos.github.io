@@ -60,6 +60,8 @@
 				nmpd.grid = table;
 				table.append($(options.rowTpl).append($(options.displayCellTpl).append(display).append($('<input type="hidden" class="dirty" value="0"></input>'))));
 				// Create rows and columns of the the grid with appropriate buttons
+                var upRepeater = Utils.repeater(() => nmpd.shift(1));
+                var downRepeater = Utils.repeater(() => nmpd.shift(-1));
 				table.append(
 					$(options.rowTpl)
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(7).addClass('numero')))
@@ -82,12 +84,8 @@
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(2).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonNumberTpl).html(3).addClass('numero')))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftUp).addClass('up')
-                            .mousedown(function() {
-                                this.intervalCancel = Utils.repeated(() => nmpd.shift(1));
-                            })
-                            .mouseup(function () {
-                                Utils.stopRepeated(this.intervalCancel);
-                            })
+                            .mousedown(upRepeater.start)
+                            .mouseup(upRepeater.stop)
                         ))
 					).append(
 					$(options.rowTpl)
@@ -102,12 +100,8 @@
 							nmpd.setValue(nmpd.getValue().toString() + options.decimalSeparator);
 						})))
 						.append($(options.cellTpl).append($(options.buttonFunctionTpl).html(options.textShiftDown).addClass('down')
-                            .mousedown(function() {
-                                this.intervalCancel = Utils.repeated(() => nmpd.shift(-1));
-                            })
-                            .mouseup(function () {
-                                Utils.stopRepeated(this.intervalCancel);
-                            })
+                            .mousedown(downRepeater.start)
+                            .mouseup(downRepeater.stop)
                         ))
 					);
 				var footer = $(options.rowFooter);
