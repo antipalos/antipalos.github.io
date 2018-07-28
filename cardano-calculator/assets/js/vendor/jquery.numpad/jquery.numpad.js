@@ -224,9 +224,11 @@
 			};
 
 			nmpd.shift = function(direction) {
-				let value = options.shiftFn(nmpd.getValue(), direction);
-				if (value) {
-					nmpd.setValue(value);
+				if (options.shiftFn) {
+					let value = options.shiftFn(nmpd.getValue(), direction);
+					if (value) {
+						nmpd.setValue(value);
+					}
 				}
 			};
 
