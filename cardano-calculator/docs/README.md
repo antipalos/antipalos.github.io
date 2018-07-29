@@ -2,4 +2,4 @@
 
 [Delegateion spec DRAFT PDF](delegation_design_spec.pdf)
 
-This document is generated from [official draft in cardano repo](https://github.com/input-output-hk/cardano-sl/blob/fe6653822a6bc0aa007d6255a8511a562aad222e/docs/delegation_design_spec.md) 
+This document is generated from [official draft in cardano repo](https://github.com/input-output-hk/cardano-sl/blob/76c01411a9017fa8db5699a3fe40530f734c3eb8/docs/delegation_design_spec.md) 
