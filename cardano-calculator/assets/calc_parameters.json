@@ -75,7 +75,7 @@
                     "title": "Transaction size (bytes)",
                     "tip": [
                         "Average transaction size in byte.",
-                        "The number of 350 bytes is calculated from the official explorer data."
+                        "The number of 458 bytes is calculated from the official explorer data."
                     ],
                     "is_cleave": false,
                     "inp_tip": "Cannot be less than 1",
