@@ -84,6 +84,20 @@
 
             function drawCharts(params) {
 
+                if (window.chart) {
+                    window.chart.forEach((c) => c.destroy());
+                }
+
+                window.chart = [
+                    draw_sH_chart('chart-s_H', params),
+                    draw_oH_chart('chart-o_H', params),
+                    draw_aoH_chart('chart-a_o_H', params),
+                    draw_asH_chart('chart-a_s_H', params),
+                ]
+            }
+
+            function draw_sH_chart(canvas_id, params) {
+
                 let steps = [0.0, 0.0025, 0.005, 0.0075, 0.01];
                 let datasets = steps.map(function (o, idx) {
                     return {
@@ -95,22 +109,14 @@
                             let params2 = Object.create(params);
                             params2.s = s;
                             params2.o = o;
-                            console.log(params2);
                             update(params2);
-                            console.log(params2);
                             return params2.H;
                         })
                     }
                 });
 
-                console.log(datasets);
-
-                if (window.chart) {
-                    window.chart.destroy();
-                }
-
-                let ctx = document.getElementById('chart-o_s').getContext('2d');
-                window.chart = Chart.Line(ctx, {
+                let ctx = document.getElementById(canvas_id).getContext('2d');
+                return Chart.Line(ctx, {
                     data: {
                         labels: steps,
                         datasets: datasets
@@ -129,6 +135,169 @@
                                 scaleLabel: {
                                     display: true,
                                     labelString: 's'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'H'
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            function draw_oH_chart(canvas_id, params) {
+
+                let steps = [0.0, 0.0025, 0.005, 0.0075, 0.01];
+                let datasets = steps.map(function (s, idx) {
+                    return {
+                        label: 's = ' + s,
+                        fill: false,
+                        borderColor: COLOR_ARR[idx],
+                        backgroundColor: COLOR_ARR[idx],
+                        data: steps.map(function (o) {
+                            let params2 = Object.create(params);
+                            params2.s = s;
+                            params2.o = o;
+                            update(params2);
+                            return params2.H;
+                        })
+                    }
+                });
+
+                let ctx = document.getElementById(canvas_id).getContext('2d');
+                return Chart.Line(ctx, {
+                    data: {
+                        labels: steps,
+                        datasets: datasets
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
+                        },
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'o'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'H'
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            function draw_aoH_chart(canvas_id, params) {
+
+                let aSteps = [0.0, 0.1, 0.25, 0.5, 1, 3, 5, 10];
+                let oSteps = [0.0, 0.0025, 0.005, 0.0075, 0.01];
+
+                let datasets = oSteps.map(function (o, idx) {
+                    return {
+                        label: 'o = ' + o,
+                        fill: false,
+                        borderColor: COLOR_ARR[idx],
+                        backgroundColor: COLOR_ARR[idx],
+                        data: aSteps.map(function (a) {
+                            let params2 = Object.create(params);
+                            params2.o = o;
+                            params2.a0 = a;
+                            update(params2);
+                            return params2.H;
+                        })
+                    }
+                });
+
+                let ctx = document.getElementById(canvas_id).getContext('2d');
+                return Chart.Line(ctx, {
+                    data: {
+                        labels: aSteps,
+                        datasets: datasets
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Changing of result (H) in dependence to a0 and o (s = ' + params.s + ')'
+                        },
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'a0'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'H'
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            function draw_asH_chart(canvas_id, params) {
+
+                let aSteps = [0.0, 0.1, 0.25, 0.5, 1, 3, 5, 10];
+                let oSteps = [0.0, 0.0025, 0.005, 0.0075, 0.01];
+
+                let datasets = oSteps.map(function (s, idx) {
+                    return {
+                        label: 's = ' + s,
+                        fill: false,
+                        borderColor: COLOR_ARR[idx],
+                        backgroundColor: COLOR_ARR[idx],
+                        data: aSteps.map(function (a) {
+                            let params2 = Object.create(params);
+                            params2.s = s;
+                            params2.a0 = a;
+                            update(params2);
+                            return params2.H;
+                        })
+                    }
+                });
+
+                let ctx = document.getElementById(canvas_id).getContext('2d');
+                return Chart.Line(ctx, {
+                    data: {
+                        labels: aSteps,
+                        datasets: datasets
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Changing of result (H) in dependence to a0 and s (o = ' + params.o + ')'
+                        },
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'a0'
                                 }
                             }],
                             yAxes: [{
@@ -186,7 +355,19 @@
         <h3>Charting</h3>
 
         <div class="chart-canvas">
-            <canvas id="chart-o_s"></canvas>
+            <canvas id="chart-s_H"></canvas>
+        </div>
+
+        <div class="chart-canvas">
+            <canvas id="chart-o_H"></canvas>
+        </div>
+
+        <div class="chart-canvas">
+            <canvas id="chart-a_o_H"></canvas>
+        </div>
+
+        <div class="chart-canvas">
+            <canvas id="chart-a_s_H"></canvas>
         </div>
 
     </body>
