@@ -1,0 +1,186 @@
+<html>
+    <head>
+
+        <script src="../assets/js/vendor/jquery/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+
+        <style type="text/css">
+            .chart-canvas {
+                width: 50%;
+            }
+        </style>
+
+        <script language="JavaScript">
+
+            const PARAMS = {
+                k: 100,
+                a0: 0.1,
+                o: 0.01,
+                s: 0.01,
+                R: 100000
+            };
+
+            const FLOATS = ['a0', 'o', 's'];
+
+            const COLORS = {
+                black: 'rgb(0, 0, 0)',
+                red: 'rgb(255, 99, 132)',
+                orange: 'rgb(255, 159, 64)',
+                aqua: 'rgb(0, 255, 255)',
+                yellow: 'rgb(255, 205, 86)',
+                green: 'rgb(75, 192, 192)',
+                brown: 'rgb(165, 42, 42)',
+                blue: 'rgb(54, 162, 235)',
+                purple: 'rgb(153, 102, 255)',
+                grey: 'rgb(201, 203, 207)',
+                cadet: 'rgb(95, 158, 160)'
+            };
+            const COLOR_ARR = Object.values(COLORS);
+
+            $(function() {
+
+                Object.entries(PARAMS).forEach(function ([k, v]) {
+                    $('#' + k).val(v);
+                });
+
+                $('input').on("change paste keyup", function () {
+                    $this = $(this);
+                    let id = $this.attr('id');
+                    let val = $this.val() || '0';
+                    PARAMS[id] = FLOATS.indexOf(id) > -1 ? parseFloat(val) : parseInt(val);
+                    update(PARAMS);
+                    updateView(PARAMS);
+                });
+
+                update(PARAMS);
+                updateView(PARAMS);
+            });
+
+            function round(val) {
+                return Number(Math.round(val+'e11')+'e-11');
+            }
+
+            function update(params = PARAMS) {
+                params.z0 = round(1/params.k);
+                params.oP = round(Math.min(params.o, params.z0));
+                params.sP = round(Math.min(params.s, params.z0));
+                params.A = round((params.z0 - params.oP) / params.z0);
+                params.B = round(params.sP * params.A);
+                params.C = round(params.oP - params.B);
+                params.D = round(params.C / params.z0);
+                params.E = round(params.sP * params.a0 * params.D);
+                params.F = round(params.oP + params.E);
+                params.G = round(params.R / (1 + params.a0));
+                params.H = round(params.G * params.F);
+            }
+
+            function updateView(params) {
+                $('span.result').each(function () {
+                    $this = $(this);
+                    $this.text(params[$this.attr('id')]);
+                });
+                drawCharts(params);
+            }
+
+            function drawCharts(params) {
+
+                let steps = [0.0, 0.0025, 0.005, 0.0075, 0.01];
+                let datasets = steps.map(function (o, idx) {
+                    return {
+                        label: 'o = ' + o,
+                        fill: false,
+                        borderColor: COLOR_ARR[idx],
+                        backgroundColor: COLOR_ARR[idx],
+                        data: steps.map(function (s) {
+                            let params2 = Object.create(params);
+                            params2.s = s;
+                            params2.o = o;
+                            console.log(params2);
+                            update(params2);
+                            console.log(params2);
+                            return params2.H;
+                        })
+                    }
+                });
+
+                console.log(datasets);
+
+                let ctx = document.getElementById('chart-o_s').getContext('2d');
+                Chart.Line(ctx, {
+                    data: {
+                        labels: steps,
+                        datasets: datasets
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 's'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'H'
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+        </script>
+    </head>
+    <body>
+        <h2>Pool reward calculation example (per epoch)</h2>
+
+        <img src="pool_reward.png">
+
+        <h3>Parameters</h3>
+        <label>
+            k: <input id="k" type="number" min="1" step="1"> (desired number of pools)
+        </label><br/>
+        <label>
+            a0: <input id="a0" type="number" min="0" step="0.1"> (leader stake influence)
+        </label><br/>
+        <label>
+            o: <input id="o" type="number" min="0" step="0.001"> (pool share)
+        </label><br/>
+        <label>
+            s: <input id="s" type="number" min="0" step="0.001"> (leader share)
+        </label><br/>
+        <label>
+            R: <input id="R" type="number" min="0" step="1"> (total epoch reward)
+        </label><br/>
+
+        <h3>Intermediate results</h3>
+        <span>z0 [1/k] = <span class="result" id="z0">?</span> (max cap share)</span><br/>
+        <span>o' [min(o,z0)] = <span class="result" id="oP">?</span> (capped pool share)</span><br/>
+        <span>s' [min(s,z0)] = <span class="result" id="sP">?</span> (capped leader share)</span><br/>
+        <br/>
+        <span>A [(z0 - o') / z0] = <span class="result" id="A">?</span></span><br/>
+        <span>B [s' * A] = <span class="result" id="B">?</span></span><br/>
+        <span>C [o' - B] = <span class="result" id="C">?</span></span><br/>
+        <span>D [C / z0] = <span class="result" id="D">?</span></span><br/>
+        <span>E [s' * a0 * D] = <span class="result" id="E">?</span></span><br/>
+        <span>F [o' + E] = <span class="result" id="F">?</span></span><br/>
+        <br/>
+        <span>G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
+        <br/>
+        <span>H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
+
+        <h3>Charting</h3>
+
+        <div class="chart-canvas">
+            <canvas id="chart-o_s"></canvas>
+        </div>
+
+    </body>
+</html>
