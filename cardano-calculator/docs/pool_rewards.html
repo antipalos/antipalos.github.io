@@ -2,7 +2,10 @@
     <head>
 
         <script src="../assets/js/vendor/jquery/jquery.min.js"></script>
+        <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+
+        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
 
         <style type="text/css">
             .chart-canvas {
@@ -219,59 +222,76 @@
             </script>
     </head>
     <body>
-        <h2>Pool reward calculation example (per epoch)</h2>
 
-        <img src="pool_reward.png">
+        <div class="col-12">
 
-        <h3>Parameters</h3>
-        <label>
-            k: <input id="k" type="number" min="1" step="1"> (desired number of pools)
-        </label><br/>
-        <label>
-            a0: <input id="a0" type="number" min="0" step="0.1"> (leader stake influence)
-        </label><br/>
-        <label>
-            o: <input id="o" type="number" min="0" step="0.001"> (pool share)
-        </label><br/>
-        <label>
-            s: <input id="s" type="number" min="0" step="0.001"> (leader share)
-        </label><br/>
-        <label>
-            R: <input id="R" type="number" min="0" step="1"> (total epoch reward)
-        </label><br/>
+            <h2>Pool reward calculation example (per epoch)</h2>
 
-        <h3>Intermediate results</h3>
-        <span>z0 [1/k] = <span class="result" id="z0">?</span> (max cap share)</span><br/>
-        <span>o' [min(o,z0)] = <span class="result" id="oP">?</span> (capped pool share)</span><br/>
-        <span>s' [min(s,z0)] = <span class="result" id="sP">?</span> (capped leader share)</span><br/>
-        <br/>
-        <span>A [(z0 - o') / z0] = <span class="result" id="A">?</span></span><br/>
-        <span>B [s' * A] = <span class="result" id="B">?</span></span><br/>
-        <span>C [o' - B] = <span class="result" id="C">?</span></span><br/>
-        <span>D [C / z0] = <span class="result" id="D">?</span></span><br/>
-        <span>E [s' * a0 * D] = <span class="result" id="E">?</span></span><br/>
-        <span>F [o' + E] = <span class="result" id="F">?</span></span><br/>
-        <br/>
-        <span>G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
-        <br/>
-        <span>H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
+            <img src="pool_reward.png">
 
-        <h3>Charting</h3>
+            <h3>Parameters</h3>
+            <label>
+                k: <input id="k" type="number" min="1" step="1"> (desired number of pools)
+            </label><br/>
+            <label>
+                a0: <input id="a0" type="number" min="0" step="0.1"> (leader stake influence)
+            </label><br/>
+            <label>
+                o: <input id="o" type="number" min="0" step="0.001"> (pool share)
+            </label><br/>
+            <label>
+                s: <input id="s" type="number" min="0" step="0.001"> (leader share)
+            </label><br/>
+            <label>
+                R: <input id="R" type="number" min="0" step="1"> (total epoch reward)
+            </label><br/>
 
-        <div class="chart-canvas">
-            <canvas id="chart-s_H"></canvas>
-        </div>
+            <h3>Intermediate results</h3>
+            <span>z0 [1/k] = <span class="result" id="z0">?</span> (max cap share)</span><br/>
+            <span>o' [min(o,z0)] = <span class="result" id="oP">?</span> (capped pool share)</span><br/>
+            <span>s' [min(s,z0)] = <span class="result" id="sP">?</span> (capped leader share)</span><br/>
+            <br/>
+            <span>A [(z0 - o') / z0] = <span class="result" id="A">?</span></span><br/>
+            <span>B [s' * A] = <span class="result" id="B">?</span></span><br/>
+            <span>C [o' - B] = <span class="result" id="C">?</span></span><br/>
+            <span>D [C / z0] = <span class="result" id="D">?</span></span><br/>
+            <span>E [s' * a0 * D] = <span class="result" id="E">?</span></span><br/>
+            <span>F [o' + E] = <span class="result" id="F">?</span></span><br/>
+            <br/>
+            <span>G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
+            <br/>
+            <span>H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
 
-        <div class="chart-canvas">
-            <canvas id="chart-o_H"></canvas>
-        </div>
+            <br/>
 
-        <div class="chart-canvas">
-            <canvas id="chart-a_o_H"></canvas>
-        </div>
+            <hr/>
 
-        <div class="chart-canvas">
-            <canvas id="chart-a_s_H"></canvas>
+            <h3>Charting</h3>
+
+            <div class="chart-canvas">
+                <canvas id="chart-s_H"></canvas>
+            </div>
+
+            <hr/>
+
+            <div class="chart-canvas">
+                <canvas id="chart-o_H"></canvas>
+            </div>
+
+            <hr/>
+
+            <div class="chart-canvas">
+                <canvas id="chart-a_o_H"></canvas>
+            </div>
+
+            <hr/>
+
+            <div class="chart-canvas">
+                <canvas id="chart-a_s_H"></canvas>
+            </div>
+
+            <br/>
+
         </div>
 
     </body>
