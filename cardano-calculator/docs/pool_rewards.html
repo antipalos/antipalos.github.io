@@ -105,8 +105,12 @@
 
                 console.log(datasets);
 
+                if (window.chart) {
+                    window.chart.destroy();
+                }
+
                 let ctx = document.getElementById('chart-o_s').getContext('2d');
-                Chart.Line(ctx, {
+                window.chart = Chart.Line(ctx, {
                     data: {
                         labels: steps,
                         datasets: datasets
