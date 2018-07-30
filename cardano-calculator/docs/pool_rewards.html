@@ -223,73 +223,110 @@
     </head>
     <body>
 
-        <div class="col-12">
+        <div class="container-fluid">
 
             <h2>Pool reward calculation example (per epoch)</h2>
 
             <img src="pool_reward.png">
 
             <h3>Parameters</h3>
-            <label>
-                k: <input id="k" type="number" min="1" step="1"> (desired number of pools)
-            </label><br/>
-            <label>
-                a0: <input id="a0" type="number" min="0" step="0.1"> (leader stake influence)
-            </label><br/>
-            <label>
-                o: <input id="o" type="number" min="0" step="0.001"> (pool share)
-            </label><br/>
-            <label>
-                s: <input id="s" type="number" min="0" step="0.001"> (leader share)
-            </label><br/>
-            <label>
-                R: <input id="R" type="number" min="0" step="1"> (total epoch reward)
-            </label><br/>
-
-            <h3>Intermediate results</h3>
-            <span>z0 [1/k] = <span class="result" id="z0">?</span> (max cap share)</span><br/>
-            <span>o' [min(o,z0)] = <span class="result" id="oP">?</span> (capped pool share)</span><br/>
-            <span>s' [min(s,z0)] = <span class="result" id="sP">?</span> (capped leader share)</span><br/>
-            <br/>
-            <span>A [(z0 - o') / z0] = <span class="result" id="A">?</span></span><br/>
-            <span>B [s' * A] = <span class="result" id="B">?</span></span><br/>
-            <span>C [o' - B] = <span class="result" id="C">?</span></span><br/>
-            <span>D [C / z0] = <span class="result" id="D">?</span></span><br/>
-            <span>E [s' * a0 * D] = <span class="result" id="E">?</span></span><br/>
-            <span>F [o' + E] = <span class="result" id="F">?</span></span><br/>
-            <br/>
-            <span>G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
-            <br/>
-            <span>H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
-
-            <br/>
-
-            <hr/>
-
-            <h3>Charting</h3>
-
-            <div class="chart-canvas">
-                <canvas id="chart-s_H"></canvas>
+            <div class="container">
+                <div class="row">
+                    <label class="col-sm form-group form-control">
+                        <span>o: </span><input id="o" type="number" min="0" step="0.001"><span class="text-nowrap"> (pool share)</span>
+                    </label>
+                    <label class="col-sm form-group form-control">
+                        <span>k: </span><input id="k" type="number" min="1" step="1"><span class="text-nowrap"> (desired number of pools)</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="col-sm form-group form-control">
+                        <span>s: </span><input id="s" type="number" min="0" step="0.001"><span class="text-nowrap"> (leader share)</span>
+                    </label>
+                    <label class="col-sm form-group form-control">
+                        <span>a0: </span><input id="a0" type="number" min="0" step="0.05"><span class="text-nowrap"> (leader stake influence)</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <span class="col-sm"></span>
+                    <label class="col-sm form-group form-control">
+                        <span>R: </span><input id="R" type="number" min="0" step="1"><span class="text-nowrap"> (total epoch reward)</span>
+                    </label>
+                </div>
             </div>
 
-            <hr/>
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#formula">Formula</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#charts"><code>o\s</code> charts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#charts2"><code>a0</code> charts</a>
+                </li>
+            </ul>
 
-            <div class="chart-canvas">
-                <canvas id="chart-o_H"></canvas>
+            <div class="tab-content">
+
+                <div id="formula" class="tab-pane active">
+
+                    <h3 class="pt-2">Formula break-down</h3>
+
+                    <div class="row">
+                        <div class="col-sm border">
+                            <span class="text-nowrap">z0 [1/k] = <span class="result" id="z0">?</span> (max cap share)</span><br/>
+                            <span class="text-nowrap">o' [min(o,z0)] = <span class="result" id="oP">?</span> (capped pool share)</span><br/>
+                            <span class="text-nowrap">s' [min(s,z0)] = <span class="result" id="sP">?</span> (capped leader share)</span><br/>
+                            <br/>
+                        </div>
+                        <div class="col-sm border">
+                            <span class="text-nowrap">A [(z0 - o') / z0] = <span class="result" id="A">?</span></span><br/>
+                            <span class="text-nowrap">B [s' * A] = <span class="result" id="B">?</span></span><br/>
+                            <span class="text-nowrap">C [o' - B] = <span class="result" id="C">?</span></span><br/>
+                            <span class="text-nowrap">D [C / z0] = <span class="result" id="D">?</span></span><br/>
+                            <span class="text-nowrap">E [s' * a0 * D] = <span class="result" id="E">?</span></span><br/>
+                            <span class="text-nowrap">F [o' + E] = <span class="result" id="F">?</span></span><br/>
+                            <br/>
+                        </div>
+                        <div class="col-sm border">
+                            <span class="text-nowrap">G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
+                            <span class="text-nowrap">H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="charts" class="tab-pane">
+
+                    <h3 class="pt-2">Pool stake to leader stake charts</h3>
+
+                    <div class="row d-flex justify-content-around">
+                        <div class="chart-canvas border">
+                            <canvas id="chart-s_H"></canvas>
+                        </div>
+                        <div class="chart-canvas border">
+                            <canvas id="chart-o_H"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="charts2" class="tab-pane">
+
+                    <h3 class="pt-2">Leader stake influence charts</h3>
+
+                    <div class="row d-flex justify-content-around">
+                        <div class="chart-canvas border">
+                            <canvas id="chart-a_o_H"></canvas>
+                        </div>
+                        <div class="chart-canvas border">
+                            <canvas id="chart-a_s_H"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <hr/>
 
-            <div class="chart-canvas">
-                <canvas id="chart-a_o_H"></canvas>
-            </div>
-
-            <hr/>
-
-            <div class="chart-canvas">
-                <canvas id="chart-a_s_H"></canvas>
-            </div>
-
+            <br/>
             <br/>
 
         </div>
