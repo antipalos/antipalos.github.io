@@ -49,6 +49,9 @@
             };
             const COLOR_ARR = Object.values(COLORS);
 
+            const STEPS_O_S = Object.freeze([0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02]);
+            const STEPS_A0 = Object.freeze([0.0, 0.1, 0.25, 0.5, 1, 3, 5, 10]);
+
             $(function() {
 
                 Object.entries(PARAMS).forEach(function ([k, v]) {
@@ -84,6 +87,7 @@
                 params.F = round(params.oP + params.E);
                 params.G = round(params.R / (1 + params.a0));
                 params.H = round(params.G * params.F);
+                return params;
             }
 
             function updateView(params) {
@@ -109,197 +113,85 @@
             }
 
             function draw_sH_chart(canvas_id, params) {
-
-                let steps = [0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02];
-                let datasets = steps.map(function (o, idx) {
-                    return {
-                        label: 'o = ' + o,
-                        fill: false,
-                        borderColor: COLOR_ARR[idx],
-                        backgroundColor: COLOR_ARR[idx],
-                        data: steps.map(function (s) {
-                            let params2 = Object.create(params);
-                            params2.s = s;
-                            params2.o = o;
-                            update(params2);
-                            return params2.H;
-                        })
-                    }
-                });
-
-                let ctx = document.getElementById(canvas_id).getContext('2d');
-                return Chart.Line(ctx, {
-                    data: {
-                        labels: steps,
-                        datasets: datasets
-                    },
-                    options: {
-                        title: {
-                            display: true,
-                            text: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
-                        },
-                        animation: {
-                            duration: 0
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 's'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'H'
-                                }
-                            }]
-                        }
-                    }
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_O_S,
+                    yName: 'o',
+                    xName: 's',
+                    title: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
                 });
             }
 
             function draw_oH_chart(canvas_id, params) {
-
-                let steps = [0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02];
-                let datasets = steps.map(function (s, idx) {
-                    return {
-                        label: 's = ' + s,
-                        fill: false,
-                        borderColor: COLOR_ARR[idx],
-                        backgroundColor: COLOR_ARR[idx],
-                        data: steps.map(function (o) {
-                            let params2 = Object.create(params);
-                            params2.s = s;
-                            params2.o = o;
-                            update(params2);
-                            return params2.H;
-                        })
-                    }
-                });
-
-                let ctx = document.getElementById(canvas_id).getContext('2d');
-                return Chart.Line(ctx, {
-                    data: {
-                        labels: steps,
-                        datasets: datasets
-                    },
-                    options: {
-                        title: {
-                            display: true,
-                            text: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
-                        },
-                        animation: {
-                            duration: 0
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'o'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'H'
-                                }
-                            }]
-                        }
-                    }
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_O_S,
+                    yName: 's',
+                    xName: 'o',
+                    title: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
                 });
             }
 
             function draw_aoH_chart(canvas_id, params) {
-
-                let aSteps = [0.0, 0.1, 0.25, 0.5, 1, 3, 5, 10];
-                let oSteps = [0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02];
-
-                let datasets = oSteps.map(function (o, idx) {
-                    return {
-                        label: 'o = ' + o,
-                        fill: false,
-                        borderColor: COLOR_ARR[idx],
-                        backgroundColor: COLOR_ARR[idx],
-                        data: aSteps.map(function (a) {
-                            let params2 = Object.create(params);
-                            params2.o = o;
-                            params2.a0 = a;
-                            update(params2);
-                            return params2.H;
-                        })
-                    }
-                });
-
-                let ctx = document.getElementById(canvas_id).getContext('2d');
-                return Chart.Line(ctx, {
-                    data: {
-                        labels: aSteps,
-                        datasets: datasets
-                    },
-                    options: {
-                        title: {
-                            display: true,
-                            text: 'Changing of result (H) in dependence to a0 and o (s = ' + params.s + ')'
-                        },
-                        animation: {
-                            duration: 0
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'a0'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'H'
-                                }
-                            }]
-                        }
-                    }
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_A0,
+                    yName: 'o',
+                    xName: 'a0',
+                    title: 'Changing of result (H) in dependence to a0 and o (s = ' + params.s + ')'
                 });
             }
 
             function draw_asH_chart(canvas_id, params) {
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_A0,
+                    yName: 's',
+                    xName: 'a0',
+                    title: 'Changing of result (H) in dependence to a0 and s (o = ' + params.o + ')'
+                });
+            }
 
-                let aSteps = [0.0, 0.1, 0.25, 0.5, 1, 3, 5, 10];
-                let oSteps = [0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02];
+            function plotDataAndCreateChart(canvasId, params,
+                    {ySteps = [], xSteps = [], yName = '', xName = '', title = ''} = {}) {
+                return createChart(canvasId, {
+                    title: title,
+                    xName: xName,
+                    labels: xSteps,
+                    datasets: createDatasetFromSteps(params, ySteps, xSteps, yName, (y,x) => {
+                        let r = {};
+                        r[yName] = y;
+                        r[xName] = x;
+                        return r;
+                    })
+                });
+            }
 
-                let datasets = oSteps.map(function (s, idx) {
+            function createDatasetFromSteps(params, ySteps, xSteps, yLabel, f) {
+                return ySteps.map(function (y, idx) {
                     return {
-                        label: 's = ' + s,
+                        label: yLabel + ' = ' + y,
                         fill: false,
                         borderColor: COLOR_ARR[idx],
                         backgroundColor: COLOR_ARR[idx],
-                        data: aSteps.map(function (a) {
-                            let params2 = Object.create(params);
-                            params2.s = s;
-                            params2.a0 = a;
-                            update(params2);
-                            return params2.H;
+                        data: xSteps.map(function (x) {
+                            return update(Object.assign(Object.create(params), f(y, x))).H;
                         })
-                    }
+                    };
                 });
+            }
 
-                let ctx = document.getElementById(canvas_id).getContext('2d');
+            function createChart(canvasId, {labels = [], datasets = [], xName = '', title = ''} = {}) {
+                let ctx = document.getElementById(canvasId).getContext('2d');
                 return Chart.Line(ctx, {
                     data: {
-                        labels: aSteps,
+                        labels: labels,
                         datasets: datasets
                     },
                     options: {
                         title: {
                             display: true,
-                            text: 'Changing of result (H) in dependence to a0 and s (o = ' + params.o + ')'
+                            text: title
                         },
                         animation: {
                             duration: 0
@@ -309,7 +201,7 @@
                                 display: true,
                                 scaleLabel: {
                                     display: true,
-                                    labelString: 'a0'
+                                    labelString: xName
                                 }
                             }],
                             yAxes: [{
@@ -324,7 +216,7 @@
                 });
             }
 
-        </script>
+            </script>
     </head>
     <body>
         <h2>Pool reward calculation example (per epoch)</h2>
