@@ -11,15 +11,24 @@
             .chart-canvas {
                 width: 50%;
             }
+            p {
+                width: 60%;
+            }
 
             @media (max-width: 1023.99px) {
                 .chart-canvas {
                     width: 75%;
                 }
+                p {
+                    width: 80%;
+                }
             }
 
             @media (max-width: 767.99px) {
                 .chart-canvas {
+                    width: 100%;
+                }
+                p {
                     width: 100%;
                 }
             }
@@ -292,6 +301,71 @@
                         <div class="col-sm border">
                             <span class="text-nowrap">G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
                             <span class="text-nowrap">H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <p>
+                                Cardano staking rewards distribution happens once at the end of each epoch (5 days).
+                                For 5 days all the rewards in the system are collected in a special address.
+                                At the end of an epoch total reward pool <code>(R)</code> is split between
+                                all the participants and the treasury.
+                                This formula is just a single part of the complex system, and it determines how
+                                delegated pool stake <code>(o)</code> and personal pool-leader stake <code>(s)</code>
+                                affect the reward distribution among pools.
+                            </p>
+
+                            <h4>Parameters description</h4>
+                            <p>
+                                "Desired number of pools" <code>(k)</code> - this is a system constant that is expected to
+                                be around 100. This parameter shows what <b>optimal</b> number of pools is expected to be
+                                in the system; at least 80% of total stake is expected to be controlled by this number of pools.
+                                The stake share cap value <code>(z0)</code> is calculated from this parameter and this value
+                                determines what is the <b>maximum</b> reward any single node can ever get. Basically,
+                                if a node (pool) stake share is bigger then <code>z0</code> - then it is calculated as
+                                if its share was <code>z0</code>. The point of this is to make sure that system does not
+                                settles at the number of pools lower than <code>k</code> - because if this happens,
+                                then it would mean that people just miss additional possible profits that they can get
+                                if someone creates new pools. There might and will be more than <code>k</code> pools,
+                                but there shouldn't be less.
+                            </p>
+                            <p>
+                                "Pool share" <code>(o)</code> - the share of all the stake delegated to this pool,
+                                relative to ALL the stake in the system. If the system has current total stake of 10 billion ADA,
+                                and the pool has 50 million ADA of delegated stake than it's share is <code>0.5%</code> or
+                                <code>0.005</code>. Maximum <b>meaningful</b> value of <code>o</code> is <code>z0</code>
+                                which depends on <code>k</code>. So if the desired number of pools is 100, then maximum
+                                <b>meaningful</b> <code>o</code> is <code>0.01</code>. Any share, bigger than this, will
+                                <b>NOT</b> bring more rewards. Pool share directly determines how likely the pool is to be
+                                selected to produce a block for each slot in an epoch. The bigger the pool share - the more
+                                slots it will win, and the larger total reward it will get. But it will <b>NEVER</b> get more than
+                                <code>z0</code> share of the total reward.
+                            </p>
+                            <p>
+                                "Leader share" <code>(s)</code> - the share of stake that pool-leader (creator) has
+                                <b>pledged</b> to this pool. Creator of the pool will need to "lock" <b>at least</b>
+                                this amount of stake (or more) in order for pool to be selected at all. The size of this
+                                pledge will also determine the overall size of pool rewards. Maximum <b>significant</b> value
+                                for the pledge is also <code>z0</code>. Only a pool with a maximum pledge will be able to
+                                receive the maximum delegation reward. As pledge gets lower - reward also gets logarithmically
+                                lower even for the same delegated stake share. This pledge is required to eliminate the
+                                possibility for an adversary to create fake popular pools.
+                            </p>
+                            <p>
+                                "Leader stake influence" <code>(a0)</code> - this is a system constant, and its value
+                                is yet to be decided. The bigger this value gets - the harder it is for an adversary
+                                to create enough pools to gain the majority control. BUT! At the same time the difference
+                                in profits between differently funded pools also gets bigger.
+                            </p>
+                            <p>
+                                "Total epoch reward" <code>(R)</code> - represents the pool of total reward for the whole epoch.
+                                Similar pool of coins gets distributed among all the participant nodes at the end of each epoch.
+                                Exact value of this parameter is not important for this demo and will affect only chart scales.
+                                It is just randomly assumed to be at 100K ADA.
+                            </p>
                         </div>
                     </div>
                 </div>
