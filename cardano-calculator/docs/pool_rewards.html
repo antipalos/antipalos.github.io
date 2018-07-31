@@ -16,7 +16,7 @@
             .chart-canvas {
                 width: 50%;
             }
-            p {
+            p, div.alert {
                 width: 60%;
             }
 
@@ -24,7 +24,7 @@
                 .chart-canvas {
                     width: 75%;
                 }
-                p {
+                p, div.alert {
                     width: 80%;
                 }
             }
@@ -33,7 +33,7 @@
                 .chart-canvas {
                     width: 100%;
                 }
-                p {
+                p, div.alert {
                     width: 100%;
                 }
             }
@@ -315,6 +315,15 @@
 
                     <div class="row">
                         <div class="col-12">
+                            <div class="alert alert-info">
+                                <h5>Warning!</h5>
+                                <p style="width: 100%">
+                                    <span class="alert-warning">This demo-page  is NOT a reward calculator!</span><br/>
+                                    You should NOT use this page to try and predict your staking profits!
+                                    The ONLY purpose of this demo is to show the effect of <code>o</code>, <code>s</code>,
+                                    and <code>a0</code> parameters on the reward distribution process.
+                                </p>
+                            </div>
                             <p>
                                 Cardano staking rewards distribution happens once at the end of each epoch (5 days).
                                 For 5 days all the rewards in the system are collected in a special address.
@@ -418,6 +427,16 @@
                         </div>
                         <div class="chart-canvas border">
                             <canvas id="chart-a_s_H"></canvas>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+                    <div class="row">
+                        <div class="col-12">
+                            <p>
+                                These two charts show how resulting pool reward is affected by increasing the
+                                <code>a0</code> value with different <code>o</code> and <code>s</code> values.
+                            </p>
                         </div>
                     </div>
                 </div>
