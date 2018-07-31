@@ -9,11 +9,19 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
 
         <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <style type="text/css">
+            body {
+                padding-top: 5rem;
+            }
+        </style>
     </head>
     <body>
-        <div class="container-fluid">
-            <h2><a href="..">Calculator</a> / Docs</h2>
 
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
+            <span class="navbar-brand"><a href="../">Cardano Calculator</a> / Docs</span>
+        </nav>
+
+        <div id="main-container" class="container-fluid">
             <h4>Demos</h4>
             <ul>
                 <li><a href="pool_rewards.html">Pool reward distribution demo</a></li>

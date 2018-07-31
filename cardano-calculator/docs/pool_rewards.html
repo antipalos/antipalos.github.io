@@ -13,6 +13,10 @@
         <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
 
         <style type="text/css">
+            body {
+                padding-top: 5rem;
+            }
+
             .chart-canvas {
                 width: 50%;
             }
@@ -87,7 +91,7 @@
                 update(PARAMS);
                 updateView(PARAMS);
 
-                HashTabs.bind();
+                HashTabs.bind({scrollToTop: false});
             });
 
             function round(val) {
@@ -239,9 +243,35 @@
     </head>
     <body>
 
-        <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
+            <span class="navbar-brand"><a href="../">Cardano Calculator</a> / <a href="./">Docs</a> / Pool reward demo</span>
 
-            <h2><a href="..">Calculator</a> / <a href="./">Docs</a> / Pool reward demo</h2>
+            <button class="navbar-toggler my-2" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse d-flex justify-content-end" id="navbarSupportedContent">
+
+                <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab active" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="true">Formula</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab" id="faq-tab" data-toggle="tab" href="#charts" role="tab" aria-controls="faq" aria-selected="false">o/s charts</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab" id="roadmap-tab" data-toggle="tab" href="#charts2" role="tab" aria-controls="roadmap" aria-selected="false">a0 charts</a>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+        <div class="container-fluid">
 
             <img src="pool_reward.png">
 
@@ -270,18 +300,6 @@
                     </label>
                 </div>
             </div>
-
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link hashtab active" data-toggle="tab" href="#formula">Formula</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link hashtab" data-toggle="tab" href="#charts"><code>o\s</code> charts</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link hashtab" data-toggle="tab" href="#charts2"><code>a0</code> charts</a>
-                </li>
-            </ul>
 
             <div class="tab-content">
 
