@@ -83,6 +83,13 @@
                     $this = $(this);
                     let id = $this.attr('id');
                     let val = $this.val() || '0';
+                    if (id === 'o' || id === 's') {
+                        let $o = id === 'o' ? $this : $('#o');
+                        let $s = id === 's' ? $this : $('#s');
+                        if (parseFloat($o.val()) < parseFloat($s.val())) {
+                            (id === 'o' ? $s : $o).val((id === 'o' ? $o : $s).val());
+                        }
+                    }
                     PARAMS[id] = FLOATS.indexOf(id) > -1 ? parseFloat(val) : parseInt(val);
                     update(PARAMS);
                     updateView(PARAMS);
@@ -100,7 +107,7 @@
 
             function update(params = PARAMS) {
                 params.z0 = round(1/params.k);
-                params.oP = round(Math.min(params.o, params.z0));
+                params.oP = round(Math.min(Math.max(params.o, params.s), params.z0));
                 params.sP = round(Math.min(params.s, params.z0));
                 params.A = round((params.z0 - params.oP) / params.z0);
                 params.B = round(params.sP * params.A);
@@ -417,10 +424,10 @@
 
                     <div class="row d-flex justify-content-around">
                         <div class="chart-canvas border">
-                            <canvas id="chart-s_H"></canvas>
+                            <canvas id="chart-o_H"></canvas>
                         </div>
                         <div class="chart-canvas border">
-                            <canvas id="chart-o_H"></canvas>
+                            <canvas id="chart-s_H"></canvas>
                         </div>
                     </div>
 
@@ -429,7 +436,42 @@
                         <div class="col-12">
                             <p>
                                 These two charts show how resulting pool reward is affected by changing
-                                <code>o</code> and <code>s</code> values.
+                                <code>o</code> and <code>s</code> values. You can try changing the <code>a0</code>
+                                value and see how charts are changing.
+                            </p>
+                            <h4>Different <code>s</code> as <code>o</code> grows (left)</h4>
+                            <p>
+                                This chart shows how rewards for pools with different leader stake <code>(s)</code>
+                                change as their delegated share <code>(o)</code> grows. You can see how rewards for
+                                each pool logically goes up along with its share up until it hits the "cap" of <code>(z0)</code>,
+                                and after this even if pool gets more delegated stake - reward stays the same.
+                            </p>
+                            <!--<p>-->
+                                <!--But! The interesting part, of course, is how exactly those lines are bot equal.-->
+                                <!--You can see that lines form something like a butterfly form, with black line being the top-->
+                                <!--one in the left part and at the same time the bottom one in the right part.-->
+                            <!--</p>-->
+                            <!--<p>-->
+                                <!--This shows us the very interesting property of how the leader stake is affecting the-->
+                                <!--rewards. To understand it we need to define a "full pool", which means that the pool-->
+                                <!--has got so much delegated stake that it got capped (at <code>z0</code>) and it cannot-->
+                                <!--get more rewards in no case. So now we can use terms such as "full", "half-full", "empty", etc.-->
+                            <!--</p>-->
+                            <!--<p>-->
+                                <!--So the interesting property is that for all pools which are less than a half-full,-->
+                                <!--the <b>LESS</b> leader stake they have - the more reward they get. At the half of-->
+                                <!--maximum stake pools with different leader stake are (roughly) equal. And as the stake-->
+                                <!--share is growing from the half up, the more leader stake you have - the more reward you-->
+                                <!--will be able to get.-->
+                            <!--</p>-->
+                            <!--<p>-->
+                                <!--One of the main properties is that different pools show different "capping" height-->
+                                <!--at the point they become full. This means that a pool with a lower initial leader stake-->
+                                <!--will have lower maximum reward barrier.-->
+                            <!--</p>-->
+                            <h4>Different <code>o</code> as <code>s</code> grows (right)</h4>
+                            <p>
+
                             </p>
                         </div>
                     </div>
