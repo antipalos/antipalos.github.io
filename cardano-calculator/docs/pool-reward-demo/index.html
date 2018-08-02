@@ -49,7 +49,7 @@
                 k: 100,
                 a0: 0.25,
                 o: 0.01,
-                s: 0.01,
+                s: 0.0,
                 R: 100
             };
 
@@ -86,11 +86,20 @@
                     if (id === 'o' || id === 's') {
                         let $o = id === 'o' ? $this : $('#o');
                         let $s = id === 's' ? $this : $('#s');
-                        if (parseFloat($o.val()) < parseFloat($s.val())) {
-                            (id === 'o' ? $s : $o).val((id === 'o' ? $o : $s).val());
+                        let oVal = parseFloat($o.val());
+                        let sVal = parseFloat($s.val());
+                        if (oVal < sVal) {
+                            if (id === 'o') {
+                                $s.val(sVal = oVal);
+                            } else {
+                                $o.val(oVal = sVal);
+                            }
                         }
+                        PARAMS.o = oVal;
+                        PARAMS.s = sVal;
+                    } else {
+                        PARAMS[id] = FLOATS.indexOf(id) > -1 ? parseFloat(val) : parseInt(val);
                     }
-                    PARAMS[id] = FLOATS.indexOf(id) > -1 ? parseFloat(val) : parseInt(val);
                     update(PARAMS);
                     updateView(PARAMS);
                 });
@@ -105,9 +114,9 @@
                 return Number(Math.round(val+'e11')+'e-11');
             }
 
-            function update(params = PARAMS) {
+            function update(params = PARAMS, strict = false) {
                 params.z0 = round(1/params.k);
-                params.oP = round(Math.min(Math.max(params.o, params.s), params.z0));
+                params.oP = strict & params.o < params.s ? Number.NaN : round(Math.min(Math.max(params.o, params.s), params.z0));
                 params.sP = round(Math.min(params.s, params.z0));
                 params.A = round((params.z0 - params.oP) / params.z0);
                 params.B = round(params.sP * params.A);
@@ -142,23 +151,24 @@
                 ]
             }
 
-            function draw_sH_chart(canvas_id, params) {
-                return plotDataAndCreateChart(canvas_id, params, {
-                    ySteps: STEPS_O_S,
-                    xSteps: STEPS_O_S,
-                    yName: 'o',
-                    xName: 's',
-                    title: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
-                });
-            }
-
             function draw_oH_chart(canvas_id, params) {
                 return plotDataAndCreateChart(canvas_id, params, {
                     ySteps: STEPS_O_S,
                     xSteps: STEPS_O_S,
                     yName: 's',
                     xName: 'o',
-                    title: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')'
+                    title: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')',
+                    strict: true
+                });
+            }
+
+            function draw_sH_chart(canvas_id, params) {
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_O_S,
+                    yName: 'o',
+                    xName: 's',
+                    title: 'Changing of result (H) in dependence to s and o (a0 = ' + params.a0 + ')'
                 });
             }
 
@@ -183,7 +193,7 @@
             }
 
             function plotDataAndCreateChart(canvasId, params,
-                    {ySteps = [], xSteps = [], yName = '', xName = '', title = ''} = {}) {
+                    {ySteps = [], xSteps = [], yName = '', xName = '', title = '', strict = false} = {}) {
                 return createChart(canvasId, {
                     title: title,
                     xName: xName,
@@ -193,19 +203,20 @@
                         r[yName] = y;
                         r[xName] = x;
                         return r;
-                    })
+                    }, strict)
                 });
             }
 
-            function createDatasetFromSteps(params, ySteps, xSteps, yLabel, f) {
+            function createDatasetFromSteps(params, ySteps, xSteps, yLabel, f, strict = false) {
                 return ySteps.map(function (y, idx) {
                     return {
                         label: yLabel + ' = ' + y,
                         fill: false,
+                        lineTension: 0.2,
                         borderColor: COLOR_ARR[idx],
                         backgroundColor: COLOR_ARR[idx],
                         data: xSteps.map(function (x) {
-                            return update(Object.assign(Object.create(params), f(y, x))).H;
+                            return update(Object.assign(Object.create(params), f(y, x)), strict).H;
                         })
                     };
                 });
@@ -446,29 +457,10 @@
                                 each pool logically goes up along with its share up until it hits the "cap" of <code>(z0)</code>,
                                 and after this even if pool gets more delegated stake - reward stays the same.
                             </p>
-                            <!--<p>-->
-                                <!--But! The interesting part, of course, is how exactly those lines are bot equal.-->
-                                <!--You can see that lines form something like a butterfly form, with black line being the top-->
-                                <!--one in the left part and at the same time the bottom one in the right part.-->
-                            <!--</p>-->
-                            <!--<p>-->
-                                <!--This shows us the very interesting property of how the leader stake is affecting the-->
-                                <!--rewards. To understand it we need to define a "full pool", which means that the pool-->
-                                <!--has got so much delegated stake that it got capped (at <code>z0</code>) and it cannot-->
-                                <!--get more rewards in no case. So now we can use terms such as "full", "half-full", "empty", etc.-->
-                            <!--</p>-->
-                            <!--<p>-->
-                                <!--So the interesting property is that for all pools which are less than a half-full,-->
-                                <!--the <b>LESS</b> leader stake they have - the more reward they get. At the half of-->
-                                <!--maximum stake pools with different leader stake are (roughly) equal. And as the stake-->
-                                <!--share is growing from the half up, the more leader stake you have - the more reward you-->
-                                <!--will be able to get.-->
-                            <!--</p>-->
-                            <!--<p>-->
-                                <!--One of the main properties is that different pools show different "capping" height-->
-                                <!--at the point they become full. This means that a pool with a lower initial leader stake-->
-                                <!--will have lower maximum reward barrier.-->
-                            <!--</p>-->
+                            <p>
+                                At the left part of the chart you can see lines being fixed at a certain height,
+                                until they reach a the value of <code>o = s</code>. This is because
+                            </p>
                             <h4>Different <code>o</code> as <code>s</code> grows (right)</h4>
                             <p>
 
