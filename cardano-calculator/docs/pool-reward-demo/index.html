@@ -168,7 +168,8 @@
                     xSteps: STEPS_O_S,
                     yName: 'o',
                     xName: 's',
-                    title: 'Changing of result (H) in dependence to s and o (a0 = ' + params.a0 + ')'
+                    title: 'Changing of result (H) in dependence to s and o (a0 = ' + params.a0 + ')',
+                    strict: true
                 });
             }
 
@@ -450,7 +451,8 @@
                                 <code>o</code> and <code>s</code> values. You can try changing the <code>a0</code>
                                 value and see how charts are changing.
                             </p>
-                            <h4>Different <code>s</code> as <code>o</code> grows (left)</h4>
+
+                            <h4>Different <code>s</code> as <code>o</code> grows (left or top chart)</h4>
                             <p>
                                 This chart shows how rewards for pools with different leader stake <code>(s)</code>
                                 change as their delegated share <code>(o)</code> grows. You can see how rewards for
@@ -476,10 +478,70 @@
                                 in there for others to delegate, because any further delegation will move such a pool
                                 over capacity and will reduce profits for everyone.
                             </p>
-                            <h4>Different <code>o</code> as <code>s</code> grows (right)</h4>
+
+                            <h4>Different <code>o</code> as <code>s</code> grows (right or bottom chart)</h4>
                             <p>
-                                This chart shows the same data but from another angle.
+                                This chart shows the same data but from another angle. Each horizontal line here
+                                shows the same data as corresponding vertical line on the first chart. So the top
+                                line represents any "full" pool <code>(o=0.01)</code> this means that this pool has
+                                reached its maximum capacity and will not be able to receive any more reward, even if
+                                more people will delegate to it.
                             </p>
+                            <p>
+                                You can see top line representing how rewards would grow for a capped pool
+                                as leader stake represents bigger and bigger share of it. The leftmost point
+                                <code>(s=0)</code> means that there's no leader stake at all - the pool is capped,
+                                but all the coins in it are delegated by other people. In the middle <code>(s=0.05)</code>
+                                - half of stake is owned by the leader, and half of it is delegated by other people.
+                                And in the right part <code>(s=0.01)</code> - all stake in the pool (node) is owned by
+                                its leader and reward reaches possible maximum <code>(z0)</code>.
+                            </p>
+                            <p>
+                                Second from the top line represents a pool filled for 75%, it is shorter than the top
+                                line, because it is impossible for a pool to have leader stake more than a total stake
+                                at all (leader stake is regarded as a part of total stake), so chart would not work
+                                that way. This pool will never be able to reach the maximum possible reward, just
+                                because it doesn't have enough stake share at all. But you also can notice how this
+                                line is a bit flatter than the top one, and the next one is even flatter. This shows
+                                how delegated stake affects the total pool reward. Namely - it's something like it
+                                adds value to the option of having leader stake. Meaning that if you own a "half-full"
+                                pool <code>(o=0.005)</code> - then it is more profitable for the whole pool if you
+                                would personally own half of coins in it (0.0025). But if you have a completely "full" pool
+                                <code>(o=0.01)</code> - then the profit for the pool of you owning the same amount of coins
+                                (0.0025) is even better now, and the whole pool would receive more reward.
+                            </p>
+
+                            <h4>Conclusions</h4>
+                            <p>
+                                The leader stake is important for a whole set of reasons, e.g. - it <b>disincentivises</b>
+                                whales to split their stake; it makes pools with a real locked stake more valuable than
+                                just empty pools that anyone can create, because former are less likely to brake
+                                any rules or be negligent; it also <b>disincentivises</b> whales from creating empty pools
+                                and putting their coins in there as delegates, instead of locking it in as leader pledge.
+                            </p>
+                            <p>
+                                Interesting fact is that any pool in reality will never be able to receive the same
+                                share of rewards as its share of the stake is (cuz only maximum possible leader stake
+                                can guarantee maximum possible reward). This means that after each epoch there will be
+                                "left-over" reward. Do not worry, part of it will go toward the treasury, and the rest
+                                will be added to rewards for the next epoch.
+                            </p>
+
+                            <h4>Significance of <code>a0</code></h4>
+                            <p>
+                                Both presented charts do not plot the <code>a0</code> parameter. This means that you
+                                can change its value in parameters form and see how it changes the charts.
+                                Basically, this parameter determines - what will be the difference in rewards
+                                between a full pool with no leader stake and a pool created with maximum leader stake.
+                                As you move this value around - you can see how capped maximums on the left (top) chart
+                                are either drawn together or drawn apart, and also how the top line on the right (bottom)
+                                chart gets more and more steep or flat. This means that as <code>a0</code> grows -
+                                the profit from each single leader stake ADA is getting bigger and bigger.
+                                And it gets bigger not because top pools are making <b>more</b> money, but because
+                                bottom pools are making less. Which is obvious, because they can't have more than 100%
+                                of total rewards to distribute.
+                            </p>
+                            <b><h6>Note! That detailed <code>a0</code> plotting can be found on the next page with charts.</h6></b>
                         </div>
                     </div>
                 </div>
