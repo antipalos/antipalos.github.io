@@ -458,12 +458,27 @@
                                 and after this even if pool gets more delegated stake - reward stays the same.
                             </p>
                             <p>
-                                At the left part of the chart you can see lines being fixed at a certain height,
-                                until they reach a the value of <code>o = s</code>. This is because
+                                You can notice how all lines have different length. This is because you cannot have
+                                parameter <code>o</code> to be less than parameter <code>s</code>. This is explained
+                                by the fact that when a leader already puts 0.05 of total stake of personal stake
+                                <code>(s)</code> into his pool - the total pool reward <code>(o)</code> is also
+                                already equal to that  number, which means that this pool is already "half-full",
+                                and there's only another 0.05 of total stake available for delegates to "fill".
+                            </p>
+                            <p>
+                                The most interesting property is how all lines are capped at different height.
+                                This represents exactly the effect of leader stake on the pool rewards - the bigger
+                                personal leader stake <code>(s)</code> a pool has - the bigger eventual reward it will
+                                be able to get. You can see that the topmost line only starts at <code>o=0.01</code>
+                                and is already capped - this means that <b>the only</b> way for a pool (or a node)
+                                to get the maximum possible reward is to set the personal stake at the maximum possible
+                                value. BUT! For a pool this would also mean that there's no "empty stake space" left
+                                in there for others to delegate, because any further delegation will move such a pool
+                                over capacity and will reduce profits for everyone.
                             </p>
                             <h4>Different <code>o</code> as <code>s</code> grows (right)</h4>
                             <p>
-
+                                This chart shows the same data but from another angle.
                             </p>
                         </div>
                     </div>
