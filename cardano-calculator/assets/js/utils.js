@@ -24,6 +24,10 @@ function UtilsConstructor() {
         return this.indexOf(x) > -1;
     };
 
+    Array.prototype.flat = function() {
+        return [].concat.apply([], this);
+    };
+
     String.prototype.contains = function (x) {
         return this.indexOf(x) > -1;
     };

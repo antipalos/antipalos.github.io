@@ -7,6 +7,7 @@
 
         <script src="../../assets/js/vendor/jquery/jquery.min.js"></script>
         <script src="../../assets/js/hashtabs.js"></script>
+        <script src="../../assets/js/utils.js"></script>
         <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
 
@@ -179,7 +180,8 @@
                     xSteps: STEPS_A0,
                     yName: 'o',
                     xName: 'a0',
-                    title: 'Changing of result (H) in dependence to a0 and o (s = ' + params.s + ')'
+                    title: 'Changing of result (H) in dependence to a0 and o (s = ' + params.s + ')',
+                    strict: true
                 });
             }
 
@@ -189,7 +191,8 @@
                     xSteps: STEPS_A0,
                     yName: 's',
                     xName: 'a0',
-                    title: 'Changing of result (H) in dependence to a0 and s (o = ' + params.o + ')'
+                    title: 'Changing of result (H) in dependence to a0 and s (o = ' + params.o + ')',
+                    strict: true
                 });
             }
 
@@ -225,6 +228,7 @@
 
             function createChart(canvasId, {labels = [], datasets = [], xName = '', title = ''} = {}) {
                 let ctx = document.getElementById(canvasId).getContext('2d');
+                let max = Math.max.apply(null, datasets.map(d => d.data.filter(x => !Number.isNaN(x))).flat());
                 return Chart.Line(ctx, {
                     data: {
                         labels: labels,
@@ -251,6 +255,10 @@
                                 scaleLabel: {
                                     display: true,
                                     labelString: 'H'
+                                },
+                                ticks : {
+                                    beginAtZero : true,
+                                    max: Math.max(max, 1)
                                 }
                             }]
                         }
@@ -298,7 +306,7 @@
             <div class="container">
                 <div class="row">
                     <label class="col-sm form-group form-control">
-                        <span>o: </span><input id="o" type="number" min="0" step="0.001"><span class="text-nowrap"> (pool share)</span>
+                        <span>o: </span><input id="o" type="number" min="0" step="0.0005"><span class="text-nowrap"> (pool share)</span>
                     </label>
                     <label class="col-sm form-group form-control">
                         <span>k: </span><input id="k" type="number" min="1" step="1"><span class="text-nowrap"> (desired number of pools)</span>
@@ -306,7 +314,7 @@
                 </div>
                 <div class="row">
                     <label class="col-sm form-group form-control">
-                        <span>s: </span><input id="s" type="number" min="0" step="0.001"><span class="text-nowrap"> (leader share)</span>
+                        <span>s: </span><input id="s" type="number" min="0" step="0.0005"><span class="text-nowrap"> (leader share)</span>
                     </label>
                     <label class="col-sm form-group form-control">
                         <span>a0: </span><input id="a0" type="number" min="0" step="0.05"><span class="text-nowrap"> (leader stake influence)</span>
@@ -386,26 +394,31 @@
                                 but there shouldn't be less.
                             </p>
                             <p>
-                                "Pool share" <code>(o)</code> - the share of all the stake delegated to this pool,
-                                relative to ALL the stake in the system. If the system has current total stake of 10 billion ADA,
-                                and the pool has 50 million ADA of delegated stake than it's share is <code>0.5%</code> or
+                                "Pool share" <code>(o)</code> - the share of all the stake in this pool, relative to
+                                ALL the stake in the system. If the system has current total stake of 10 billion ADA,
+                                and the pool has 50 million ADA of stake than it's share is <code>0.5%</code> or
                                 <code>0.005</code>. Maximum <b>meaningful</b> value of <code>o</code> is <code>z0</code>
                                 which depends on <code>k</code>. So if the desired number of pools is 100, then maximum
-                                <b>meaningful</b> <code>o</code> is <code>0.01</code>. Any share, bigger than this, will
+                                <b>meaningful</b> <code>o</code> is <code>0.01 (1%)</code>. Any share, bigger than this, will
                                 <b>NOT</b> bring more rewards. Pool share directly determines how likely the pool is to be
                                 selected to produce a block for each slot in an epoch. The bigger the pool share - the more
-                                slots it will win, and the larger total reward it will get. But it will <b>NEVER</b> get more than
-                                <code>z0</code> share of the total reward.
+                                slots it will win, and the larger total reward it will get. But it will <b>NEVER</b>
+                                get more than <code>z0</code> share of the total reward.
                             </p>
                             <p>
                                 "Leader share" <code>(s)</code> - the share of stake that pool-leader (creator) has
                                 <b>pledged</b> to this pool. Creator of the pool will need to "lock" <b>at least</b>
                                 this amount of stake (or more) in order for pool to be selected at all. The size of this
-                                pledge will also determine the overall size of pool rewards. Maximum <b>significant</b> value
-                                for the pledge is also <code>z0</code>. Only a pool with a maximum pledge will be able to
-                                receive the maximum delegation reward. As pledge gets lower - reward also gets logarithmically
-                                lower even for the same delegated stake share. This pledge is required to eliminate the
-                                possibility for an adversary to create fake popular pools.
+                                pledge will also determine the overall size of pool rewards. Pledged stake is automatically
+                                considered to be a part of the pool share, so if leader pledges <code>0.005 (0.5%)</code>
+                                of total stake, than the pool is already half-full, and there's only another <code>0.005</code>
+                                of "free stake space" left to be filled by delegation. Parameter <code>s</code> is
+                                <b>always</b> <code><=</code> than the parameter <code>o</code>. Maximum <b>significant</b>
+                                value for the pledge is logically also <code>z0</code>, because if leader pledges <code>z0</code>
+                                of stake - the pool is already automatically full, so no more stake can be delegated to it.
+                                Only a pool with a maximum pledge will be able to receive the maximum delegation reward.
+                                As pledge gets lower - reward also gets lower even for the same delegated stake share.
+                                This pledge is required to eliminate the possibility for an adversary to create fake popular pools.
                             </p>
                             <p>
                                 "Leader stake influence" <code>(a0)</code> - this is a system constant, and its value
@@ -565,6 +578,21 @@
                             <p>
                                 These two charts show how resulting pool reward is affected by increasing the
                                 <code>a0</code> value with different <code>o</code> and <code>s</code> values.
+                                You can change <code>o</code> or <code>s</code> parameters in the input form
+                                and see how charts are changing.
+                            </p>
+
+                            <h4>Different <code>o</code> as <code>a0</code> grows (left or top chart)</h4>
+                            <p>
+                                On this chart each line represents a stake pool of different stake share <code>(o)</code>.
+                                You can see how their rewards change as <code>a0</code> parameter grows.
+                                The leader stake <code>(s)</code> is not plotted, so you can change it's value in the
+                                input form and see how it changes the chart.
+                            </p>
+
+                            <h4>Different <code>s</code> as <code>a0</code> grows (right or bottom chart)</h4>
+                            <p>
+
                             </p>
                         </div>
                     </div>
