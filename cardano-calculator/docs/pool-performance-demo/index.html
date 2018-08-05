@@ -1,0 +1,355 @@
+<html>
+    <head>
+
+        <title>
+            Cardano Pool Rewards distribution demo
+        </title>
+
+        <script src="../../assets/js/vendor/jquery/jquery.min.js"></script>
+        <script src="../../assets/js/hashtabs.js"></script>
+        <script src="../../assets/js/utils.js"></script>
+        <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+
+        <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+        <style type="text/css">
+            body {
+                padding-top: 5rem;
+            }
+
+            .chart-canvas {
+                width: 50%;
+            }
+            p, div.alert {
+                width: 60%;
+            }
+
+            @media (max-width: 1023.99px) {
+                .chart-canvas {
+                    width: 75%;
+                }
+                p, div.alert {
+                    width: 80%;
+                }
+            }
+
+            @media (max-width: 767.99px) {
+                .chart-canvas {
+                    width: 100%;
+                }
+                p, div.alert {
+                    width: 100%;
+                }
+            }
+        </style>
+
+        <script language="JavaScript">
+
+            const PARAMS = {
+                slots: 100,
+                blocks: 90,
+                reward: 100,
+                y: 0.75,
+            };
+
+            const FLOATS = ['y', 'reward'];
+
+            const COLORS = {
+                black: 'rgb(0, 0, 0)',
+                red: 'rgb(255, 99, 132)',
+                orange: 'rgb(255, 159, 64)',
+                aqua: 'rgb(0, 255, 255)',
+                yellow: 'rgb(255, 205, 86)',
+                green: 'rgb(75, 192, 192)',
+                brown: 'rgb(165, 42, 42)',
+                blue: 'rgb(54, 162, 235)',
+                purple: 'rgb(153, 102, 255)',
+                grey: 'rgb(201, 203, 207)',
+                cadet: 'rgb(95, 158, 160)'
+            };
+            const COLOR_ARR = Object.values(COLORS);
+
+            const STEPS_Y = Object.freeze([0.0, 0.25, 0.5, 0.75, 1, 1.5, 2, 5, 10]);
+
+            $(function() {
+
+                Object.entries(PARAMS).forEach(function ([k, v]) {
+                    $('#' + k).val(v);
+                });
+
+                $('input').on("change paste keyup", function () {
+                    $this = $(this);
+                    let id = $this.attr('id');
+                    let val = $this.val() || '0';
+                    if (id === 'slots' || id === 'blocks') {
+                        let $slots = id === 'slots' ? $this : $('#slots');
+                        let $blocks = id === 'blocks' ? $this : $('#blocks');
+                        let slotsVal = parseInt($slots.val());
+                        let blocksVal = parseInt($blocks.val());
+                        if (slotsVal < blocksVal) {
+                            if (id === 'slots') {
+                                $blocks.val(blocksVal = slotsVal);
+                            } else {
+                                $slots.val(slotsVal = blocksVal);
+                            }
+                        }
+                        PARAMS.slots = slotsVal;
+                        PARAMS.blocks = blocksVal;
+                    } else {
+                        PARAMS[id] = FLOATS.indexOf(id) > -1 ? parseFloat(val) : parseInt(val);
+                    }
+                    update(PARAMS);
+                    updateView(PARAMS);
+                });
+
+                update(PARAMS);
+                updateView(PARAMS);
+
+                // HashTabs.bind({scrollToTop: false});
+            });
+
+            function round(val) {
+                return Number(Math.round(val+'e11')+'e-11');
+            }
+
+            function update(params = PARAMS, strict = false) {
+                params.NP = Math.max(params.slots, 1);
+                params.A = params.blocks / params.NP;
+                params.B = Math.pow(params.A, params.y);
+                params.H = Number((params.B * params.reward).toFixed(6));
+                params.Z = Number((100.0 - ((params.H * 100) / params.reward)).toFixed(2));
+                return params;
+            }
+
+            function updateView(params) {
+                $('span.result').each(function () {
+                    $this = $(this);
+                    $this.text(params[$this.attr('id')]);
+                });
+                drawCharts(params);
+            }
+
+            function drawCharts(params) {
+
+                if (window.chart) {
+                    window.chart.forEach((c) => c.destroy());
+                }
+
+                window.chart = [
+                    draw_sH_chart('chart-nNy', params),
+                ]
+            }
+
+            function draw_sH_chart(canvas_id, params) {
+                let step = Math.max(Number((params.slots / 20).toFixed(0)), 1);
+                let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0)
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_Y,
+                    xSteps: nSteps,
+                    yId: 'y',
+                    xId: 'blocks',
+                    xName: 'n',
+                    title: 'Changing of result (H) in dependence to y and n (N = ' + params.slots + ')',
+                    strict: true
+                });
+            }
+
+            function plotDataAndCreateChart(canvasId, params,
+                    {ySteps = [], xSteps = [], yId = '', xId = '', yName = yId, xName = xId, title = '', strict = false} = {}) {
+                return createChart(canvasId, {
+                    title: title,
+                    xName: xName,
+                    labels: xSteps,
+                    expectedMax: params.reward,
+                    datasets: createDatasetFromSteps(params, ySteps, xSteps, yName, (y,x) => {
+                        let r = {};
+                        r[yId] = y;
+                        r[xId] = x;
+                        return r;
+                    }, strict)
+                });
+            }
+
+            function createDatasetFromSteps(params, ySteps, xSteps, yLabel, f, strict = false) {
+                return ySteps.map(function (y, idx) {
+                    return {
+                        label: yLabel + ' = ' + y,
+                        fill: false,
+                        lineTension: 0.2,
+                        borderColor: COLOR_ARR[idx],
+                        backgroundColor: COLOR_ARR[idx],
+                        data: xSteps.map(function (x) {
+                            return update(Object.assign(Object.create(params), f(y, x)), strict).H;
+                        })
+                    };
+                });
+            }
+
+            function createChart(canvasId, {labels = [], datasets = [], xName = '', title = '', expectedMax = 1} = {}) {
+                let ctx = document.getElementById(canvasId).getContext('2d');
+                let max = Math.max.apply(null, datasets.map(d => d.data.filter(x => !Number.isNaN(x))).flat());
+                return Chart.Line(ctx, {
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: title
+                        },
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: xName
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'H'
+                                },
+                                ticks : {
+                                    beginAtZero : true,
+                                    max: Math.max(max, expectedMax)
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            </script>
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
+            <span class="navbar-brand"><a href="../..">Cardano Calculator</a> / <a href="..">Docs</a> / Pool performance demo</span>
+        </nav>
+
+        <div class="container-fluid">
+
+            <img src="pool_performance.png">
+
+            <h3>Parameters</h3>
+            <div class="container">
+                <div class="row">
+                    <label class="col-sm form-group form-control">
+                        <span>N: </span><input id="slots" type="number" min="0" step="1"><span class="text-nowrap"> (number of slots owned)</span>
+                    </label>
+                    <label class="col-sm form-group form-control">
+                        <span>f(s,o): </span><input id="reward" type="number" min="0" step="1"><span class="text-nowrap"> (raw pool rewards in ADA)</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="col-sm form-group form-control">
+                        <span>n: </span><input id="blocks" type="number" min="0" step="1"><span class="text-nowrap"> (number of created blocks)</span>
+                    </label>
+                    <label class="col-sm form-group form-control">
+                        <span>y: </span><input id="y" type="number" min="0" step="0.05"><span class="text-nowrap"> (penalty severity)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="tab-content">
+
+                <div id="formula" class="tab-pane active">
+
+                    <h3 class="pt-2">Formula break-down</h3>
+
+                    <div class="row d-flex justify-content-around">
+                        <div class="col border">
+                            <span class="text-nowrap">N' [max(N,1)] = <span class="result" id="NP">?</span> (Safe divisor)</span><br/>
+                            <br/>
+                            <span class="text-nowrap">A [n / N'] = <span class="result" id="A">?</span></span><br/>
+                            <span class="text-nowrap">B [A<sup>y</sup>] = <span class="result" id="B">?</span></span><br/>
+                            <br/>
+                            <span class="text-nowrap">H [B * f(s,o)] = <span class="result" id="H">?</span> (Final result)</span><br/>
+                            <br/>
+                            <span class="text-nowrap">Z [(f(s,o) * 100) / C] = <span class="result" id="Z">?</span>% (loss)</span><br/>
+                            <br/>
+                        </div>
+                        <div class="col chart-canvas border">
+                            <canvas id="chart-nNy"></canvas>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <p>
+                                Cardano delegation model includes a mechanism to punish nodes for imperfect performance.
+                                More specifically, if a node (or pool) wins a certain amount of slots <code>N</code>
+                                for an epoch, but misses some of them and creates only <code>n &lt; N</code> blocks.
+                                Then this node will be punished by reducing its total reward (so all the stakeholders
+                                who delegated to the pool are losing profits) and by reducing its rating for future
+                                epoch selections.
+                            </p>
+                            <p>
+                                This demo-page is for the formula that is used to determine the actual reward of a
+                                pool, considering the punishment. This formula is used <b>after</b> <a href="../pool-reward-demo">
+                                the main pool reward formula</a>. This means that at first the "raw" reward is calculated
+                                by the main formula, and then this punishment formula is applied to see if the raw
+                                reward should be reduced.
+                            </p>
+
+                            <h4>Parameters description</h4>
+                            <p>
+                                "Number of slots owned" <code>(N)</code> - how many slots did the node won at the beginning
+                                of the epoch. These slots are considered to be "owned" by this node, and the node is
+                                supposed to create the same amount of blocks. This number cannot be smaller than
+                                number of created blocks <code>(n)</code>.
+                            </p>
+                            <p>
+                                "Number of created blocks" <code>(n)</code> - how much actual blocks were created
+                                by the node. This number cannot be larger than number of owned slots <code>(N)</code>.
+                            </p>
+                            <p>
+                                "Raw pool rewards" <code>(f(s,o))</code> - the raw reward, earned by this pool
+                                based on its stake. You can use <a href="../pool-reward-demo">specific separate
+                                demo page</a> to see how this works.
+                            </p>
+                            <p>
+                                "penalty severity" <code>(y)</code> - this parameter determines, how severely
+                                the node will be punished depending on how many slots are missed.
+                            </p>
+                            <div class="border-top pt-2">
+                                <h5>Sources</h5>
+                                <p>
+                                    This formula is taken from the official delegation spec DRAFT:
+                                    <a href="..">Calculator Documentation</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <br/>
+            <br/>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="footer" class="text-center">
+                        GitHub <a target="_blank" href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
+                        | Dev: <a target="_blank" href="https://twitter.com/vsubhuman">@vsubhuman</a>
+                        | Forum: <a target="_blank" href="https://forum.cardano.org/t/cardano-staking-profits-calculator/12314">forum.cardano.org</a>
+                        | Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a>
+                        | Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/comments/8m0ji3/cardano_staking_profits_calculator/">r/Cardano</a>
+                        | Donate: <a target="_blank" href="https://cardanowiki.info/wiki/Funding">CardanoWiki</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </body>
+</html>
