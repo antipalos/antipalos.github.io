@@ -1,0 +1,675 @@
+<html>
+    <head>
+
+        <title>
+            Cardano Pool Rewards distribution demo
+        </title>
+
+        <script src="../../assets/js/vendor/jquery/jquery.min.js"></script>
+        <script src="../../assets/js/hashtabs.js"></script>
+        <script src="../../assets/js/utils.js"></script>
+        <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+
+        <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
+
+        <style type="text/css">
+            body {
+                padding-top: 5rem;
+            }
+
+            .chart-canvas {
+                width: 50%;
+            }
+            p, div.alert {
+                width: 60%;
+            }
+
+            @media (max-width: 1023.99px) {
+                .chart-canvas {
+                    width: 75%;
+                }
+                p, div.alert {
+                    width: 80%;
+                }
+            }
+
+            @media (max-width: 767.99px) {
+                .chart-canvas {
+                    width: 100%;
+                }
+                p, div.alert {
+                    width: 100%;
+                }
+            }
+        </style>
+
+        <script language="JavaScript">
+
+            const PARAMS = {
+                k: 100,
+                a0: 0.25,
+                o: 0.01,
+                s: 0.0,
+                R: 100
+            };
+
+            const FLOATS = ['a0', 'o', 's'];
+
+            const COLORS = {
+                black: 'rgb(0, 0, 0)',
+                red: 'rgb(255, 99, 132)',
+                orange: 'rgb(255, 159, 64)',
+                aqua: 'rgb(0, 255, 255)',
+                yellow: 'rgb(255, 205, 86)',
+                green: 'rgb(75, 192, 192)',
+                brown: 'rgb(165, 42, 42)',
+                blue: 'rgb(54, 162, 235)',
+                purple: 'rgb(153, 102, 255)',
+                grey: 'rgb(201, 203, 207)',
+                cadet: 'rgb(95, 158, 160)'
+            };
+            const COLOR_ARR = Object.values(COLORS);
+
+            const STEPS_O_S = Object.freeze([0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02]);
+            const STEPS_A0 = Object.freeze([0.0, 0.1, 0.25, 0.5, 1, 2, 3, 5, 10]);
+
+            $(function() {
+
+                Object.entries(PARAMS).forEach(function ([k, v]) {
+                    $('#' + k).val(v);
+                });
+
+                $('input').on("change paste keyup", function () {
+                    $this = $(this);
+                    let id = $this.attr('id');
+                    let val = $this.val() || '0';
+                    if (id === 'o' || id === 's') {
+                        let $o = id === 'o' ? $this : $('#o');
+                        let $s = id === 's' ? $this : $('#s');
+                        let oVal = parseFloat($o.val());
+                        let sVal = parseFloat($s.val());
+                        if (oVal < sVal) {
+                            if (id === 'o') {
+                                $s.val(sVal = oVal);
+                            } else {
+                                $o.val(oVal = sVal);
+                            }
+                        }
+                        PARAMS.o = oVal;
+                        PARAMS.s = sVal;
+                    } else {
+                        PARAMS[id] = FLOATS.indexOf(id) > -1 ? parseFloat(val) : parseInt(val);
+                    }
+                    update(PARAMS);
+                    updateView(PARAMS);
+                });
+
+                update(PARAMS);
+                updateView(PARAMS);
+
+                HashTabs.bind({scrollToTop: false});
+            });
+
+            function round(val) {
+                return Number(Math.round(val+'e11')+'e-11');
+            }
+
+            function update(params = PARAMS, strict = false) {
+                params.z0 = round(1/params.k);
+                params.oP = strict & params.o < params.s ? Number.NaN : round(Math.min(Math.max(params.o, params.s), params.z0));
+                params.sP = round(Math.min(params.s, params.z0));
+                params.A = round((params.z0 - params.oP) / params.z0);
+                params.B = round(params.sP * params.A);
+                params.C = round(params.oP - params.B);
+                params.D = round(params.C / params.z0);
+                params.E = round(params.sP * params.a0 * params.D);
+                params.F = round(params.oP + params.E);
+                params.G = round(params.R / (1 + params.a0));
+                params.H = round(params.G * params.F);
+                return params;
+            }
+
+            function updateView(params) {
+                $('span.result').each(function () {
+                    $this = $(this);
+                    $this.text(params[$this.attr('id')]);
+                });
+                drawCharts(params);
+            }
+
+            function drawCharts(params) {
+
+                if (window.chart) {
+                    window.chart.forEach((c) => c.destroy());
+                }
+
+                window.chart = [
+                    draw_sH_chart('chart-s_H', params),
+                    draw_oH_chart('chart-o_H', params),
+                    draw_aoH_chart('chart-a_o_H', params),
+                    draw_asH_chart('chart-a_s_H', params),
+                ]
+            }
+
+            function draw_oH_chart(canvas_id, params) {
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_O_S,
+                    yName: 's',
+                    xName: 'o',
+                    title: 'Changing of result (H) in dependence to o and s (a0 = ' + params.a0 + ')',
+                    strict: true
+                });
+            }
+
+            function draw_sH_chart(canvas_id, params) {
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_O_S,
+                    yName: 'o',
+                    xName: 's',
+                    title: 'Changing of result (H) in dependence to s and o (a0 = ' + params.a0 + ')',
+                    strict: true
+                });
+            }
+
+            function draw_aoH_chart(canvas_id, params) {
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_A0,
+                    yName: 'o',
+                    xName: 'a0',
+                    title: 'Changing of result (H) in dependence to a0 and o (s = ' + params.s + ')',
+                    strict: true
+                });
+            }
+
+            function draw_asH_chart(canvas_id, params) {
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: STEPS_O_S,
+                    xSteps: STEPS_A0,
+                    yName: 's',
+                    xName: 'a0',
+                    title: 'Changing of result (H) in dependence to a0 and s (o = ' + params.o + ')',
+                    strict: true
+                });
+            }
+
+            function plotDataAndCreateChart(canvasId, params,
+                    {ySteps = [], xSteps = [], yName = '', xName = '', title = '', strict = false} = {}) {
+                return createChart(canvasId, {
+                    title: title,
+                    xName: xName,
+                    labels: xSteps,
+                    expectedMax: Math.round(params.R / 100),
+                    datasets: createDatasetFromSteps(params, ySteps, xSteps, yName, (y,x) => {
+                        let r = {};
+                        r[yName] = y;
+                        r[xName] = x;
+                        return r;
+                    }, strict)
+                });
+            }
+
+            function createDatasetFromSteps(params, ySteps, xSteps, yLabel, f, strict = false) {
+                return ySteps.map(function (y, idx) {
+                    return {
+                        label: yLabel + ' = ' + y,
+                        fill: false,
+                        lineTension: 0.2,
+                        borderColor: COLOR_ARR[idx],
+                        backgroundColor: COLOR_ARR[idx],
+                        data: xSteps.map(function (x) {
+                            return update(Object.assign(Object.create(params), f(y, x)), strict).H;
+                        })
+                    };
+                });
+            }
+
+            function createChart(canvasId, {labels = [], datasets = [], xName = '', title = '', expectedMax = 1} = {}) {
+                let ctx = document.getElementById(canvasId).getContext('2d');
+                let max = Math.max.apply(null, datasets.map(d => d.data.filter(x => !Number.isNaN(x))).flat());
+                return Chart.Line(ctx, {
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            text: title
+                        },
+                        animation: {
+                            duration: 0
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: xName
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'H'
+                                },
+                                ticks : {
+                                    beginAtZero : true,
+                                    max: Math.max(max, expectedMax)
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            </script>
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
+            <span class="navbar-brand"><a href="../..">Cardano Calculator</a> / <a href="..">Docs</a> / Pool reward demo</span>
+
+            <button class="navbar-toggler my-2" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <ul class="nav nav-pills nav-fill ml-auto" id="pills-tab" role="tablist">
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab active" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="true">Formula</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab" id="faq-tab" data-toggle="tab" href="#charts" role="tab" aria-controls="faq" aria-selected="false">o/s charts</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab" id="roadmap-tab" data-toggle="tab" href="#charts2" role="tab" aria-controls="roadmap" aria-selected="false">a0 charts</a>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+
+            <img src="pool_reward.png">
+
+            <h3>Parameters</h3>
+            <div class="container">
+                <div class="row">
+                    <label class="col-sm form-group form-control">
+                        <span>o: </span><input id="o" type="number" min="0" step="0.0005"><span class="text-nowrap"> (pool share)</span>
+                    </label>
+                    <label class="col-sm form-group form-control">
+                        <span>k: </span><input id="k" type="number" min="1" step="1"><span class="text-nowrap"> (desired number of pools)</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="col-sm form-group form-control">
+                        <span>s: </span><input id="s" type="number" min="0" step="0.0005"><span class="text-nowrap"> (leader share)</span>
+                    </label>
+                    <label class="col-sm form-group form-control">
+                        <span>a0: </span><input id="a0" type="number" min="0" step="0.05"><span class="text-nowrap"> (leader stake influence)</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <span class="col-sm"></span>
+                    <label class="col-sm form-group form-control">
+                        <span>R: </span><input id="R" type="number" min="0" step="1"><span class="text-nowrap"> (total epoch reward)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="tab-content">
+
+                <div id="formula" class="tab-pane active">
+
+                    <h3 class="pt-2">Formula break-down</h3>
+
+                    <div class="row">
+                        <div class="col-sm border">
+                            <span class="text-nowrap">z0 [1/k] = <span class="result" id="z0">?</span> (max cap share)</span><br/>
+                            <span class="text-nowrap">o' [min(o,z0)] = <span class="result" id="oP">?</span> (capped pool share)</span><br/>
+                            <span class="text-nowrap">s' [min(s,z0)] = <span class="result" id="sP">?</span> (capped leader share)</span><br/>
+                            <br/>
+                        </div>
+                        <div class="col-sm border">
+                            <span class="text-nowrap">A [(z0 - o') / z0] = <span class="result" id="A">?</span></span><br/>
+                            <span class="text-nowrap">B [s' * A] = <span class="result" id="B">?</span></span><br/>
+                            <span class="text-nowrap">C [o' - B] = <span class="result" id="C">?</span></span><br/>
+                            <span class="text-nowrap">D [C / z0] = <span class="result" id="D">?</span></span><br/>
+                            <span class="text-nowrap">E [s' * a0 * D] = <span class="result" id="E">?</span></span><br/>
+                            <span class="text-nowrap">F [o' + E] = <span class="result" id="F">?</span></span><br/>
+                            <br/>
+                        </div>
+                        <div class="col-sm border">
+                            <span class="text-nowrap">G [R / (1 + a0)] = <span class="result" id="G">?</span></span><br/>
+                            <span class="text-nowrap">H [G * F] = <span class="result" id="H">?</span> (final result)</span><br/>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h5>Warning!</h5>
+                                <p style="width: 100%">
+                                    <span class="alert-warning">This demo-page  is NOT a reward calculator!</span><br/>
+                                    You should NOT use this page to try and predict your staking profits!
+                                    The ONLY purpose of this demo is to show the effect of <code>o</code>, <code>s</code>,
+                                    and <code>a0</code> parameters on the reward distribution process.
+                                </p>
+                            </div>
+                            <p>
+                                Cardano staking rewards distribution happens once at the end of each epoch (5 days).
+                                For 5 days all the rewards in the system are collected in a special address.
+                                At the end of an epoch total reward pool <code>(R)</code> is split between
+                                all the participants and the treasury.
+                                This formula is just a single part of the complex system, and it determines how
+                                delegated pool stake <code>(o)</code> and personal pool-leader stake <code>(s)</code>
+                                affect the reward distribution among pools.
+                            </p>
+
+                            <h4>Parameters description</h4>
+                            <p>
+                                "Desired number of pools" <code>(k)</code> - this is a system constant that is expected to
+                                be around 100. This parameter shows what <b>optimal</b> number of pools is expected to be
+                                in the system; at least 80% of total stake is expected to be controlled by this number of pools.
+                                The stake share cap value <code>(z0)</code> is calculated from this parameter and this value
+                                determines what is the <b>maximum</b> reward any single node can ever get. Basically,
+                                if a node (pool) stake share is bigger then <code>z0</code> - then it is calculated as
+                                if its share was <code>z0</code>. The point of this is to make sure that system does not
+                                settles at the number of pools lower than <code>k</code> - because if this happens,
+                                then it would mean that people just miss additional possible profits that they can get
+                                if someone creates new pools. There might and will be more than <code>k</code> pools,
+                                but there shouldn't be less.
+                            </p>
+                            <p>
+                                "Pool share" <code>(o)</code> - the share of all the stake in this pool, relative to
+                                ALL the stake in the system. If the system has current total stake of 10 billion ADA,
+                                and the pool has 50 million ADA of stake than it's share is <code>0.5%</code> or
+                                <code>0.005</code>. Maximum <b>meaningful</b> value of <code>o</code> is <code>z0</code>
+                                which depends on <code>k</code>. So if the desired number of pools is 100, then maximum
+                                <b>meaningful</b> <code>o</code> is <code>0.01 (1%)</code>. Any share, bigger than this, will
+                                <b>NOT</b> bring more rewards. Pool share directly determines how likely the pool is to be
+                                selected to produce a block for each slot in an epoch. The bigger the pool share - the more
+                                slots it will win, and the larger total reward it will get. But it will <b>NEVER</b>
+                                get more than <code>z0</code> share of the total reward.
+                            </p>
+                            <p>
+                                "Leader share" <code>(s)</code> - the share of stake that pool-leader (creator) has
+                                <b>pledged</b> to this pool. Creator of the pool will need to "lock" <b>at least</b>
+                                this amount of stake (or more) in order for pool to be selected at all. The size of this
+                                pledge will also determine the overall size of pool rewards. Pledged stake is automatically
+                                considered to be a part of the pool share, so if leader pledges <code>0.005 (0.5%)</code>
+                                of total stake, than the pool is already half-full, and there's only another <code>0.005</code>
+                                of "free stake space" left to be filled by delegation. Parameter <code>s</code> is
+                                <b>always</b> <code><=</code> than the parameter <code>o</code>. Maximum <b>significant</b>
+                                value for the pledge is logically also <code>z0</code>, because if leader pledges <code>z0</code>
+                                of stake - the pool is already automatically full, so no more stake can be delegated to it.
+                                Only a pool with a maximum pledge will be able to receive the maximum delegation reward.
+                                As pledge gets lower - reward also gets lower even for the same delegated stake share.
+                                This pledge is required to eliminate the possibility for an adversary to create fake popular pools.
+                            </p>
+                            <p>
+                                "Leader stake influence" <code>(a0)</code> - this is a system constant, and its value
+                                is yet to be decided. The bigger this value gets - the harder it is for an adversary
+                                to create enough pools to gain the majority control. BUT! At the same time the difference
+                                in profits between differently funded pools also gets bigger.
+                            </p>
+                            <p>
+                                "Total epoch reward" <code>(R)</code> - represents the pool of total reward for the whole epoch.
+                                Similar pool of coins gets distributed among all the participant nodes at the end of each epoch.
+                                Exact value of this parameter is not important for this demo and will affect only chart scales.
+                                It is just randomly taken at 100 ADA so that charts would not look like promising some real numbers.
+                            </p>
+                            <div class="border-top pt-2">
+                                <h5>Sources</h5>
+                                <p>
+                                    This formula is taken from the official delegation spec DRAFT:
+                                    <a href="..">Calculator Documentation</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="charts" class="tab-pane">
+
+                    <h3 class="pt-2">Pool stake to leader stake charts</h3>
+
+                    <div class="row d-flex justify-content-around">
+                        <div class="chart-canvas border">
+                            <canvas id="chart-o_H"></canvas>
+                        </div>
+                        <div class="chart-canvas border">
+                            <canvas id="chart-s_H"></canvas>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+                    <div class="row">
+                        <div class="col-12">
+                            <p>
+                                These two charts show how resulting pool reward is affected by changing
+                                <code>o</code> and <code>s</code> values. You can try changing the <code>a0</code>
+                                value and see how charts are changing.
+                            </p>
+
+                            <h4>Different <code>s</code> as <code>o</code> grows (left or top chart)</h4>
+                            <p>
+                                This chart shows how rewards for pools with different leader stake <code>(s)</code>
+                                change as their delegated share <code>(o)</code> grows. You can see how rewards for
+                                each pool logically goes up along with its share up until it hits the "cap" of <code>(z0)</code>,
+                                and after this even if pool gets more delegated stake - reward stays the same.
+                            </p>
+                            <p>
+                                You can notice how all lines have different length. This is because you cannot have
+                                parameter <code>o</code> to be less than parameter <code>s</code>. This is explained
+                                by the fact that when a leader already puts 0.05 of total stake of personal stake
+                                <code>(s)</code> into his pool - the total pool reward <code>(o)</code> is also
+                                already equal to that  number, which means that this pool is already "half-full",
+                                and there's only another 0.05 of total stake available for delegates to "fill".
+                            </p>
+                            <p>
+                                The most interesting property is how all lines are capped at different height.
+                                This represents exactly the effect of leader stake on the pool rewards - the bigger
+                                personal leader stake <code>(s)</code> a pool has - the bigger eventual reward it will
+                                be able to get. You can see that the topmost line only starts at <code>o=0.01</code>
+                                and is already capped - this means that <b>the only</b> way for a pool (or a node)
+                                to get the maximum possible reward is to set the personal stake at the maximum possible
+                                value. BUT! For a pool this would also mean that there's no "empty stake space" left
+                                in there for others to delegate, because any further delegation will move such a pool
+                                over capacity and will reduce profits for everyone.
+                            </p>
+
+                            <h4>Different <code>o</code> as <code>s</code> grows (right or bottom chart)</h4>
+                            <p>
+                                This chart shows the same data but from another angle. Each horizontal line here
+                                shows the same data as corresponding vertical line on the first chart. So the top
+                                line represents any "full" pool <code>(o=0.01)</code> this means that this pool has
+                                reached its maximum capacity and will not be able to receive any more reward, even if
+                                more people will delegate to it.
+                            </p>
+                            <p>
+                                You can see top line representing how rewards would grow for a capped pool
+                                as leader stake represents bigger and bigger share of it. The leftmost point
+                                <code>(s=0)</code> means that there's no leader stake at all - the pool is capped,
+                                but all the coins in it are delegated by other people. In the middle <code>(s=0.05)</code>
+                                - half of stake is owned by the leader, and half of it is delegated by other people.
+                                And in the right part <code>(s=0.01)</code> - all stake in the pool (node) is owned by
+                                its leader and reward reaches possible maximum <code>(z0)</code>.
+                            </p>
+                            <p>
+                                Second from the top line represents a pool filled for 75%, it is shorter than the top
+                                line, because it is impossible for a pool to have leader stake more than a total stake
+                                at all (leader stake is regarded as a part of total stake), so chart would not work
+                                that way. This pool will never be able to reach the maximum possible reward, just
+                                because it doesn't have enough stake share at all. But you also can notice how this
+                                line is a bit flatter than the top one, and the next one is even flatter. This shows
+                                how delegated stake affects the total pool reward. Namely - it's something like it
+                                adds value to the option of having leader stake. Meaning that if you own a "half-full"
+                                pool <code>(o=0.005)</code> - then it is more profitable for the whole pool if you
+                                would personally own half of coins in it (0.0025). But if you have a completely "full" pool
+                                <code>(o=0.01)</code> - then the profit for the pool of you owning the same amount of coins
+                                (0.0025) is even better now, and the whole pool would receive more reward.
+                            </p>
+
+                            <h4>Conclusions</h4>
+                            <p>
+                                The leader stake is important for a whole set of reasons, e.g. - it <b>disincentivises</b>
+                                whales to split their stake; it makes pools with a real locked stake more valuable than
+                                just empty pools that anyone can create, because former are less likely to brake
+                                any rules or be negligent; it also <b>disincentivises</b> whales from creating empty pools
+                                and putting their coins in there as delegates, instead of locking it in as leader pledge.
+                            </p>
+                            <p>
+                                Interesting fact is that any pool in reality will never be able to receive the same
+                                share of rewards as its share of the stake is (cuz only maximum possible leader stake
+                                can guarantee maximum possible reward). This means that after each epoch there will be
+                                "left-over" reward. Do not worry, part of it will go toward the treasury, and the rest
+                                will be added to rewards for the next epoch.
+                            </p>
+
+                            <h4>Significance of <code>a0</code></h4>
+                            <p>
+                                Both presented charts do not plot the <code>a0</code> parameter. This means that you
+                                can change its value in parameters form and see how it changes the charts.
+                                Basically, this parameter determines - what will be the difference in rewards
+                                between a full pool with no leader stake and a pool created with maximum leader stake.
+                                As you move this value around - you can see how capped maximums on the left (top) chart
+                                are either drawn together or drawn apart, and also how the top line on the right (bottom)
+                                chart gets more and more steep or flat. This means that as <code>a0</code> grows -
+                                the profit from each single leader stake ADA is getting bigger and bigger.
+                                And it gets bigger not because top pools are making <b>more</b> money, but because
+                                bottom pools are making less. Which is obvious, because they can't have more than 100%
+                                of total rewards to distribute.
+                            </p>
+                            <b><h6>Note! That detailed <code>a0</code> plotting can be found on the next page with charts.</h6></b>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="charts2" class="tab-pane">
+
+                    <h3 class="pt-2">Leader stake influence charts</h3>
+
+                    <div class="row d-flex justify-content-around">
+                        <div class="chart-canvas border">
+                            <canvas id="chart-a_o_H"></canvas>
+                        </div>
+                        <div class="chart-canvas border">
+                            <canvas id="chart-a_s_H"></canvas>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+                    <div class="row">
+                        <div class="col-12">
+                            <p>
+                                These two charts show how resulting pool reward is affected by increasing the
+                                <code>a0</code> value with different <code>o</code> and <code>s</code> values.
+                                You can change <code>o</code> or <code>s</code> parameters in the input form
+                                and see how charts are changing.
+                            </p>
+
+                            <h4>Different <code>o</code> as <code>a0</code> grows (left or top chart)</h4>
+                            <p>
+                                On this chart each line represents a stake pool of different stake share <code>(o)</code>.
+                                You can see how their rewards change as <code>a0</code> parameter grows.
+                                The leader stake <code>(s)</code> is not plotted, so you can change it's value in the
+                                input form and see how it changes the chart.
+                            </p>
+                            <p>
+                                You can see that the leftmost part of the chart (<code>a0=0</code>) is perfectly proportional
+                                to the <code>o</code> value, for example, <code>o=0.005</code> gets <code>50%</code>
+                                of rewards, and <code>o=0.01</code> gets <code>100%</code> of rewards, even if you change
+                                the <code>s</code> value. This is because <code>a0=0</code> means that leader stake
+                                <code>(s)</code> has no effect at all and can be ignored. This is how one would expect
+                                pool rewards to be distributed in a naive system.
+                            </p>
+                            <p>
+                                But as <code>a0</code> value grows to the right, you can see rewards getting lower
+                                and lower, and the more stake a pool has - the more value it loses. So watching on this
+                                chart you can estimate how having a pool of different saturation with no leader stake
+                                will be affected by different values of <code>a0</code>.
+                            </p>
+
+                            <h4>Different <code>s</code> as <code>a0</code> grows (right or bottom chart)</h4>
+                            <p>
+                                On this chart all lines represent pools with the same total stake <code>(o)</code>
+                                (by default, they are all full, so <code>o=0.01</code>), but different leader stakes
+                                <code>(s)</code>. The pool stake is not plotted, so you can change this value <code>(o)</code>
+                                in the input form and see how this chart changes.
+                            </p>
+                            <p>
+                                You can see that in the leftmost part all pools have the same maximum reward of <code>1.0</code>
+                                (means 100%). This is because at <code>a0=0</code> difference in leader stake plays no role.
+                                But as <code>a0</code> grows to the right, you can see how the pools with maximum
+                                leader stake stay on the same position of maximum rewards, but pools with lower
+                                leader stake shift down to lower and lower rewards. And you can see how the lower
+                                leader stake a pool has - the greater downshift in rewards it gets.
+                            </p>
+
+                            <h4>Conclusions</h4>
+                            <p>
+                                These two charts demonstrate how majorly maximum rewards can be affected by increased
+                                values of <code>a0</code>, an why it is important for stakeholders, which exactly value
+                                will be selected by IOHK for the final implementation.
+                            </p>
+                            <p>
+                                They also show how hard it is to chose the right value, because as <code>a0</code>
+                                grows - security is improved, because it gets more and more costly for an adversary
+                                to split stake (one of the main problems the leader stake is designed to solve). But at
+                                the same time you get the problem that pools get worse and worse rewards as their
+                                leader stake goes down, which results in the whole sector being largely dominated by
+                                "whale pools", and anyone without a large pledge would not have a chance to build
+                                a sustainable pool. At the same time, as <code>a0</code> reduces - the environment
+                                gets more and more "fair" and "flat", but at the same time a possible Sybyl attack
+                                get cheaper ad cheaper to perform. So selecting the proper value for this parameter
+                                is non-trivial, but very important task.
+                            </p>
+                            <p class="alert alert-info">
+                                <b>Note</b>, that as you change value of <code>s</code> or <code>o</code> on the input form
+                                you can notice some lines disappearing from the charts. This happens because <code>o</code>
+                                can <b>never</b> be less than <code>s</code>, just because the personal stake of the
+                                pool leader is included in the total pool stake. So it does not make any sense to
+                                say "what is the reward at <code>s=0.005</code> and <code>o=0.0</code>",
+                                because this situation is impossible.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <br/>
+            <br/>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="footer" class="text-center">
+                        GitHub <a target="_blank" href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">@Antipalos</a>
+                        | Dev: <a target="_blank" href="https://twitter.com/vsubhuman">@vsubhuman</a>
+                        | Forum: <a target="_blank" href="https://forum.cardano.org/t/cardano-staking-profits-calculator/12314">forum.cardano.org</a>
+                        | Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a>
+                        | Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/comments/8m0ji3/cardano_staking_profits_calculator/">r/Cardano</a>
+                        | Donate: <a target="_blank" href="https://cardanowiki.info/wiki/Funding">CardanoWiki</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </body>
+</html>
