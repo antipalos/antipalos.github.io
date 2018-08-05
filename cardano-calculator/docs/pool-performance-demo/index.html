@@ -106,7 +106,7 @@
                 update(PARAMS);
                 updateView(PARAMS);
 
-                // HashTabs.bind({scrollToTop: false});
+                HashTabs.bind({scrollToTop: false});
             });
 
             function round(val) {
@@ -115,7 +115,7 @@
 
             function update(params = PARAMS, strict = false) {
                 params.NP = Math.max(params.slots, 1);
-                params.A = params.blocks / params.NP;
+                params.A = strict & params.blocks > params.slots ? Number.NaN : params.blocks / params.NP;
                 params.B = Math.pow(params.A, params.y);
                 params.H = Number((params.B * params.reward).toFixed(6));
                 params.Z = Number((100.0 - ((params.H * 100) / params.reward)).toFixed(2));
@@ -137,11 +137,12 @@
                 }
 
                 window.chart = [
-                    draw_sH_chart('chart-nNy', params),
+                    draw_nyN_chart('chart-nyN', params),
+                    draw_nNy_chart('chart-nNy', params),
                 ]
             }
 
-            function draw_sH_chart(canvas_id, params) {
+            function draw_nyN_chart(canvas_id, params) {
                 let step = Math.max(Number((params.slots / 20).toFixed(0)), 1);
                 let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0)
                 return plotDataAndCreateChart(canvas_id, params, {
@@ -151,6 +152,21 @@
                     xId: 'blocks',
                     xName: 'n',
                     title: 'Changing of result (H) in dependence to y and n (N = ' + params.slots + ')',
+                    strict: true
+                });
+            }
+
+            function draw_nNy_chart(canvas_id, params) {
+                let step = Math.max(Number((params.slots / 10).toFixed(0)), 1);
+                let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0)
+                return plotDataAndCreateChart(canvas_id, params, {
+                    ySteps: nSteps,
+                    xSteps: nSteps,
+                    yId: 'slots',
+                    xId: 'blocks',
+                    yName: 'N',
+                    xName: 'n',
+                    title: 'Changing of result (H) in dependence to N and n (y = ' + params.y + ')',
                     strict: true
                 });
             }
@@ -172,7 +188,7 @@
             }
 
             function createDatasetFromSteps(params, ySteps, xSteps, yLabel, f, strict = false) {
-                return ySteps.map(function (y, idx) {
+                let datasets = ySteps.map(function (y, idx) {
                     return {
                         label: yLabel + ' = ' + y,
                         fill: false,
@@ -184,6 +200,16 @@
                         })
                     };
                 });
+                datasets.push({
+                    label: 'H = 50%',
+                    fill: false,
+                    lineTension: 0,
+                    borderColor: 'rgb(200, 200, 200)',
+                    backgroundColor: 'rgb(200, 200, 200)',
+                    data: Array.apply(null, Array(datasets[0].data.length)).map(x => round(params.reward / 2)),
+                    pointRadius: 0
+                });
+                return datasets;
             }
 
             function createChart(canvasId, {labels = [], datasets = [], xName = '', title = '', expectedMax = 1} = {}) {
@@ -232,6 +258,26 @@
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
             <span class="navbar-brand"><a href="../..">Cardano Calculator</a> / <a href="..">Docs</a> / Pool performance demo</span>
+
+            <button class="navbar-toggler my-2" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <ul class="nav nav-pills nav-fill ml-auto" id="pills-tab" role="tablist">
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab active" id="formula-tab" data-toggle="tab" href="#formula" role="tab" aria-controls="formula" aria-selected="true">Formula</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link hashtab" id="faq-tab" data-toggle="tab" href="#charts" role="tab" aria-controls="faq" aria-selected="false">Charts</a>
+                    </li>
+
+                </ul>
+
+            </div>
         </nav>
 
         <div class="container-fluid">
@@ -264,7 +310,7 @@
 
                     <h3 class="pt-2">Formula break-down</h3>
 
-                    <div class="row d-flex justify-content-around">
+                    <div class="row">
                         <div class="col border">
                             <span class="text-nowrap">N' [max(N,1)] = <span class="result" id="NP">?</span> (Safe divisor)</span><br/>
                             <br/>
@@ -275,9 +321,6 @@
                             <br/>
                             <span class="text-nowrap">Z [(f(s,o) * 100) / C] = <span class="result" id="Z">?</span>% (loss)</span><br/>
                             <br/>
-                        </div>
-                        <div class="col chart-canvas border">
-                            <canvas id="chart-nNy"></canvas>
                         </div>
                     </div>
 
@@ -318,18 +361,88 @@
                                 demo page</a> to see how this works.
                             </p>
                             <p>
-                                "penalty severity" <code>(y)</code> - this parameter determines, how severely
-                                the node will be punished depending on how many slots are missed.
+                                "penalty severity" <code>(y)</code> - a system constant. This parameter determines,
+                                how severely the node will be punished depending on how many slots are missed.
+                                You can see different values of this parameter being plotted on the chart.
                             </p>
+
                             <div class="border-top pt-2">
                                 <h5>Sources</h5>
                                 <p>
-                                    This formula is taken from the official delegation spec DRAFT:
+                                    This formula is taken from the official reward scheme paper:
                                     <a href="..">Calculator Documentation</a>
                                 </p>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div id="charts" class="tab-pane">
+                    <h3 class="pt-2">Charts</h3>
+
+                    <div class="row d-flex justify-content-around">
+                        <div class="chart-canvas border">
+                            <canvas id="chart-nyN"></canvas>
+                        </div>
+                        <div class="chart-canvas border">
+                            <canvas id="chart-nNy"></canvas>
+                        </div>
+                    </div>
+
+                    <h3 class="pt-2">Explanation</h3>
+                    <div class="row">
+                        <div class="col-12">
+                            <p>
+                                These two charts show how resulting pool reward is affected by changing
+                                <code>o</code> and <code>s</code> values. You can try changing the <code>a0</code>
+                                value and see how charts are changing.
+                            </p>
+
+                            <h4>Different <code>y</code> as <code>n</code> grows (left or top chart)</h4>
+                            <p>
+                                On this chart you can see different values of <code>y</code> being plotted
+                                at different number of blocks <code>(n)</code> being created. Each line represents
+                                a different system, where <b>constant</b> <code>y</code> is selected at different value.
+                                You can change  the number of slots <code>(N)</code> value in the input form and see
+                                how chart changes.
+                            </p>
+                            <p>
+                                Chart clearly shows that at <code>n=0</code> any value of <code>y</code> gives
+                                the resulting reward of 0 (except the very special case of <code>y=0</code>,
+                                which means that no punishment will be applied at all). This means that no matter
+                                what is the punishment severity - it is impossible to get a reward for making no
+                                blocks at all.
+                            </p>
+                            <p>
+                                Next you can clearly see a straight middle line that goes diagonally between bottom-left
+                                and top-right corners. This line represents value of <code>y=1</code> when punishment
+                                is perfectly proportional to the performance - if a node has created 50% of it's blocks,
+                                then it will receive 50% of raw rewards, etc.
+                            </p>
+                            <p>
+                                All lines <b>above</b> the middle-line represent values of <code>y &lt; 1</code>.
+                                You can see how with these values node would receive lower punishment at higher
+                                number of created blocks (few missed blocks), but then as number of created blocks
+                                goes down - punishment gets more severe, resulting in the same zero value.
+                            </p>
+                            <p>
+                                On the other side, all lines <b>under</b> the middle-line represent values of
+                                <code>y &gt; 1</code> and bend in opposite direction. This means that the larger
+                                value of <code>y</code> gets - the more severely punished first missed slots become.
+                                You can see how at <code>y=10</code> first 5 missed blocks <code>(n=95)</code>
+                                already gets the node only <code>~60%</code> of the raw reward.
+                            </p>
+
+                            <h4>Different <code>N</code> as <code>n</code> grows (right or bottom chart)</h4>
+                            <p>
+
+                            </p>
+
+                            <h4>Conclusions</h4>
+                            <p>
+
+                            </p>
+                        </div>
                 </div>
             </div>
 
