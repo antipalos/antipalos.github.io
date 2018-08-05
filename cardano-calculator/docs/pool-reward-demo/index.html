@@ -72,7 +72,7 @@
             const COLOR_ARR = Object.values(COLORS);
 
             const STEPS_O_S = Object.freeze([0.0, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02]);
-            const STEPS_A0 = Object.freeze([0.0, 0.1, 0.25, 0.5, 1, 3, 5, 10]);
+            const STEPS_A0 = Object.freeze([0.0, 0.1, 0.25, 0.5, 1, 2, 3, 5, 10]);
 
             $(function() {
 
@@ -202,6 +202,7 @@
                     title: title,
                     xName: xName,
                     labels: xSteps,
+                    expectedMax: Math.round(params.R / 100),
                     datasets: createDatasetFromSteps(params, ySteps, xSteps, yName, (y,x) => {
                         let r = {};
                         r[yName] = y;
@@ -226,7 +227,7 @@
                 });
             }
 
-            function createChart(canvasId, {labels = [], datasets = [], xName = '', title = ''} = {}) {
+            function createChart(canvasId, {labels = [], datasets = [], xName = '', title = '', expectedMax = 1} = {}) {
                 let ctx = document.getElementById(canvasId).getContext('2d');
                 let max = Math.max.apply(null, datasets.map(d => d.data.filter(x => !Number.isNaN(x))).flat());
                 return Chart.Line(ctx, {
@@ -258,7 +259,7 @@
                                 },
                                 ticks : {
                                     beginAtZero : true,
-                                    max: Math.max(max, 1)
+                                    max: Math.max(max, expectedMax)
                                 }
                             }]
                         }
@@ -589,10 +590,62 @@
                                 The leader stake <code>(s)</code> is not plotted, so you can change it's value in the
                                 input form and see how it changes the chart.
                             </p>
+                            <p>
+                                You can see that the leftmost part of the chart (<code>a0=0</code>) is perfectly proportional
+                                to the <code>o</code> value, for example, <code>o=0.005</code> gets <code>50%</code>
+                                of rewards, and <code>o=0.01</code> gets <code>100%</code> of rewards, even if you change
+                                the <code>s</code> value. This is because <code>a0=0</code> means that leader stake
+                                <code>(s)</code> has no effect at all and can be ignored. This is how one would expect
+                                pool rewards to be distributed in a naive system.
+                            </p>
+                            <p>
+                                But as <code>a0</code> value grows to the right, you can see rewards getting lower
+                                and lower, and the more stake a pool has - the more value it loses. So watching on this
+                                chart you can estimate how having a pool of different saturation with no leader stake
+                                will be affected by different values of <code>a0</code>.
+                            </p>
 
                             <h4>Different <code>s</code> as <code>a0</code> grows (right or bottom chart)</h4>
                             <p>
+                                On this chart all lines represent pools with the same total stake <code>(o)</code>
+                                (by default, they are all full, so <code>o=0.01</code>), but different leader stakes
+                                <code>(s)</code>. The pool stake is not plotted, so you can change this value <code>(o)</code>
+                                in the input form and see how this chart changes.
+                            </p>
+                            <p>
+                                You can see that in the leftmost part all pools have the same maximum reward of <code>1.0</code>
+                                (means 100%). This is because at <code>a0=0</code> difference in leader stake plays no role.
+                                But as <code>a0</code> grows to the right, you can see how the pools with maximum
+                                leader stake stay on the same position of maximum rewards, but pools with lower
+                                leader stake shift down to lower and lower rewards. And you can see how the lower
+                                leader stake a pool has - the greater downshift in rewards it gets.
+                            </p>
 
+                            <h4>Conclusions</h4>
+                            <p>
+                                These two charts demonstrate how majorly maximum rewards can be affected by increased
+                                values of <code>a0</code>, an why it is important for stakeholders, which exactly value
+                                will be selected by IOHK for the final implementation.
+                            </p>
+                            <p>
+                                They also show how hard it is to chose the right value, because as <code>a0</code>
+                                grows - security is improved, because it gets more and more costly for an adversary
+                                to split stake (one of the main problems the leader stake is designed to solve). But at
+                                the same time you get the problem that pools get worse and worse rewards as their
+                                leader stake goes down, which results in the whole sector being largely dominated by
+                                "whale pools", and anyone without a large pledge would not have a chance to build
+                                a sustainable pool. At the same time, as <code>a0</code> reduces - the environment
+                                gets more and more "fair" and "flat", but at the same time a possible Sybyl attack
+                                get cheaper ad cheaper to perform. So selecting the proper value for this parameter
+                                is non-trivial, but very important task.
+                            </p>
+                            <p class="alert alert-info">
+                                <b>Note</b>, that as you change value of <code>s</code> or <code>o</code> on the input form
+                                you can notice some lines disappearing from the charts. This happens because <code>o</code>
+                                can <b>never</b> be less than <code>s</code>, just because the personal stake of the
+                                pool leader is included in the total pool stake. So it does not make any sense to
+                                say "what is the reward at <code>s=0.005</code> and <code>o=0.0</code>",
+                                because this situation is impossible.
                             </p>
                         </div>
                     </div>
