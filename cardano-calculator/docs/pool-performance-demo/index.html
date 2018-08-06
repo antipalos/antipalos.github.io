@@ -115,7 +115,7 @@
 
             function update(params = PARAMS, strict = false) {
                 params.NP = Math.max(params.slots, 1);
-                params.A = strict & params.blocks > params.slots ? Number.NaN : params.blocks / params.NP;
+                params.A = strict && params.blocks > params.slots ? Number.NaN : params.blocks / params.NP;
                 params.B = Math.pow(params.A, params.y);
                 params.H = Number((params.B * params.reward).toFixed(6));
                 params.Z = Number((100.0 - ((params.H * 100) / params.reward)).toFixed(2));
@@ -144,7 +144,7 @@
 
             function draw_nyN_chart(canvas_id, params) {
                 let step = Math.max(Number((params.slots / 20).toFixed(0)), 1);
-                let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0)
+                let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0);
                 return plotDataAndCreateChart(canvas_id, params, {
                     ySteps: STEPS_Y,
                     xSteps: nSteps,
@@ -157,10 +157,11 @@
             }
 
             function draw_nNy_chart(canvas_id, params) {
-                let step = Math.max(Number((params.slots / 10).toFixed(0)), 1);
-                let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0)
+                let step = Math.max(Number((params.slots / 20).toFixed(0)), 1);
+                let nSteps = [...Array(params.slots + 1).keys()].filter(x => x % step === 0);
+                let ySteps = nSteps.filter(x => x % (step * 4) === 0);
                 return plotDataAndCreateChart(canvas_id, params, {
-                    ySteps: nSteps,
+                    ySteps: ySteps,
                     xSteps: nSteps,
                     yId: 'slots',
                     xId: 'blocks',
@@ -435,12 +436,39 @@
 
                             <h4>Different <code>N</code> as <code>n</code> grows (right or bottom chart)</h4>
                             <p>
-
+                                On this chart each line represents a node\pool with different amount of slots
+                                they have won for the passed epoch, and x-axis represents how many blocks they
+                                have actually created. So leftmost line represents a pool that have won 20 slots
+                                (or 20% of slots, if you have <code>N&gt;100</code>). You cann see 5 points on this line,
+                                representing its reward if has produced: <code>0</code>, <code>N/4</code>, <code>N/2</code>,
+                                <code>3N/4</code>, or <code>N</code> blocks. All other lines represent similar steps
+                                for nodes with larger amount of owned slots.
+                            </p>
+                            <p>
+                                If you change the <code>y</code> value in the input form, you will see the chart respond.
+                                Doing so you can clearly notice the "middle-line" of rewards, consisting of points
+                                representing 50% of blocks in the middle of each line (this middle-line falls exactly
+                                at 50% reward at <code>y=1</code>). So you can move <code>y</code> value around
+                                and see, how nodes of different size would be relatively compensated if they miss
+                                a quoter, or a half of its slots.
                             </p>
 
                             <h4>Conclusions</h4>
                             <p>
-
+                                Selecting right <code>y</code> value is a complex task, because it determines the
+                                "forgiveness" of the system. With smaller values of <code>y</code> nodes can
+                                easier miss <b>few</b> blocks and not lose that much profits, but again as number
+                                of created blocks goes down - mild <code>y</code> appears to be less and less fair,
+                                because even by missing 50% of slots nodes still receive >50% of rewards.
+                            </p>
+                            <p>
+                                On the other hand, larger values of <code>y</code> impose more severe punishment
+                                for nodes as they miss more blocks, but at the same time it may cause the punishment
+                                to be "too severe" for small nodes that miss few blocks.
+                            </p>
+                            <p>
+                                Right value is for the IOHK to select, depending on what kind of behaviour they want
+                                to model for the system.
                             </p>
                         </div>
                 </div>
