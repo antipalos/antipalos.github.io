@@ -17,13 +17,15 @@
         <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="node_modules/swiper/dist/css/swiper.min.css">
         <link rel="stylesheet" href="assets/css/vendor/jquery.numpad/jquery.numpad.css">
+        <link rel="stylesheet" href="assets/css/vendor/fontello/fontello.css">
+        <link rel="stylesheet" href="assets/css/daedalus-dark.css">
         <link rel="stylesheet" href="assets/css/cardano-calculator.css">
 
     </head>
 
     <body>
 
-        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top border-bottom">
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top border-bottom">
 
             <a class="navbar-brand" href=".">Cardano Calculator</a>
 
@@ -93,416 +95,429 @@
 
             </div>
 
-            <div class="row">
+            <div class="container">
 
-                <div class="col-md-12">
+                <div class="row">
 
-                    <div class="container">
+                    <div class="col-md-12 p-0">
 
-                        <div class="row">
+                        <div class="tab-content" id="pills-tab-content">
 
-                            <div class="col-md-12">
+                            <div class="tab-pane fade show active" id="calculator" role="tabpanel" aria-labelledby="calculator-tab">
 
-                                <div class="tab-content" id="pills-tab-content">
+                                <h2 class="mb-3">Calculator</h2>
 
-                                    <div class="tab-pane fade show active" id="calculator" role="tabpanel" aria-labelledby="calculator-tab">
+                                <div class="row mb-2">
 
-                                        <h2 class="mb-1">Calculator</h2>
+                                    <div class="col-sm-4 text-center text-sm-left text-md-left text-lg-left text-xl-left">
 
                                         <div id="layout-switcher" role="group" aria-label="Layout switcher"
-                                             class="mb-2 btn-group-sm btn-group-toggle" data-toggle="buttons">
-                                            <label class="btn btn-light">
-                                                <input type="radio" name="options" id="layout-switcher-table" layout="TABLE" autocomplete="off"> Table
+                                            class="mb-2 btn-group-sm btn-group-toggle" data-toggle="buttons">
+                                        <label class="btn btn-light">
+                                            <input type="radio" name="options" id="layout-switcher-table" layout="TABLE" autocomplete="off"> Table
+                                        </label>
+                                        <label class="btn btn-light">
+                                            <input type="radio" name="options" id="layout-switcher-swiper" layout="SWIPER" autocomplete="off"> Swiper
+                                        </label>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-8 text-center text-lg-right text-xl-right">
+
+                                        <div id="locale-selector-div" style="display: inline;border-left:none;">
+                                            <label for="locale-selector">
+                                                Number format:
+                                                <select class="form-control-sm" id="locale-selector">
+                                                </select>
                                             </label>
-                                            <label class="btn btn-light">
-                                                <input type="radio" name="options" id="layout-switcher-swiper" layout="SWIPER" autocomplete="off"> Swiper
-                                            </label>
-                                            <div id="locale-selector-div" style="display: inline;">
-                                                <label for="locale-selector">
-                                                    Number format:
-                                                    <select class="form-control-sm" id="locale-selector">
-                                                    </select>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="row" id="calc-row"></div>
-
-                                    </div>
-
-                                    <div class="tab-pane fade" id="formula" role="tabpanel" aria-labelledby="formula-tab">
-
-                                        <div class="row">
-
-                                            <div class="col-md-10">
-
-                                                <h2 class="mb-5">Formula explanation</h2>
-
-                                                <p>All information for calculations are taken from these documents:</p>
-
-                                                <ol>
-                                                    <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
-                                                    <!--<li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>-->
-                                                    <li><a href="https://forum.cardano.org/t/summary-pos-delegation-incentives-lars-brunjes/11880">Cardano staking explained</a></li>
-                                                    <li><a href="https://adatracker.com/charts">AdaTracker charts (to approximate transaction number)</a></li>
-                                                    <li><a href="https://github.com/antipalos/istoria/blob/master/explorer/cardano_explorer_latest_stats_2018-07-27.json">"Antipalos" project stats calculated from official explorer</a></li>
-                                                </ol>
-
-                                                <h3>Parameters require for calculations:</h3>
-
-                                                <ul id="params-list" class="list-unstyled">
-                                                    <li><code>INFL</code> - the level of inflation in yearly percentile reserve decrease</li>
-                                                    <li><code>YEAR</code> - number of full years since the launch of the staking</li>
-                                                    <li><code>STAKE</code> - your stake in coins</li>
-                                                    <li><code>TOTAL_STAKE</code> - total stake in the system in coins</li>
-                                                    <li><code>TX_EPOCH</code> - average number of transactions each epoch (5 days)</li>
-                                                    <li><code>TX_SIZE</code> - average size of a transaction</li>
-                                                    <li><code>TAX</code> - the percentage of profits taxed towards the treasury</li>
-                                                    <li><code>POOL_FEE</code> - the percentage of profits that pool takes as a fee</li>
-                                                </ul>
-
-                                                <h3>Full formula:</h3>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * inflation<br/>
-                                                        FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
-                                                        RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE
-                                                    </code>
-
-                                                </div>
-
-                                                <h3>Detailed explanation:</h3>
-
-                                                <h4>Minted coins</h4>
-
-                                                <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
-                                                        MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL
-                                                    </code>
-
-                                                </div>
-
-                                                <p>The 13 billions number is taken from the monetary policy and represents the total reserve
-                                                of coins not issued from the beginning. These coins will be gradually issued thru minting
-                                                using formula above to calculate the amount. Formula is taken from the staking explanation post.</p>
-
-                                                <p class="zero-margin">For example: if we take an <b>arbitrary example</b> of 5% reserve decrease, and calculated it for the
-                                                second year (1 whole year after launch), then it would give us:</p>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
-                                                        13,887,515,354 * (1 - 5%)<sup>1</sup> * 5% = 659,656,979.315
-                                                    </code>
-
-                                                </div>
-
-                                                <p>Just under 660 millions of newly minted ADA in the second year of staking.</p>
-
-                                                <p>The <code>MINT</code> value now gives us notion of how much <b>new</b> coins will
-                                                be issued to reward people. But there are also fees that users pay to send coins or execute any
-                                                transactions. Total fees for the whole year are calculated like this:</p>
-
-                                                <h4>Fees</h4>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        TX_YEAR = 73 * TX_EPOCH<br/>
-                                                        FIXED_FEES = TX_YEAR * 0.155381<br/>
-                                                        SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
-                                                        FEES = FIXED_FEES + SIZE_FEES
-                                                    </code>
-
-                                                </div>
-
-                                                <p><code>TX_YEAR</code> gives us the average number of transactions for the whole year.
-                                                One year consists of 73 epochs. For now it's fixed, but in theory also may change.
-                                                Best practice would be to make it a separate parameter <code>EPOCH_YEAR</code></p>
-
-                                                <p><code>FIXED_FEES</code> is the number of all transactions per year multiplied by
-                                                the <b>fixed transaction cost</b> as described in the staking explanation post.
-                                                It also might change in the future so would be best to define parameter <code>TX_FEE_FIXED</code></p>
-
-                                                <p><code>SIZE_FEES</code> is the sum of all bytes of all transactions per year multiplied by
-                                                the <b>byte cost</b> as described in the staking explanation post.
-                                                It also might change in the future so would be best to define parameter <code>TX_FEE_PER_BYTE</code></p>
-
-                                                <p class="zero-margin">For example: if we take current average number of transaction from
-                                                <a href="https://adatracker.com/charts">the actual tracker</a> it would be around 15,000.
-                                                And if we take an average transaction size to be 458 byte, as can be seen in the statistics.
-                                                Then we could calculate:</p>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        TX_YEAR = 73 * 15,000 = 1,095,000<br/>
-                                                        FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
-                                                        SIZE_FEES = 1,095,000 * 458 * 0.000043946 = 22,039.35846<br/>
-                                                        FEES = 170,142.195 + 22,039.35846 = 192,181.55346
-                                                    </code>
-
-                                                </div>
-
-                                                <h4>Tax</h4>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        UNTAXED_REWARD = MINT + FEES<br/>
-                                                        TAXED_REWARD = UNTAXED_REWARD - TAX
-                                                    </code>
-
-                                                </div>
-
-                                                <p><code>UNTAXED_REWARD</code> is the total pool of reward for all stakers in the system, but before
-                                                tax is subtracted. Once we subtract some percentage of the total pool into treasury -
-                                                we get the final <code>TAXED_REWARD</code> - total reward distributed among all stakers.</p>
-
-                                                <p class="zero-margin">For example: if we take <code>TAX</code> to be 20% just as
-                                                an arbitrary rational example (IOHK proposed 20% tax for ETC, but it might end up
-                                                being be 25% for Cardano, or some other number), then calculations would go like:</p>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        UNTAXED_REWARD = 659,656,979.315 + 192,181.55346 = 659,849,160.868<br/>
-                                                        TAXED_REWARD = 659,849,160.868 - 20% = 527,879,328.694<br/>
-                                                        SHARE = STAKE / TOTAL_STAKE<br/>
-                                                        REWARD_SHARE = TAXED_REWARD * SHARE
-                                                    </code>
-
-                                                </div>
-
-                                                <p>Any arbitrary staker (in the pool or not) may calculate his <b>AVERAGE</b> share of the rewards,
-                                                by calculating his <code>SHARE</code> in the total stake of the system.
-                                                This parameter of the total stake is actually the most important one, because
-                                                it directly and in the most significant way affects how much coins a user will receive
-                                                by staking <b>the same</b> amount of coins. The lower total stake - the greater you share
-                                                can be with the same coins staked.</p>
-
-                                                <p class="zero-margin">For example: if we take <code>TOTAL_STAKE</code> to be 15 billion (just as
-                                                an arbitrary completely random example, no one knows how many actual coins will be staked) and
-                                                we take out stake to be 42 thousand coins, then calculations would go like:</p>
-
-                                                <div class="codeblock">
-
-                                                    <code>
-                                                        SHARE = 42,000 / 15,000,000,000 = 0.0000028<br/>
-                                                        REWARD_SHARE = 527,879,328.694 * 0.0000028 = 1,478.06212
-                                                    </code>
-
-                                                </div>
-
-                                                <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
-                                                about 1,478.06212 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
-
-                                                <h4>Pools fees</h4>
-
-                                                <div class="codeblock mb-3">
-
-                                                    <code>
-                                                        RESULT_REWARD = 1,478.06212 - 5% = 1,404.159014
-                                                    </code>
-
-                                                </div>
-
-                                                <p class="zero-margin">Pools might take fees of different size and they will define those at the moment
-                                                of the pool registration. For example: if we take a <b>completely arbitrary</b> number of 5%,
-                                                then calculations would go like:</p>
-
-                                                <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 1,404.159014 for a 42K stake, or 3.34%.</p>
-
-                                            </div>
-
                                         </div>
 
                                     </div>
 
-                                    <div class="tab-pane fade" id="faq" role="tabpanel" aria-labelledby="faq-tab">
+                                </div>
 
-                                        <div class="row">
+                                <div class="row" id="calc-row"></div>
 
-                                            <div class="col-md-12">
+                            </div>
 
-                                                <h2 class="mb-5">Frequently Asked Questions</h2>
+                            <div class="tab-pane fade" id="formula" role="tabpanel" aria-labelledby="formula-tab">
 
-                                                <h5>How reliable is this whole thing, eh?</h5>
+                                <div class="row">
 
-                                                <p>Presented results <b>are not</b> a promise of future profits!
-                                                All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
-                                                in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
-                                                would somewhat match WITH PARAMETERS SELECTED ABOVE!</p>
+                                    <div class="col-md-10">
 
-                                                <p>This project is <b>strictly educational</b>. These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
-                                                to the one that will be used in the Cardano reward calculation protocol.</p>
+                                        <h2 class="mb-5">Formula explanation</h2>
 
-                                                <p class="mb-5">As soon as <b>any new information</b> about the incentives system becomes available - I <b>will update
-                                                the default parameters or the formula</b> in this calculator. Subscribe to the informational channels,
-                                                and <b>look out for announcements</b>.</p>
+                                        <p>All information for calculations are taken from these documents:</p>
 
-                                                <h5>What's up with all those parameters, eh?</h5>
+                                        <ol>
+                                            <li><a href="https://cardanodocs.com/cardano/monetary-policy/">Cardano monetary policy</a></li>
+                                            <!--<li><a href="https://www.cardano.org/en/staking/">Cardano staking explained</a></li>-->
+                                            <li><a href="https://forum.cardano.org/t/summary-pos-delegation-incentives-lars-brunjes/11880">Cardano staking explained</a></li>
+                                            <li><a href="https://adatracker.com/charts">AdaTracker charts (to approximate transaction number)</a></li>
+                                            <li><a href="https://github.com/antipalos/istoria/blob/master/explorer/cardano_explorer_latest_stats_2018-07-27.json">"Antipalos" project stats calculated from official explorer</a></li>
+                                        </ol>
 
-                                                <p>See the <a href="#formula" class="activate-tab"><b>Formula</b></a> page to find
-                                                detailed explanation of why all those parameters are needed.Basically, after seeing this calculator
-                                                and explanation of its functionality, if someone shows you a calculator with fewer parameters -
-                                                you may be sure they are hiding something. There are some yet undefined parameters they are not showing to you.</p>
-                                                <p class="mb-5">That's it. All those parameters are <span class="text-danger">required</span> to derive the final value.
-                                                And there's no definite value for them exist yet (or ever) like with the fixed fee cost.</p>
+                                        <h3>Parameters require for calculations:</h3>
 
-                                                <h5>Why total stake is <u>15 billions</u>, eh?</h5>
+                                        <ul id="params-list" class="list-unstyled">
+                                            <li><code>INFL</code> - the level of inflation in yearly percentile reserve decrease</li>
+                                            <li><code>YEAR</code> - number of full years since the launch of the staking</li>
+                                            <li><code>STAKE</code> - your stake in coins</li>
+                                            <li><code>TOTAL_STAKE</code> - total stake in the system in coins</li>
+                                            <li><code>TX_EPOCH</code> - average number of transactions each epoch (5 days)</li>
+                                            <li><code>TX_SIZE</code> - average size of a transaction</li>
+                                            <li><code>TAX</code> - the percentage of profits taxed towards the treasury</li>
+                                            <li><code>POOL_FEE</code> - the percentage of profits that pool takes as a fee</li>
+                                        </ul>
 
-                                                <p>The amount of <b>somewhat stable</b> total stake in the system is <span class="text-danger">not known</span> at this point
-                                                and will also change in time (but not as a predictable function) until it converges
-                                                to some more or less stable value (in percentage) and will show only slight fluctuations from there on.</p>
-                                                <p>The total stake is <span class="text-danger">one of 2 most important parameters</span> - along with your own stake.
-                                                These two parameters are basically decide how much you will profit, because they directly define
-                                                <span class="text-danger">your share in total stake</span> - and this value directly shows how much of yearly
-                                                inflation and yearly fees will go to you.</p>
-                                                <p>So for now - there's <b>absolutely zero</b> available data to decide what the total stake would be in the
-                                                year one, or year two, or later on. For a real-world example we can take the "Waves" Proof-of-Stake platform
-                                                that <a href="http://dev.pywaves.org/generators-weekly/">has total stake of ~60% of its supply</a>.
-                                                So the 15 billion number is taken <span class="text-danger">completely arbitrarily</span> just as middle ground
-                                                around 50% of supply. The main point is to <b>SHOW</b> you how this value affects the rewards.
-                                                So try to move it around and just plan ahead what you profits <b>would be</b> if the total
-                                                stake would be at this value.</p>
-                                                <p class="mb-5">It might as well be lower in reality. But might as well be more.</p>
+                                        <h3>Full formula:</h3>
 
-                                                <h5>Why <code>Year</code> needed, eh?</h5>
+                                        <div class="codeblock">
 
-                                                <p>The <code>Year</code> parameter is <span class="text-danger">required</span>, since all the other monetary
-                                                    behavior of the system <b>changes in time</b> - inflation decreases with total supply, fixed block
-                                                    reward changes, etc. Any calculation that does not include time may only demonstrate you a "splice"
-                                                    of time, for example, only the first year of staking.</p>
-
-                                                    <h5>Why <code>Year</code> starts with 2019, eh?</h5>
-
-                                                <p>The official date of staking release in Cardano is not defined yet, but it's <b>somewhere in the fall of 2018</b>.
-                                                    Since profits are calculated <b>only yearly</b> anyways (for now) and to make controls easier and more concise -
-                                                    it was decided to simply place 2019 as a first <b>full</b> year of staking. Basically, you can think
-                                                    of that date as: "the first year when I will receive my yearly profits".</p>
-
-                                                <h5>Are you gonna make it better, eh?</h5>
-
-                                                <p>Yes, see the <a href="#roadmap" class="activate-tab">roadmap</a>.</p>
-
-                                                <h5>Can you add new cool feature, eh?</h5>
-
-                                                <p>See the <a href="#roadmap" class="activate-tab">roadmap</a> in case it's already planned,
-                                                or <a href="https://github.com/antipalos/antipalos.github.io/issues/1">propose new features here</a>.</p>
-
-                                            </div>
+                                            <code>
+                                                MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * inflation<br/>
+                                                FEES = ((73 * TX_EPOCH) * 0.155381) + ((73 * TX_EPOCH) * TX_SIZE * 0.000043946)<br/>
+                                                RESULT = (((MINT + FEES) - TAX) * (STAKE / TOTAL_STAKE)) - POOL_FEE
+                                            </code>
 
                                         </div>
 
+                                        <h3>Detailed explanation:</h3>
+
+                                        <h4>Minted coins</h4>
+
+                                        <p class="zero-margin">First we calculate how much coins will be issued this year as an inflation:</p>
+
+                                        <div class="codeblock mb-3">
+
+                                            <code>
+                                                MINT = 13,887,515,354 * (1 - INFL)<sup>YEAR</sup> * INFL
+                                            </code>
+
+                                        </div>
+
+                                        <p>The 13 billions number is taken from the monetary policy and represents the total reserve
+                                        of coins not issued from the beginning. These coins will be gradually issued thru minting
+                                        using formula above to calculate the amount. Formula is taken from the staking explanation post.</p>
+
+                                        <p class="zero-margin">For example: if we take an <b>arbitrary example</b> of 5% reserve decrease, and calculated it for the
+                                        second year (1 whole year after launch), then it would give us:</p>
+
+                                        <div class="codeblock mb-3">
+
+                                            <code>
+                                                13,887,515,354 * (1 - 5%)<sup>1</sup> * 5% = 659,656,979.315
+                                            </code>
+
+                                        </div>
+
+                                        <p>Just under 660 millions of newly minted ADA in the second year of staking.</p>
+
+                                        <p>The <code>MINT</code> value now gives us notion of how much <b>new</b> coins will
+                                        be issued to reward people. But there are also fees that users pay to send coins or execute any
+                                        transactions. Total fees for the whole year are calculated like this:</p>
+
+                                        <h4>Fees</h4>
+
+                                        <div class="codeblock">
+
+                                            <code>
+                                                TX_YEAR = 73 * TX_EPOCH<br/>
+                                                FIXED_FEES = TX_YEAR * 0.155381<br/>
+                                                SIZE_FEES = TX_YEAR * TX_SIZE * 0.000043946<br/>
+                                                FEES = FIXED_FEES + SIZE_FEES
+                                            </code>
+
+                                        </div>
+
+                                        <p><code>TX_YEAR</code> gives us the average number of transactions for the whole year.
+                                        One year consists of 73 epochs. For now it's fixed, but in theory also may change.
+                                        Best practice would be to make it a separate parameter <code>EPOCH_YEAR</code></p>
+
+                                        <p><code>FIXED_FEES</code> is the number of all transactions per year multiplied by
+                                        the <b>fixed transaction cost</b> as described in the staking explanation post.
+                                        It also might change in the future so would be best to define parameter <code>TX_FEE_FIXED</code></p>
+
+                                        <p><code>SIZE_FEES</code> is the sum of all bytes of all transactions per year multiplied by
+                                        the <b>byte cost</b> as described in the staking explanation post.
+                                        It also might change in the future so would be best to define parameter <code>TX_FEE_PER_BYTE</code></p>
+
+                                        <p class="zero-margin">For example: if we take current average number of transaction from
+                                        <a href="https://adatracker.com/charts">the actual tracker</a> it would be around 15,000.
+                                        And if we take an average transaction size to be 458 byte, as can be seen in the statistics.
+                                        Then we could calculate:</p>
+
+                                        <div class="codeblock">
+
+                                            <code>
+                                                TX_YEAR = 73 * 15,000 = 1,095,000<br/>
+                                                FIXED_FEES = 1,095,000 * 0.155381 = 170,142.195<br/>
+                                                SIZE_FEES = 1,095,000 * 458 * 0.000043946 = 22,039.35846<br/>
+                                                FEES = 170,142.195 + 22,039.35846 = 192,181.55346
+                                            </code>
+
+                                        </div>
+
+                                        <h4>Tax</h4>
+
+                                        <div class="codeblock">
+
+                                            <code>
+                                                UNTAXED_REWARD = MINT + FEES<br/>
+                                                TAXED_REWARD = UNTAXED_REWARD - TAX
+                                            </code>
+
+                                        </div>
+
+                                        <p><code>UNTAXED_REWARD</code> is the total pool of reward for all stakers in the system, but before
+                                        tax is subtracted. Once we subtract some percentage of the total pool into treasury -
+                                        we get the final <code>TAXED_REWARD</code> - total reward distributed among all stakers.</p>
+
+                                        <p class="zero-margin">For example: if we take <code>TAX</code> to be 20% just as
+                                        an arbitrary rational example (IOHK proposed 20% tax for ETC, but it might end up
+                                        being be 25% for Cardano, or some other number), then calculations would go like:</p>
+
+                                        <div class="codeblock">
+
+                                            <code>
+                                                UNTAXED_REWARD = 659,656,979.315 + 192,181.55346 = 659,849,160.868<br/>
+                                                TAXED_REWARD = 659,849,160.868 - 20% = 527,879,328.694<br/>
+                                                SHARE = STAKE / TOTAL_STAKE<br/>
+                                                REWARD_SHARE = TAXED_REWARD * SHARE
+                                            </code>
+
+                                        </div>
+
+                                        <p>Any arbitrary staker (in the pool or not) may calculate his <b>AVERAGE</b> share of the rewards,
+                                        by calculating his <code>SHARE</code> in the total stake of the system.
+                                        This parameter of the total stake is actually the most important one, because
+                                        it directly and in the most significant way affects how much coins a user will receive
+                                        by staking <b>the same</b> amount of coins. The lower total stake - the greater you share
+                                        can be with the same coins staked.</p>
+
+                                        <p class="zero-margin">For example: if we take <code>TOTAL_STAKE</code> to be 15 billion (just as
+                                        an arbitrary completely random example, no one knows how many actual coins will be staked) and
+                                        we take out stake to be 42 thousand coins, then calculations would go like:</p>
+
+                                        <div class="codeblock">
+
+                                            <code>
+                                                SHARE = 42,000 / 15,000,000,000 = 0.0000028<br/>
+                                                REWARD_SHARE = 527,879,328.694 * 0.0000028 = 1,478.06212
+                                            </code>
+
+                                        </div>
+
+                                        <p>This shows us that a person with a 42K coins stacked would receive <b>ROUGHLY</b>
+                                        about 1,478.06212 in a year, but <b>ONLY IF</b> there would be 15 billions of total stake.</p>
+
+                                        <h4>Pools fees</h4>
+
+                                        <div class="codeblock mb-3">
+
+                                            <code>
+                                                RESULT_REWARD = 1,478.06212 - 5% = 1,404.159014
+                                            </code>
+
+                                        </div>
+
+                                        <p class="zero-margin">Pools might take fees of different size and they will define those at the moment
+                                        of the pool registration. For example: if we take a <b>completely arbitrary</b> number of 5%,
+                                        then calculations would go like:</p>
+
+                                        <p>This gives us the final <b>APPROXIMATE</b> yearly profit of 1,404.159014 for a 42K stake, or 3.34%.</p>
+
                                     </div>
 
-                                    <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade" id="faq" role="tabpanel" aria-labelledby="faq-tab">
+
+                                <div class="row">
+
+                                    <div class="col-md-12">
+
+                                        <h2 class="mb-5">Frequently Asked Questions</h2>
+
+                                        <h5 class="mb-3">How reliable is this whole thing, eh?</h5>
+
+                                        <p>Presented results <b>are not</b> a promise of future profits!
+                                        All they show is what <b>APPROXIMATE</b> amount of reward a person could receive <b>ON AVERAGE</b>
+                                        in the selected period of time (specific year) <b>ONLY IF</b> actual behavior of the system
+                                        would somewhat match WITH PARAMETERS SELECTED ABOVE!</p>
+
+                                        <p>This project is <b>strictly educational</b>. These results just <b>demonstrate</b> how the formula works, and the formula is <b>somewhat similar</b>
+                                        to the one that will be used in the Cardano reward calculation protocol.</p>
+
+                                        <p class="mb-5">As soon as <b>any new information</b> about the incentives system becomes available - I <b>will update
+                                        the default parameters or the formula</b> in this calculator. Subscribe to the informational channels,
+                                        and <b>look out for announcements</b>.</p>
+
+                                        <h5 class="mb-3">What's up with all those parameters, eh?</h5>
+
+                                        <p>See the <a href="#formula" class="activate-tab"><b>Formula</b></a> page to find
+                                        detailed explanation of why all those parameters are needed.Basically, after seeing this calculator
+                                        and explanation of its functionality, if someone shows you a calculator with fewer parameters -
+                                        you may be sure they are hiding something. There are some yet undefined parameters they are not showing to you.</p>
+                                        <p class="mb-5">That's it. All those parameters are <span class="text-danger">required</span> to derive the final value.
+                                        And there's no definite value for them exist yet (or ever) like with the fixed fee cost.</p>
+
+                                        <h5 class="mb-3">Why total stake is <u>15 billions</u>, eh?</h5>
+
+                                        <p>The amount of <b>somewhat stable</b> total stake in the system is <span class="text-danger">not known</span> at this point
+                                        and will also change in time (but not as a predictable function) until it converges
+                                        to some more or less stable value (in percentage) and will show only slight fluctuations from there on.</p>
+                                        <p>The total stake is <span class="text-danger">one of 2 most important parameters</span> - along with your own stake.
+                                        These two parameters are basically decide how much you will profit, because they directly define
+                                        <span class="text-danger">your share in total stake</span> - and this value directly shows how much of yearly
+                                        inflation and yearly fees will go to you.</p>
+                                        <p>So for now - there's <b>absolutely zero</b> available data to decide what the total stake would be in the
+                                        year one, or year two, or later on. For a real-world example we can take the "Waves" Proof-of-Stake platform
+                                        that <a href="http://dev.pywaves.org/generators-weekly/">has total stake of ~60% of its supply</a>.
+                                        So the 15 billion number is taken <span class="text-danger">completely arbitrarily</span> just as middle ground
+                                        around 50% of supply. The main point is to <b>SHOW</b> you how this value affects the rewards.
+                                        So try to move it around and just plan ahead what you profits <b>would be</b> if the total
+                                        stake would be at this value.</p>
+                                        <p class="mb-5">It might as well be lower in reality. But might as well be more.</p>
+
+                                        <h5 class="mb-3">Why <code>Year</code> needed, eh?</h5>
+
+                                        <p>The <code>Year</code> parameter is <span class="text-danger">required</span>, since all the other monetary
+                                            behavior of the system <b>changes in time</b> - inflation decreases with total supply, fixed block
+                                            reward changes, etc. Any calculation that does not include time may only demonstrate you a "splice"
+                                            of time, for example, only the first year of staking.</p>
+
+                                            <h5>Why <code>Year</code> starts with 2019, eh?</h5>
+
+                                        <p>The official date of staking release in Cardano is not defined yet, but it's <b>somewhere in the fall of 2018</b>.
+                                            Since profits are calculated <b>only yearly</b> anyways (for now) and to make controls easier and more concise -
+                                            it was decided to simply place 2019 as a first <b>full</b> year of staking. Basically, you can think
+                                            of that date as: "the first year when I will receive my yearly profits".</p>
+
+                                        <h5>Are you gonna make it better, eh?</h5>
+
+                                        <p>Yes, see the <a href="#roadmap" class="activate-tab">roadmap</a>.</p>
+
+                                        <h5 class="mb-3">Can you add new cool feature, eh?</h5>
+
+                                        <p>See the <a href="#roadmap" class="activate-tab">roadmap</a> in case it's already planned,
+                                        or <a href="https://github.com/antipalos/antipalos.github.io/issues/1">propose new features here</a>.</p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+
+                                <div class="row">
+
+                                    <div class="col-md-10">
+
+                                        <h2 class="mb-5">About this project</h2>
+
+                                        <p>As mentioned in the disclaimer:</p>
+
+                                        <ul class="mb-3">
+                                            <li>All calculations are actually <b>rough estimates</b></li>
+                                            <li>No result from this calculator should be considered as a promise of a future profits</li>
+                                            <li>There are too much <b>unknown variables</b> present in the calculations and without knowing those -
+                                            <b>no result</b> might be easily predicted</li>
+                                        </ul>
+
+                                        <h5 class="mb-3">Why</h5>
+
+                                        <p>Main points of this project are:</p>
+
+                                        <ol>
+                                            <li>Show <b>how</b> calculations are done</li>
+                                            <li>Show how <b>complex</b> calculations are</li>
+                                            <li>Show how many <b>variables</b> are used</li>
+                                            <li>Show how many variables are yet <b>unknown</b></li>
+                                            <li>Show <b>estimated</b> order of magnitude for rewards</li>
+                                        </ol>
+
+                                        <p>This project is <b>educational</b>! Remember this project if someone shows you a calculator
+                                        with a couple of fields and a single question of how big your stake is. Or if someone tries to
+                                        get an easy answer of "what the profit percentage will be" - show them this calculator.</p>
+                                        <p class="mb-5">Also it provides a nice place for the formula explanations with an immediate example.</p>
+
+                                        <h5 class="mb-3">Project development</h5>
+
+                                        <p>This calculator is in the initial state. It was developed extremely fast with the
+                                        main point ot get the formula and the example to people as soon as possible. There are many
+                                        potential additional calculations possible, so project is planned for some support in the near future.</p>
+
+                                        <p class="nav">See <a href="#roadmap" class="pl-1 activate-tab"><b>roadmap</b></a></p>
+                                        <p>To ask development questions or propose features, you use:</p>
+
+                                        <ol class="mb-5">
+                                            <li>This dedicated discussion issue: <a href="https://github.com/antipalos/antipalos.github.io/issues/1">
+                                                https://github.com/antipalos/antipalos.github.io/issues/1</a></li>
+                                            <li>Project issues in general: <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                                                https://github.com/antipalos/antipalos.github.io/issues</a></li>
+                                        </ol>
+
+                                        <h5 class="mb-3">Design</h5>
+
+                                        <p class="mb-5">
+                                            <a target="_blank" href="v0.1/">Initially</a> this website had awful simplistic design (or it's absence).
+                                            And this sections contained an invitation for anyone who can do all this stuff to help the project and to contribute
+                                            into improving the design. Completely out of nowhere anonymous user <a href="https://github.com/DEFAULTERROR1">DEFAULTERROR1</a>
+                                            opened a <a href="https://github.com/antipalos/antipalos.github.io/pull/8">pull-request</a>
+                                            that majorly changed the whole layout of the website and turned it into the beauty it is today.<br/>
+                                            <br/>
+                                            To this day I don't know who the DEFAULTERROR1 really are, but he always will be one of the greatest
+                                            and appreciated contributors to this website. He saw the opportunity to help - and he took it.
+                                            Be like DEFAULTERROR1 :)<br/>
+                                            <br/>
+                                            UPD: New additional kudos to DEFAULTERROR1 for contributing the `NumPad` feature for mobile layout!
+                                        </p>
+
+                                        <h5 class="mb-3">Help</h5>
+
+                                        <p>If anyone wants to help with all of this, there are options:</p>
+
+                                        <ul class="mb-5">
+                                            <li>
+                                                Create issue with a <b>detailed tip</b> on how I can make some JS or CSS stuff work better here:
+                                                <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                                                    https://github.com/antipalos/antipalos.github.io/issues
+                                                </a>
+                                            </li>
+                                            <li>
+                                                Create issue with a suggestions for new cool calculations - especially awesome if you can also suggest a formula:
+                                                <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                                                    https://github.com/antipalos/antipalos.github.io/issues
+                                                </a>
+                                            </li>
+                                            <li>
+                                                Just look for something to fix or add and open a PR:
+                                                <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">
+                                                    https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator
+                                                </a>
+                                            </li>
+                                            <li>
+                                                Spread the gospel about Cardano in general and this calculator in particular:
+                                                <a href="https://forum.cardano.org/">https://forum.cardano.org/</a>
+                                            </li>
+                                            <li>Donate to our community wiki at:
+                                                <a href="https://cardanowiki.info/wiki/Funding">
+                                                    https://cardanowiki.info/wiki/Funding
+                                                </a>
+                                            </li>
+                                        </ul>
+
+                                        <h3 class="mb-4">Contacts</h3>
 
                                         <div class="row">
 
-                                            <div class="col-md-10">
-
-                                                <h2 class="mb-5">About this project</h2>
-
-                                                <p>As mentioned in the disclaimer:</p>
-
-                                                <ul class="mb-3">
-                                                    <li>All calculations are actually <b>rough estimates</b></li>
-                                                    <li>No result from this calculator should be considered as a promise of a future profits</li>
-                                                    <li>There are too much <b>unknown variables</b> present in the calculations and without knowing those -
-                                                    <b>no result</b> might be easily predicted</li>
-                                                </ul>
-
-                                                <h5>Why</h5>
-
-                                                <p>Main points of this project are:</p>
-
-                                                <ol>
-                                                    <li>Show <b>how</b> calculations are done</li>
-                                                    <li>Show how <b>complex</b> calculations are</li>
-                                                    <li>Show how many <b>variables</b> are used</li>
-                                                    <li>Show how many variables are yet <b>unknown</b></li>
-                                                    <li>Show <b>estimated</b> order of magnitude for rewards</li>
-                                                </ol>
-
-                                                <p>This project is <b>educational</b>! Remember this project if someone shows you a calculator
-                                                with a couple of fields and a single question of how big your stake is. Or if someone tries to
-                                                get an easy answer of "what the profit percentage will be" - show them this calculator.</p>
-                                                <p class="mb-5">Also it provides a nice place for the formula explanations with an immediate example.</p>
-
-                                                <h5>Project development</h5>
-
-                                                <p>This calculator is in the initial state. It was developed extremely fast with the
-                                                main point ot get the formula and the example to people as soon as possible. There are many
-                                                potential additional calculations possible, so project is planned for some support in the near future.</p>
-
-                                                <p class="nav">See <a href="#roadmap" class="pl-1 activate-tab"><b>roadmap</b></a></p>
-                                                <p>To ask development questions or propose features, you use:</p>
-
-                                                <ol class="mb-5">
-                                                    <li>This dedicated discussion issue: <a href="https://github.com/antipalos/antipalos.github.io/issues/1">
-                                                        https://github.com/antipalos/antipalos.github.io/issues/1</a></li>
-                                                    <li>Project issues in general: <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                                                        https://github.com/antipalos/antipalos.github.io/issues</a></li>
-                                                </ol>
-
-                                                <h5>Design</h5>
-
-                                                <p class="mb-5">
-                                                    <a target="_blank" href="v0.1/">Initially</a> this website had awful simplistic design (or it's absence).
-                                                    And this sections contained an invitation for anyone who can do all this stuff to help the project and to contribute
-                                                    into improving the design. Completely out of nowhere anonymous user <a href="https://github.com/DEFAULTERROR1">DEFAULTERROR1</a>
-                                                    opened a <a href="https://github.com/antipalos/antipalos.github.io/pull/8">pull-request</a>
-                                                    that majorly changed the whole layout of the website and turned it into the beauty it is today.<br/>
-                                                    <br/>
-                                                    To this day I don't know who the DEFAULTERROR1 really are, but he always will be one of the greatest
-                                                    and appreciated contributors to this website. He saw the opportunity to help - and he took it.
-                                                    Be like DEFAULTERROR1 :)<br/>
-                                                    <br/>
-                                                    UPD: New additional kudos to DEFAULTERROR1 for contributing the `NumPad` feature for mobile layout!
-                                                </p>
-
-                                                <h5>Help</h5>
-
-                                                <p>If anyone wants to help with all of this, there are options:</p>
-
-                                                <ul class="mb-5">
-                                                    <li>
-                                                        Create issue with a <b>detailed tip</b> on how I can make some JS or CSS stuff work better here:
-                                                        <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                                                            https://github.com/antipalos/antipalos.github.io/issues
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        Create issue with a suggestions for new cool calculations - especially awesome if you can also suggest a formula:
-                                                        <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                                                            https://github.com/antipalos/antipalos.github.io/issues
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        Just look for something to fix or add and open a PR:
-                                                        <a href="https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator">
-                                                            https://github.com/antipalos/antipalos.github.io/tree/master/cardano-calculator
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        Spread the gospel about Cardano in general and this calculator in particular:
-                                                        <a href="https://forum.cardano.org/">https://forum.cardano.org/</a>
-                                                    </li>
-                                                    <li>Donate to our community wiki at:
-                                                        <a href="https://cardanowiki.info/wiki/Funding">
-                                                            https://cardanowiki.info/wiki/Funding
-                                                        </a>
-                                                    </li>
-                                                </ul>
-
-                                                <h3 class="mb-4">Contacts</h3>
+                                            <div class="col-md-6">
 
                                                 <h5 class="mb-3">Cardano</h5>
 
@@ -510,6 +525,10 @@
                                                 <p>Chat: <a target="_blank" href="https://t.me/CardanoGeneral">t.me/CardanoGeneral</a></p>
                                                 <p>Reddit: <a target="_blank" href="https://www.reddit.com/r/cardano/">r/Cardano</a></p>
                                                 <p class="mb-5">Wiki: <a target="_blank" href="https://cardanowiki.info">cardanowiki.info</a></p>
+
+                                            </div>
+
+                                            <div class="col-md-6">
 
                                                 <h5 class="mb-3">Calculator Dev</h5>
 
@@ -525,75 +544,75 @@
 
                                     </div>
 
-                                    <div class="tab-pane fade" id="roadmap" role="tabpanel">
+                                </div>
 
-                                        <div class="row">
+                            </div>
 
-                                            <div class="col-md-12">
+                            <div class="tab-pane fade" id="roadmap" role="tabpanel">
 
-                                                <h2 class="mb-5">Roadmap</h2>
+                                <div class="row">
 
-                                                <p>
-                                                    <a href="https://github.com/antipalos/antipalos.github.io/issues/1">Propose new features here</a>
-                                                    or
-                                                    <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
-                                                    vote on existing features here</a>.
-                                                </p>
+                                    <div class="col-md-12">
 
-                                                <h3>0.1</h3>
-                                                <ul>
-                                                    <li>Release basic functionality</li>
-                                                </ul>
+                                        <h2 class="mb-5">Roadmap</h2>
 
-                                                <h3><a href="https://github.com/antipalos/antipalos.github.io/issues/16">0.1.1</a></h3>
-                                                <ul>
-                                                    <li><a href="https://github.com/antipalos/antipalos.github.io/issues/6">Design improvements and mobile layout</a></li>
-                                                    <li><a href="https://github.com/antipalos/antipalos.github.io/issues/11">Localized number formatting</a></li>
-                                                    <li><a href="https://github.com/antipalos/antipalos.github.io/issues/20">Default tx-size changed to 350 bytes</a></li>
-                                                    <li><a href="https://github.com/antipalos/antipalos.github.io/issues/15">ADA favicon added</a></li>
-                                                </ul>
+                                        <p>
+                                            <a href="https://github.com/antipalos/antipalos.github.io/issues/1">Propose new features here</a>
+                                            or
+                                            <a href="https://github.com/antipalos/antipalos.github.io/issues?q=is%3Aopen+is%3Aissue+project%3Aantipalos%2Fantipalos.github.io%2F1">
+                                            vote on existing features here</a>.
+                                        </p>
 
-                                                <h3><a href="https://github.com/antipalos/antipalos.github.io/issues/16">0.1.2</a> ✓ (Current version)</h3>
-                                                <ul>
-                                                    <li><a href="https://github.com/antipalos/antipalos.github.io/issues/18">Add comfy `NumPad` to the mobile layout</a></li>
-                                                    <li><a href="https://github.com/antipalos/antipalos.github.io/issues/25">Change default tx size to 458 bytes</a></li>
-                                                </ul>
+                                        <h3 class="mb-3">0.1</h3>
+                                        <ul>
+                                            <li>Release basic functionality</li>
+                                        </ul>
 
-                                                <h3>0.2</h3>
-                                                <ul>
-                                                    <li>Add "portion of max supply" calculation</li>
-                                                    <li>Extract text (templating engine?)</li>
-                                                    <li>Calculate yearly restaking</li>
-                                                </ul>
+                                        <h3 class="mb-3"><a href="https://github.com/antipalos/antipalos.github.io/issues/16">0.1.1</a></h3>
+                                        <ul>
+                                            <li><a href="https://github.com/antipalos/antipalos.github.io/issues/6">Design improvements and mobile layout</a></li>
+                                            <li><a href="https://github.com/antipalos/antipalos.github.io/issues/11">Localized number formatting</a></li>
+                                            <li><a href="https://github.com/antipalos/antipalos.github.io/issues/20">Default tx-size changed to 350 bytes</a></li>
+                                            <li><a href="https://github.com/antipalos/antipalos.github.io/issues/15">ADA favicon added</a></li>
+                                        </ul>
 
-                                                <h3>0.3</h3>
-                                                <ul>
-                                                    <li>Rework period calculation (prepare for per-epoch calculations)</li>
-                                                    <li>Calculator for pools</li>
-                                                    <li>Translation support</li>
-                                                </ul>
+                                        <h3 class="mb-3"><a href="https://github.com/antipalos/antipalos.github.io/issues/16">0.1.2</a> ✓ (Current version)</h3>
+                                        <ul>
+                                            <li><a href="https://github.com/antipalos/antipalos.github.io/issues/18">Add comfy `NumPad` to the mobile layout</a></li>
+                                            <li><a href="https://github.com/antipalos/antipalos.github.io/issues/25">Change default tx size to 458 bytes</a></li>
+                                        </ul>
 
-                                                <h3>0.4</h3>
-                                                <ul>
-                                                    <li>Per-epoch calculations (with restaking)</li>
-                                                    <li>Basic multiperiods calculation (epochs to years)</li>
-                                                </ul>
+                                        <h3 class="mb-3">0.2</h3>
+                                        <ul>
+                                            <li>Add "portion of max supply" calculation</li>
+                                            <li>Extract text (templating engine?)</li>
+                                            <li>Calculate yearly restaking</li>
+                                        </ul>
 
-                                                <h3>0.5</h3>
-                                                <ul>
-                                                    <li>Links with parameters</li>
-                                                    <li>...</li>
-                                                </ul>
+                                        <h3 class="mb-3">0.3</h3>
+                                        <ul>
+                                            <li>Rework period calculation (prepare for per-epoch calculations)</li>
+                                            <li>Calculator for pools</li>
+                                            <li>Translation support</li>
+                                        </ul>
 
-                                                <h3>0.6</h3>
-                                                <ul>
-                                                    <li>Prepare for stats collecting</li>
-                                                    <li>...</li>
-                                                </ul>
+                                        <h3 class="mb-3">0.4</h3>
+                                        <ul>
+                                            <li>Per-epoch calculations (with restaking)</li>
+                                            <li>Basic multiperiods calculation (epochs to years)</li>
+                                        </ul>
 
-                                            </div>
+                                        <h3 class="mb-3">0.5</h3>
+                                        <ul>
+                                            <li>Links with parameters</li>
+                                            <li>...</li>
+                                        </ul>
 
-                                        </div>
+                                        <h3 class="mb-3">0.6</h3>
+                                        <ul>
+                                            <li>Prepare for stats collecting</li>
+                                            <li>...</li>
+                                        </ul>
 
                                     </div>
 
